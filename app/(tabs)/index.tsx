@@ -37,7 +37,7 @@ export default function Home() {
       await Promise.all([
         getTodayLog(),
         getStreakCount(),
-        getRecentScans(3),
+        getRecentScans(15),
         supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle(),
         supabase
           .from("scans")
