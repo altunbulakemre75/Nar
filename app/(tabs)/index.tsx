@@ -29,7 +29,6 @@ import {
   type WeeklyStats,
 } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
-import WeeklyChart from "@/components/WeeklyChart";
 import { GOAL_LABELS, type Goal } from "@/types/database";
 
 export default function Home() {
@@ -167,48 +166,26 @@ export default function Home() {
               />
             </View>
 
-            {/* Haftalık chart */}
-            {weekly && weekly.totalScans > 0 && (
-              <View
-                className="mx-4 mt-5 p-4 rounded-2xl border"
-                style={{ backgroundColor: "#FFF", borderColor: "#EEE" }}
-              >
-                <View className="flex-row items-baseline justify-between mb-2">
-                  <Text style={{ fontSize: 14, fontWeight: "600", color: "#111" }}>
-                    Bu hafta
-                  </Text>
-                  <Text style={{ fontSize: 11, color: "#999" }}>
-                    Ort: {weekly.averageScore} · {weekly.totalScans} tarama
-                  </Text>
-                </View>
-                <View style={{ alignItems: "center" }}>
-                  <WeeklyChart days={weekly.days} />
-                </View>
-              </View>
-            )}
-
-            {/* Büyük tara butonu — sadece hiç tarama yoksa görünsün */}
-            {!hasEverScanned && (
-              <Pressable
-                onPress={() => router.push("/(tabs)/scan")}
-                style={{
-                  marginHorizontal: 16,
-                  marginTop: 16,
-                  height: 56,
-                  backgroundColor: "#111",
-                  borderRadius: 28,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                }}
-              >
-                <ScanLine color="#fff" size={20} strokeWidth={2} />
-                <Text style={{ color: "#fff", fontSize: 17, fontWeight: "600" }}>
-                  İlk Ürününü Tara
-                </Text>
-              </Pressable>
-            )}
+            {/* Büyük tara butonu — her zaman göster */}
+            <Pressable
+              onPress={() => router.push("/(tabs)/scan")}
+              style={{
+                marginHorizontal: 16,
+                marginTop: 16,
+                height: 56,
+                backgroundColor: "#111",
+                borderRadius: 28,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <ScanLine color="#fff" size={20} strokeWidth={2} />
+              <Text style={{ color: "#fff", fontSize: 17, fontWeight: "600" }}>
+                {hasEverScanned ? "Ürün Tara" : "İlk Ürününü Tara"}
+              </Text>
+            </Pressable>
 
             {/* Son taramalar — dikey liste */}
             {recent.length > 0 && (

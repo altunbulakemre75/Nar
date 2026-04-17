@@ -10,17 +10,25 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
+import Svg, { Circle } from "react-native-svg";
 import {
-  X,
+  ChevronLeft,
   Heart,
-  ChevronDown,
-  ChevronUp,
   AlertTriangle,
   Package,
+  Flame,
+  Droplet,
+  Cookie,
+  Wheat,
+  Beef,
+  Soup,
+  MessageCircle,
+  Check,
+  Info,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { getProductByBarcode, saveScan } from "@/lib/products";
-import { calculateScore, explainScore, type ScoreExplanation } from "@/lib/scoring";
+import { calculateScore, type ScoreExplanation } from "@/lib/scoring";
 import {
   getScoreBgColor,
   getScoreBorderColor,
@@ -28,8 +36,14 @@ import {
   scoreLabel,
 } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
-import type { Product, Goal } from "@/types/database";
+import type { Product, Goal, Nutrition } from "@/types/database";
 import { checkAchievements } from "@/lib/achievements";
+
+const SUGGESTED_QUESTIONS = [
+  "Bu ürün şişkinlik yapar mı?",
+  "Alternatif öner",
+  "Bu sağlıklı mı?",
+];
 
 export default function ScanResultScreen() {
   const { barcode } = useLocalSearchParams<{ barcode: string }>();
@@ -38,8 +52,6 @@ export default function ScanResultScreen() {
   const [product, setProduct] = useState<Product | null>(null);
   const [goal, setGoal] = useState<Goal>("lose_weight");
   const [score, setScore] = useState(-1);
-  const [reasons, setReasons] = useState<ScoreExplanation[]>([]);
-  const [showReasons, setShowReasons] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -64,12 +76,9 @@ export default function ScanResultScreen() {
         return;
       }
 
-      console.log("🔍 Product data:", JSON.stringify(p, null, 2));
-      console.log("🔍 Nutrition:", p.nutrition);
-
+      console.log("🔍 Product:", p.name, "nutrition:", p.nutrition);
       setProduct(p);
       setScore(calculateScore(p, userGoal));
-      setReasons(explainScore(p, userGoal));
       setLoading(false);
     })();
   }, [barcode]);
@@ -77,10 +86,7 @@ export default function ScanResultScreen() {
   const handleAddToDay = async () => {
     if (!product) return;
     if (score < 0) {
-      Alert.alert(
-        "Eklenemez",
-        "Bu ürünün besin değerleri eksik. Skor hesaplanamadığı için güne eklenemez."
-      );
+      Alert.alert("Eklenemez", "Bu ürünün besin değerleri eksik.");
       return;
     }
     setSaving(true);
@@ -102,9 +108,7 @@ export default function ScanResultScreen() {
       const first = newlyUnlocked[0];
       Alert.alert(
         `${first.icon}  Yeni rozet!`,
-        `${first.title}\n\n${first.description}${
-          newlyUnlocked.length > 1 ? `\n\n+${newlyUnlocked.length - 1} rozet daha kazandın!` : ""
-        }`,
+        `${first.title}\n\n${first.description}`,
         [{ text: "Harika!", onPress: () => router.back() }]
       );
     } else {
@@ -117,184 +121,176 @@ export default function ScanResultScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <ActivityIndicator color="#C73030" size="large" />
-          <Text style={{ marginTop: 16, fontSize: 13, color: "#666" }}>Ürün bulunuyor...</Text>
         </View>
       </SafeAreaView>
     );
   }
-
   if (!product) return null;
 
   const hasData = score >= 0;
-  const scoreDisplay = hasData ? score.toString() : "?";
-  const scoreLabelText = hasData
-    ? scoreLabel(score)
-    : "Veri yetersiz — skor hesaplanamadı";
+  const n: Nutrition | null = product.nutrition;
+  const goodItems = buildGoodItems(n);
+  const warnItems = buildWarnItems(n, goal);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
       {/* Top bar */}
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 10 }}>
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <X size={24} color="#111" strokeWidth={2} />
+          <ChevronLeft size={26} color="#111" strokeWidth={2} />
         </Pressable>
-        <Text style={{ fontSize: 17, fontWeight: "600", color: "#111" }}>Tarama Sonucu</Text>
+        <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 22, color: "#111" }}>
+          Nar
+        </Text>
         <Pressable hitSlop={10}>
           <Heart size={22} color="#111" strokeWidth={2} />
         </Pressable>
       </View>
+      <View style={{ height: 1, backgroundColor: "#EEE", marginHorizontal: 16 }} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Ürün görseli */}
-        <View style={{ alignItems: "center", paddingVertical: 24, backgroundColor: "#FFF" }}>
-          {product.image_url ? (
-            <Image
-              source={{ uri: product.image_url }}
-              style={{ width: 160, height: 160, borderRadius: 16 }}
-              resizeMode="contain"
-            />
-          ) : (
-            <View style={{ width: 160, height: 160, borderRadius: 16, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
-              <Package size={64} color="#C73030" strokeWidth={1.2} />
-            </View>
-          )}
-        </View>
-
-        {/* Ürün bilgisi */}
-        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
-          <Text style={{ fontSize: 24, fontWeight: "700", color: "#111", lineHeight: 30 }}>
-            {product.name}
-          </Text>
-          {product.brand ? (
-            <Text style={{ fontSize: 16, color: "#666", marginTop: 2 }}>{product.brand}</Text>
-          ) : null}
-          <Text style={{ fontSize: 13, color: "#999", marginTop: 4 }}>
-            Porsiyon: {product.nutrition?.serving_size_g ?? 100}g
-          </Text>
-          {product.sold_in_turkey ? (
-            <View style={{ backgroundColor: "#E1F5EE", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, alignSelf: "flex-start", marginTop: 8 }}>
-              <Text style={{ fontSize: 11, color: "#0F6E56", fontWeight: "600" }}>
-                🇹🇷 Türkiye'de satılıyor
-              </Text>
-            </View>
-          ) : (
-            <View style={{ backgroundColor: "#FAEEDA", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, alignSelf: "flex-start", marginTop: 8 }}>
-              <Text style={{ fontSize: 11, color: "#854F0B", fontWeight: "600" }}>
-                ⚠️ Yurtdışı{product.origin_country ? ` · ${product.origin_country}` : ""}
-              </Text>
-            </View>
-          )}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* Ürün başlığı */}
+        <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 18, paddingBottom: 20 }}>
+          <ProductImage imageUrl={product.image_url} size={96} />
+          <View style={{ flex: 1, marginLeft: 14 }}>
+            <Text style={{ fontSize: 22, fontWeight: "700", color: "#111", lineHeight: 26 }} numberOfLines={2}>
+              {product.name}
+            </Text>
+            {product.brand ? (
+              <Text style={{ fontSize: 15, color: "#666", marginTop: 2 }}>{product.brand}</Text>
+            ) : null}
+            <Text style={{ fontSize: 12, color: "#999", marginTop: 6 }}>
+              Porsiyon: {n?.serving_size_g ?? 100}g
+            </Text>
+          </View>
         </View>
 
         {/* Eksik veri uyarısı */}
-        {!product.has_complete_data && (
-          <View style={{ marginHorizontal: 16, marginTop: 10, padding: 12, borderRadius: 10, flexDirection: "row", alignItems: "center", backgroundColor: "#FEF3C7", borderWidth: 1, borderColor: "#F59E0B" }}>
+        {!product.has_complete_data && hasData && (
+          <View style={{ marginHorizontal: 16, marginBottom: 12, padding: 12, borderRadius: 12, flexDirection: "row", alignItems: "center", backgroundColor: "#FEF3C7", borderWidth: 1, borderColor: "#F59E0B" }}>
             <AlertTriangle size={16} color="#92400E" />
             <Text style={{ marginLeft: 8, fontSize: 12, flex: 1, color: "#92400E", lineHeight: 17 }}>
-              Bu ürünün besin değerleri eksik, skor tahmini olabilir.
+              Besin verisi eksik olabilir, skor tahminidir.
             </Text>
           </View>
         )}
 
-        {/* Skor kartı */}
+        {/* Skor kartı — dairesel */}
         <View
           style={{
             marginHorizontal: 16,
-            marginTop: 12,
-            padding: 20,
-            borderRadius: 20,
+            padding: 18,
+            borderRadius: 18,
             backgroundColor: getScoreBgColor(score),
-            borderWidth: 1,
+            borderWidth: 1.5,
             borderColor: getScoreBorderColor(score),
+            flexDirection: "row",
+            alignItems: "center",
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View>
-              <Text style={{ fontSize: 12, color: "#666", fontWeight: "500" }}>Skor</Text>
-              <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-                <Text
-                  style={{
-                    fontFamily: "Inter-Medium",
-                    fontSize: 56,
-                    lineHeight: 60,
-                    color: getScoreTextColor(score),
-                  }}
-                >
-                  {scoreDisplay}
-                </Text>
-                <Text style={{ fontSize: 18, color: "#999", marginLeft: 4 }}>/100</Text>
-              </View>
-            </View>
-            <View style={{ flex: 1, marginLeft: 20 }}>
-              <Text style={{ fontSize: 16, fontWeight: "600", color: getScoreTextColor(score), lineHeight: 22 }}>
-                {scoreLabelText}
-              </Text>
-            </View>
+          <ScoreRing score={score} />
+          <View style={{ marginLeft: 16, flex: 1 }}>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: "#111" }}>
+              {hasData ? `${goalShortLabel(goal)} Skoru` : "Skor yok"}
+            </Text>
+            <Text style={{ fontSize: 13, color: getScoreTextColor(score), marginTop: 2, fontWeight: "600" }}>
+              {hasData ? scoreLabel(score) : "Veri yetersiz"}
+            </Text>
           </View>
         </View>
 
-        {/* Neden bu skor? */}
-        <Pressable
-          onPress={() => setShowReasons((v) => !v)}
-          style={{ marginHorizontal: 16, marginTop: 10, padding: 16, borderRadius: 14, backgroundColor: "#FFF", borderWidth: 1, borderColor: "#E5E7EB" }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <Text style={{ fontSize: 16, fontWeight: "600", color: "#111" }}>Neden bu skor?</Text>
-            {showReasons ? <ChevronUp size={20} color="#111" /> : <ChevronDown size={20} color="#111" />}
+        {/* Açıklama info kutusu */}
+        {hasData && (
+          <View
+            style={{
+              marginHorizontal: 16,
+              marginTop: 10,
+              padding: 14,
+              borderRadius: 14,
+              backgroundColor: getScoreBgColor(score),
+              borderWidth: 1,
+              borderColor: getScoreBorderColor(score),
+              flexDirection: "row",
+              alignItems: "flex-start",
+            }}
+          >
+            <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: getScoreBorderColor(score), alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+              <Info size={13} color="#FFF" strokeWidth={2.5} />
+            </View>
+            <Text style={{ flex: 1, marginLeft: 10, fontSize: 13, color: "#111", lineHeight: 19 }}>
+              {buildHeadline(score, warnItems, goodItems, goal)}
+            </Text>
           </View>
+        )}
 
-          {showReasons && (
-            <View style={{ marginTop: 12 }}>
-              {reasons.map((r, i) => (
-                <View
-                  key={i}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    paddingVertical: 8,
-                    borderTopWidth: i > 0 ? 1 : 0,
-                    borderTopColor: "#F3F4F6",
-                  }}
-                >
-                  <Text style={{ fontSize: 16, marginRight: 8, color: r.type === "positive" ? "#16A34A" : r.type === "negative" ? "#DC2626" : "#999" }}>
-                    {r.type === "positive" ? "✓" : r.type === "negative" ? "✗" : "•"}
-                  </Text>
-                  <Text style={{ fontSize: 14, flex: 1, color: "#374151" }}>{r.label}</Text>
-                  <Text style={{ fontSize: 14, fontWeight: "600", color: r.points > 0 ? "#16A34A" : r.points < 0 ? "#DC2626" : "#999" }}>
-                    {r.points > 0 ? "+" : ""}
-                    {r.points}
-                  </Text>
-                </View>
+        {/* İyi Dengelenmiş */}
+        {goodItems.length > 0 && (
+          <>
+            <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", paddingHorizontal: 16, marginTop: 22, marginBottom: 8 }}>
+              <Text style={{ fontSize: 18, fontWeight: "700", color: "#111" }}>İyi Dengelenmiş</Text>
+              <Text style={{ fontSize: 11, color: "#999" }}>Porsiyon (100g)</Text>
+            </View>
+            <View style={{ marginHorizontal: 16, borderRadius: 16, backgroundColor: "#F7F7F8", overflow: "hidden" }}>
+              {goodItems.map((it, i) => (
+                <NutrientRow key={it.key} item={it} last={i === goodItems.length - 1} />
               ))}
             </View>
-          )}
-        </Pressable>
+          </>
+        )}
 
-        {/* Besin değerleri */}
-        <View style={{ marginHorizontal: 16, marginTop: 10, padding: 16, borderRadius: 14, backgroundColor: "#FFF", borderWidth: 1, borderColor: "#E5E7EB" }}>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: "#111", marginBottom: 12 }}>
-            Besin değerleri ({product.nutrition?.serving_size_g ?? 100}g)
-          </Text>
-          {product.nutrition && product.nutrition.calories > 0 ? (
-            <>
-              <NutritionRow label="Kalori" value={`${product.nutrition.calories} kcal`} />
-              <NutritionRow label="Şeker" value={`${product.nutrition.sugar}g`} />
-              <NutritionRow label="Doymuş yağ" value={`${product.nutrition.saturated_fat}g`} />
-              <NutritionRow label="Sodyum" value={`${product.nutrition.sodium}mg`} />
-              <NutritionRow label="Lif" value={`${product.nutrition.fiber}g`} />
-              <NutritionRow label="Protein" value={`${product.nutrition.protein}g`} last />
-            </>
-          ) : (
-            <Text style={{ fontSize: 14, color: "#999", textAlign: "center", paddingVertical: 20 }}>
-              Bu ürünün besin değerleri veritabanında yok
+        {/* Dikkat Edilmeli */}
+        {warnItems.length > 0 && (
+          <>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: "#111", paddingHorizontal: 16, marginTop: 22, marginBottom: 8 }}>
+              Dikkat Edilmeli
             </Text>
-          )}
-        </View>
+            <View style={{ marginHorizontal: 16, borderRadius: 16, backgroundColor: "#F7F7F8", overflow: "hidden" }}>
+              {warnItems.map((it, i) => (
+                <NutrientRow key={it.key} item={it} last={i === warnItems.length - 1} />
+              ))}
+            </View>
+          </>
+        )}
 
-        <View style={{ height: 110 }} />
+        {/* Narcı soruları */}
+        <Text style={{ fontSize: 18, fontWeight: "700", color: "#111", paddingHorizontal: 16, marginTop: 24, marginBottom: 10 }}>
+          Narcı'ya Sor
+        </Text>
+        <View style={{ paddingHorizontal: 16, gap: 8 }}>
+          {SUGGESTED_QUESTIONS.map((q) => (
+            <Pressable
+              key={q}
+              onPress={() =>
+                router.push({
+                  pathname: "/narci",
+                  params: { productId: product.barcode, prompt: q },
+                })
+              }
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingVertical: 14,
+                paddingHorizontal: 16,
+                borderRadius: 999,
+                borderWidth: 1,
+                borderColor: "#E5E7EB",
+                backgroundColor: "#FFF",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                <MessageCircle size={18} color="#111" strokeWidth={1.8} />
+                <Text style={{ marginLeft: 10, fontSize: 14, fontWeight: "600", color: "#111" }}>
+                  {q}
+                </Text>
+              </View>
+              <Text style={{ fontSize: 18, color: "#111" }}>→</Text>
+            </Pressable>
+          ))}
+        </View>
       </ScrollView>
 
-      {/* Alt sticky butonlar */}
+      {/* Alt sticky buton */}
       <View
         style={{
           position: "absolute",
@@ -302,56 +298,278 @@ export default function ScanResultScreen() {
           left: 0,
           right: 0,
           paddingHorizontal: 16,
-          paddingTop: 12,
-          paddingBottom: 28,
+          paddingTop: 10,
+          paddingBottom: 24,
           backgroundColor: "rgba(255,253,251,0.97)",
           borderTopWidth: 1,
           borderTopColor: "#E5E7EB",
-          flexDirection: "row",
-          gap: 8,
         }}
       >
         <Pressable
           onPress={handleAddToDay}
           disabled={saving || !hasData}
           style={{
-            flex: 1,
-            height: 48,
-            borderRadius: 24,
-            borderWidth: 1.5,
-            borderColor: hasData ? "#111" : "#CCC",
+            height: 54,
+            borderRadius: 27,
+            backgroundColor: hasData ? "#111" : "#CCC",
             alignItems: "center",
             justifyContent: "center",
-            opacity: saving || !hasData ? 0.45 : 1,
+            flexDirection: "row",
+            gap: 8,
+            opacity: saving || !hasData ? 0.6 : 1,
           }}
         >
-          <Text style={{ fontSize: 15, fontWeight: "600", color: hasData ? "#111" : "#999" }}>
+          <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "700" }}>
             {saving ? "Kaydediliyor..." : "Güne ekle"}
           </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => router.push({ pathname: "/narci", params: { productId: product.barcode } })}
-          style={{
-            flex: 1,
-            height: 48,
-            borderRadius: 24,
-            backgroundColor: "#C73030",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ fontSize: 15, fontWeight: "600", color: "#FFF" }}>Narcı'ya sor</Text>
+          {!saving && hasData && <Check size={18} color="#FFF" strokeWidth={2.5} />}
         </Pressable>
       </View>
     </SafeAreaView>
   );
 }
 
-function NutritionRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+/* --- Yardımcılar --- */
+
+type DotColor = "green" | "yellow" | "red";
+
+interface NutrientItem {
+  key: string;
+  icon: React.ReactNode;
+  name: string;
+  description: string;
+  value: string;
+  dot: DotColor;
+}
+
+function buildGoodItems(n: Nutrition | null): NutrientItem[] {
+  if (!n || n.calories === 0) return [];
+  const items: NutrientItem[] = [];
+  if (n.fiber > 0) {
+    items.push({
+      key: "fiber",
+      icon: <Wheat size={20} color="#111" strokeWidth={1.8} />,
+      name: "Lif",
+      description:
+        n.fiber >= 3 ? "Yüksek lif kaynağı" : n.fiber >= 1.5 ? "Orta düzeyde lif" : "Az miktarda lif",
+      value: `${n.fiber}g`,
+      dot: n.fiber >= 3 ? "green" : n.fiber >= 1.5 ? "green" : "yellow",
+    });
+  }
+  if (n.protein > 0) {
+    items.push({
+      key: "protein",
+      icon: <Beef size={20} color="#111" strokeWidth={1.8} />,
+      name: "Protein",
+      description:
+        n.protein >= 10 ? "İyi protein kaynağı" : n.protein >= 5 ? "Orta düzeyde protein" : "Az miktarda protein",
+      value: `${n.protein}g`,
+      dot: n.protein >= 10 ? "green" : n.protein >= 5 ? "green" : "yellow",
+    });
+  }
+  return items;
+}
+
+function buildWarnItems(n: Nutrition | null, goal: Goal): NutrientItem[] {
+  if (!n || n.calories === 0) return [];
+  const items: NutrientItem[] = [];
+
+  if (n.calories > 0) {
+    const high = goal === "lose_weight" ? n.calories > 250 : n.calories > 400;
+    items.push({
+      key: "calories",
+      icon: <Flame size={20} color="#111" strokeWidth={1.8} />,
+      name: "Kalori",
+      description: high
+        ? goal === "lose_weight"
+          ? "Kilo verme hedefin için yüksek"
+          : "Yüksek kalori yoğunluğu"
+        : "Kabul edilebilir seviyede",
+      value: `${n.calories} kcal`,
+      dot: high ? "yellow" : "green",
+    });
+  }
+
+  if (n.saturated_fat >= 2) {
+    items.push({
+      key: "sat_fat",
+      icon: <Droplet size={20} color="#111" strokeWidth={1.8} />,
+      name: "Doymuş yağ",
+      description:
+        n.saturated_fat >= 5
+          ? "Yüksek doymuş yağ, kalp sağlığı için dikkat"
+          : "Orta düzeyde doymuş yağ",
+      value: `${n.saturated_fat}g`,
+      dot: n.saturated_fat >= 5 ? "red" : "yellow",
+    });
+  }
+
+  if (n.sodium >= 300) {
+    items.push({
+      key: "sodium",
+      icon: <Soup size={20} color="#111" strokeWidth={1.8} />,
+      name: "Sodyum",
+      description:
+        n.sodium >= 600
+          ? "Yüksek sodyum, şişkinlik yapabilir"
+          : "Orta düzeyde sodyum",
+      value: `${n.sodium}mg`,
+      dot: n.sodium >= 600 ? "red" : "yellow",
+    });
+  }
+
+  if (n.sugar >= 5) {
+    const highSugarThreshold = goal === "lose_weight" || goal === "clear_skin" ? 10 : 15;
+    items.push({
+      key: "sugar",
+      icon: <Cookie size={20} color="#111" strokeWidth={1.8} />,
+      name: "Şeker",
+      description:
+        n.sugar >= highSugarThreshold
+          ? goal === "lose_weight"
+            ? "Kilo verme hedefin için yüksek şeker"
+            : "Yüksek şeker"
+          : "Orta düzeyde şeker",
+      value: `${n.sugar}g`,
+      dot: n.sugar >= highSugarThreshold ? "red" : "yellow",
+    });
+  }
+
+  return items;
+}
+
+function buildHeadline(
+  score: number,
+  warns: NutrientItem[],
+  goods: NutrientItem[],
+  goal: Goal
+): string {
+  if (score >= 85) return "Bu ürün hedefinle çok uyumlu görünüyor.";
+  if (score >= 65) return "Ölçülü tüketirsen hedefinle uyumlu.";
+  const badNames = warns
+    .filter((w) => w.dot === "red")
+    .map((w) => w.name.toLowerCase());
+  if (score < 40 && badNames.length > 0) {
+    return `Yüksek ${badNames.slice(0, 2).join(" ve ")} içeriyor; ${goalShortLabel(goal).toLowerCase()} hedefin için uygun değil.`;
+  }
+  if (warns.length > 0) {
+    return `${warns[0].name} değeri hedefinle uyumsuz — ölçülü tüketmeye dikkat et.`;
+  }
+  return "Ara sıra tüketilebilir.";
+}
+
+function goalShortLabel(goal: Goal): string {
+  switch (goal) {
+    case "lose_weight":
+      return "Kilo";
+    case "gain_muscle":
+      return "Kas";
+    case "clear_skin":
+      return "Cilt";
+    case "reduce_bloat":
+      return "Sindirim";
+    case "better_sleep":
+      return "Uyku";
+    case "more_energy":
+      return "Enerji";
+    case "face_sculpt":
+      return "Yüz";
+    default:
+      return "Hedef";
+  }
+}
+
+function ProductImage({ imageUrl, size = 80 }: { imageUrl: string | null | undefined; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  if (imageUrl && !failed) {
+    return (
+      <Image
+        source={{ uri: imageUrl }}
+        style={{ width: size, height: size, borderRadius: 14, backgroundColor: "#F5F5F5" }}
+        resizeMode="contain"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 9, borderBottomWidth: last ? 0 : 0.5, borderBottomColor: "#F3F4F6" }}>
-      <Text style={{ fontSize: 14, color: "#666" }}>{label}</Text>
-      <Text style={{ fontSize: 14, fontWeight: "600", color: "#111" }}>{value}</Text>
+    <View style={{ width: size, height: size, borderRadius: 14, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
+      <Package size={size * 0.4} color="#C73030" strokeWidth={1.5} />
+    </View>
+  );
+}
+
+function ScoreRing({ score }: { score: number }) {
+  const size = 88;
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = score < 0 ? 0 : Math.max(0, Math.min(100, score)) / 100;
+  const offset = circumference * (1 - pct);
+  const ringColor = getScoreBorderColor(score);
+  const trackColor = getScoreBgColor(score);
+  const textColor = getScoreTextColor(score);
+
+  return (
+    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={size} height={size}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={trackColor === "#F3F4F6" ? "#E5E7EB" : trackColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={ringColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </Svg>
+      <View style={{ position: "absolute", alignItems: "center" }}>
+        <Text style={{ fontSize: 26, fontWeight: "700", color: textColor, lineHeight: 30 }}>
+          {score < 0 ? "?" : score}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function NutrientRow({ item, last }: { item: NutrientItem; last: boolean }) {
+  const dotColor =
+    item.dot === "green" ? "#22C55E" : item.dot === "yellow" ? "#F5B100" : "#DC2626";
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderBottomWidth: last ? 0 : 1,
+        borderBottomColor: "#ECECEE",
+      }}
+    >
+      <View style={{ width: 36, alignItems: "center" }}>{item.icon}</View>
+      <View style={{ flex: 1, marginLeft: 4 }}>
+        <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>{item.name}</Text>
+        <Text style={{ fontSize: 12, color: "#666", marginTop: 2, lineHeight: 16 }}>
+          {item.description}
+        </Text>
+      </View>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={{ fontSize: 15, fontWeight: "600", color: "#111", marginRight: 8 }}>
+          {item.value}
+        </Text>
+        <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: dotColor }} />
+      </View>
     </View>
   );
 }

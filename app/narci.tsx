@@ -29,7 +29,10 @@ const SAMPLE_QUESTIONS = [
 ];
 
 export default function NarciScreen() {
-  const { productId } = useLocalSearchParams<{ productId?: string }>();
+  const { productId, prompt: initialPrompt } = useLocalSearchParams<{
+    productId?: string;
+    prompt?: string;
+  }>();
 
   const messages = useNarciStore((s) => s.messages);
   const addMessage = useNarciStore((s) => s.addMessage);
@@ -86,12 +89,14 @@ export default function NarciScreen() {
         addMessage({ role: "assistant", content: greeting });
       }
 
-      // \u00dcr\u00fcn baglam\u0131yla geldiyse otomatik soru at
-      if (currentProduct && messages.length === 0) {
-        const autoMessage = `${currentProduct.name} hakk\u0131nda konu\u015fal\u0131m, dikkat edilmesi gerekenler neler?`;
-        setTimeout(() => {
-          handleSend(autoMessage);
-        }, 500);
+      // Özel prompt varsa onu gönder, yoksa ürün bağlamıyla default soru
+      if (messages.length === 0) {
+        if (initialPrompt) {
+          setTimeout(() => handleSend(String(initialPrompt)), 500);
+        } else if (currentProduct) {
+          const autoMessage = `${currentProduct.name} hakk\u0131nda konu\u015fal\u0131m, dikkat edilmesi gerekenler neler?`;
+          setTimeout(() => handleSend(autoMessage), 500);
+        }
       }
     })();
   }, [user, productId]);
