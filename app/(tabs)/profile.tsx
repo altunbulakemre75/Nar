@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { User, Settings, ChevronRight, LogOut, Plus, Pencil } from "lucide-react-native";
+import { User, Settings, LogOut, Plus, Pencil } from "lucide-react-native";
 import { router } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { useFocusEffect } from "expo-router";
@@ -13,10 +13,7 @@ import {
   type Profile as ProfileType,
 } from "@/types/database";
 import { getCalendarData, getProfileSummary, type DayData } from "@/lib/stats";
-import { getUnlockedAchievements } from "@/lib/achievements";
-import { ACHIEVEMENTS } from "@/types/achievements";
 import DayDetailModal from "@/components/DayDetailModal";
-import AchievementCard from "@/components/AchievementCard";
 import { scoreColor } from "@/constants/colors";
 
 // Türkçe takvim lokalizasyonu
@@ -47,24 +44,21 @@ export default function Profile() {
 
   const [summary, setSummary] = useState({ totalScans: 0, averageScore: 0, currentStreak: 0 });
   const [calendarData, setCalendarData] = useState<Record<string, DayData>>({});
-  const [unlocked, setUnlocked] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
     if (!user) return;
     setName((user.user_metadata as any)?.name ?? null);
 
-    const [profRes, s, cal, unl] = await Promise.all([
+    const [profRes, s, cal] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       getProfileSummary(),
       getCalendarData(3),
-      getUnlockedAchievements(),
     ]);
 
     if (profRes.data) setProfile(profRes.data as ProfileType);
     setSummary(s);
     setCalendarData(cal);
-    setUnlocked(unl);
   }, [user]);
 
   useEffect(() => {
@@ -120,7 +114,14 @@ export default function Profile() {
     ? ACTIVITY_LABELS[profile.activity_level]
     : "Ayarlanmadı";
 
-  const unlockedCount = unlocked.length;
+  const waterLabel = (() => {
+    const g = profile?.water_glasses;
+    if (g == null) return "Ayarlanmadı";
+    if (g >= 8) return "Harika";
+    if (g >= 5) return "İyi";
+    if (g >= 1) return "Yetersiz";
+    return "Ayarlanmadı";
+  })();
 
   return (
     <SafeAreaView className="flex-1 bg-nar-cream" edges={["top"]}>
@@ -242,57 +243,57 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* Rozetler */}
-        <View className="mx-4 mt-6">
-          <View className="flex-row items-baseline justify-between mb-3">
-            <Text className="text-sm font-semibold" style={{ color: "#111" }}>
-              Rozetler
-            </Text>
-            <Text className="text-xs" style={{ color: "#666" }}>
-              {unlockedCount} / {ACHIEVEMENTS.length}
-            </Text>
-          </View>
-          <View className="flex-row flex-wrap" style={{ gap: 8 }}>
-            {ACHIEVEMENTS.map((a) => (
-              <AchievementCard
-                key={a.id}
-                achievement={a}
-                unlocked={unlocked.includes(a.id)}
-                onPress={() =>
-                  Alert.alert(
-                    unlocked.includes(a.id)
-                      ? `${a.icon} ${a.title}`
-                      : `🔒 ${a.title}`,
-                    a.description
-                  )
-                }
-              />
-            ))}
-          </View>
-        </View>
-
         {/* Hakkında */}
-        <Text className="px-4 pt-6 pb-2 text-sm font-semibold" style={{ color: "#111" }}>
+        <Text style={{ paddingHorizontal: 16, paddingTop: 28, paddingBottom: 10, fontSize: 22, fontWeight: "700", color: "#111" }}>
           Hakkında
         </Text>
         <View
-          className="mx-4 rounded-2xl border border-gray-100 overflow-hidden"
-          style={{ backgroundColor: "#fff" }}
+          style={{
+            marginHorizontal: 16,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: "#E5E7EB",
+            overflow: "hidden",
+            backgroundColor: "#FFF",
+          }}
         >
-          <Row label="Hedef" value={goalLabel} />
-          <Row label="Yaş" value={ageLabel} />
-          <Row label="Cinsiyet" value={genderLabel} />
-          <Row label="Boy & Kilo" value={measureLabel} />
-          <Row label="Aktivite seviyesi" value={activityLabel} last />
+          <FieldRow label="Hedef" value={goalLabel} onEdit={() => router.push("/onboarding/goal")} />
+          <FieldRow label="Yaş" value={ageLabel} onEdit={() => router.push("/onboarding/age")} />
+          <FieldRow label="Cinsiyet" value={genderLabel} onEdit={() => router.push("/onboarding/gender")} />
+          <FieldRow label="Boy & Kilo" value={measureLabel} onEdit={() => router.push("/onboarding/measurements")} />
+          <FieldRow label="Günlük Su Tüketimi" value={waterLabel} onEdit={() => router.push("/onboarding/measurements")} />
+          <FieldRow label="Aktivite Seviyesi" value={activityLabel} onEdit={() => router.push("/onboarding/activity")} last />
         </View>
 
-        <Pressable
-          onPress={() => router.push("/onboarding")}
-          className="mx-4 mt-3 py-3 rounded-2xl items-center border"
-          style={{ borderColor: "#EEE", backgroundColor: "#FFF" }}
-        >
-          <Text style={{ color: "#C73030", fontWeight: "600" }}>Profili düzenle</Text>
-        </Pressable>
+        {/* Tercihler */}
+        <Text style={{ paddingHorizontal: 16, paddingTop: 28, paddingBottom: 10, fontSize: 22, fontWeight: "700", color: "#111" }}>
+          Tercihler
+        </Text>
+
+        <TagGroup
+          title="Diyet Kısıtlamaları"
+          tags={profile?.dietary_restrictions ?? []}
+          emptyText="Diyet kısıtlaması yok"
+          onEdit={() => router.push("/onboarding/health")}
+        />
+
+        <View style={{ height: 10 }} />
+
+        <TagGroup
+          title="Sağlık Durumları"
+          tags={profile?.health_conditions ?? []}
+          emptyText="Sağlık durumu belirtilmedi"
+          onEdit={() => router.push("/onboarding/health")}
+        />
+
+        <View style={{ height: 10 }} />
+
+        <TagGroup
+          title="Alerjiler"
+          tags={profile?.allergies ?? []}
+          emptyText="Alerji yok"
+          onEdit={() => router.push("/onboarding/health")}
+        />
 
         <Pressable
           onPress={handleSignOut}
@@ -311,21 +312,95 @@ export default function Profile() {
   );
 }
 
-function Row({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+function FieldRow({
+  label,
+  value,
+  onEdit,
+  last = false,
+}: {
+  label: string;
+  value: string;
+  onEdit?: () => void;
+  last?: boolean;
+}) {
   const isEmpty = value === "Ayarlanmadı";
   return (
-    <View
-      className={`px-4 py-3 flex-row items-center justify-between ${
-        !last ? "border-b border-gray-100" : ""
-      }`}
+    <Pressable
+      onPress={onEdit}
+      style={{
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottomWidth: last ? 0 : 1,
+        borderBottomColor: "#F0F0F0",
+      }}
     >
-      <View>
-        <Text className="text-sm font-medium text-gray-900">{label}</Text>
-        <Text className="text-xs mt-0.5" style={{ color: isEmpty ? "#C73030" : "#666" }}>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>{label}</Text>
+        <Text
+          style={{
+            fontSize: 14,
+            marginTop: 4,
+            color: isEmpty ? "#DC2626" : "#333",
+            fontStyle: isEmpty ? "italic" : "normal",
+          }}
+        >
           {value}
         </Text>
       </View>
-      <ChevronRight size={16} color="#999" />
-    </View>
+      <Pencil size={16} color="#888" strokeWidth={1.8} />
+    </Pressable>
+  );
+}
+
+function TagGroup({
+  title,
+  tags,
+  emptyText,
+  onEdit,
+}: {
+  title: string;
+  tags: string[];
+  emptyText: string;
+  onEdit?: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onEdit}
+      style={{
+        marginHorizontal: 16,
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "#E5E7EB",
+        backgroundColor: "#FFF",
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: tags.length > 0 ? 10 : 6 }}>
+        <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>{title}</Text>
+        <Pencil size={14} color="#888" strokeWidth={1.8} style={{ marginLeft: 8 }} />
+      </View>
+      {tags.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+          {tags.map((t) => (
+            <View
+              key={t}
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 999,
+                backgroundColor: "#F3F4F6",
+              }}
+            >
+              <Text style={{ fontSize: 13, color: "#374151" }}>{t}</Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <Text style={{ fontSize: 13, color: "#999", fontStyle: "italic" }}>{emptyText}</Text>
+      )}
+    </Pressable>
   );
 }
