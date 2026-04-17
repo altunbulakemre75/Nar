@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert, Switch, Linking, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
   ChevronLeft,
-  User,
   Bell,
   Moon,
   Globe,
@@ -18,6 +18,7 @@ import {
   Star,
   LogOut,
   Sparkles,
+  Pencil,
 } from "lucide-react-native";
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +28,8 @@ export default function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const name = (user?.user_metadata as any)?.name ?? null;
+  const email = user?.email ?? "";
+  const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
 
   const [notifications, setNotifications] = useState(false);
 
@@ -112,69 +115,67 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FAF8F5" }}>
       {/* Top bar */}
-      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 10 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8 }}>
         <Pressable onPress={() => router.back()} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
           <ChevronLeft size={26} color="#111" strokeWidth={2.2} />
         </Pressable>
         <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>Ayarlar</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Hesap kartı */}
         <Pressable
           onPress={() => router.push("/onboarding")}
           style={{
             marginHorizontal: 16,
-            marginTop: 8,
-            padding: 16,
+            marginTop: 6,
+            padding: 14,
             borderRadius: 16,
             backgroundColor: "#FFF",
             borderWidth: 1,
-            borderColor: "#EEE",
+            borderColor: "#ECECEE",
             flexDirection: "row",
             alignItems: "center",
           }}
         >
-          <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
-            <User size={26} color="#C73030" strokeWidth={1.8} />
+          <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: "#E8E0D5", alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ fontSize: 24, fontWeight: "700", color: "#8B7A5E" }}>{initial}</Text>
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
-            <Text style={{ fontSize: 17, fontWeight: "700", color: "#111" }}>
+            <Text style={{ fontSize: 17, fontWeight: "700", color: "#111" }} numberOfLines={1}>
               {name ?? "Adını ekle"}
             </Text>
             <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }} numberOfLines={1}>
-              {user?.email ?? ""}
+              {email}
             </Text>
           </View>
-          <Text style={{ fontSize: 13, color: "#C73030", fontWeight: "600" }}>Düzenle</Text>
+          <Pencil size={20} color="#C73030" strokeWidth={2} />
         </Pressable>
 
-        {/* Premium — küçük pill */}
+        {/* Nar Premium — gradient kart */}
         <Pressable
           onPress={() => Alert.alert("Nar Premium", "Yakında: Sınırsız Narcı AI sohbet, fotoğraf analizi, detaylı rapor.")}
-          style={{
-            marginHorizontal: 16,
-            marginTop: 12,
-            paddingVertical: 14,
-            paddingHorizontal: 16,
-            borderRadius: 14,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "#FFF5F2",
-            borderWidth: 1,
-            borderColor: "#F5D4CA",
-          }}
+          style={{ marginHorizontal: 16, marginTop: 12, borderRadius: 16, overflow: "hidden" }}
         >
-          <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#C73030", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
-            <Sparkles size={18} color="#FFF" strokeWidth={2} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: "700", color: "#6B1A1A" }}>Nar Premium</Text>
-            <Text style={{ fontSize: 12, color: "#8B4848", marginTop: 2 }}>Sınırsız AI + fotoğraf analizi</Text>
-          </View>
-          <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: "#FFF" }}>
-            <Text style={{ fontSize: 11, color: "#C73030", fontWeight: "700" }}>YAKINDA</Text>
-          </View>
+          <LinearGradient
+            colors={["#F7D7D2", "#E8A8A0", "#D87870"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ padding: 14, flexDirection: "row", alignItems: "center" }}
+          >
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(199,48,48,0.85)", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+              <Sparkles size={20} color="#FFF" strokeWidth={2} fill="#FFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: "#6B1A1A" }}>Nar Premium</Text>
+              <Text style={{ fontSize: 12, color: "#6B1A1A", marginTop: 2, opacity: 0.8 }}>
+                Sınırsız AI + fotoğraf analizi
+              </Text>
+            </View>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: "#FFF" }}>
+              <Text style={{ fontSize: 11, color: "#C73030", fontWeight: "800", letterSpacing: 0.5 }}>YAKINDA</Text>
+            </View>
+          </LinearGradient>
         </Pressable>
 
         {/* Tercihler */}
@@ -182,7 +183,6 @@ export default function SettingsScreen() {
           <ListItem
             icon={<Bell size={16} color="#666" strokeWidth={1.8} />}
             title="Bildirimler"
-            subtitle="Günlük tarama hatırlatması"
             rightElement={
               <Switch
                 value={notifications}
@@ -196,13 +196,13 @@ export default function SettingsScreen() {
           <ListItem
             icon={<Globe size={16} color="#666" strokeWidth={1.8} />}
             title="Dil"
-            value="Türkçe"
+            subtitle="Türkçe"
             onPress={() => Alert.alert("Yakında", "Yakında daha fazla dil eklenecek.")}
           />
           <ListItem
             icon={<Moon size={16} color="#666" strokeWidth={1.8} />}
             title="Tema"
-            value="Açık"
+            subtitle="Açık"
             onPress={() => Alert.alert("Yakında", "Koyu tema yakında eklenecek.")}
             last
           />
@@ -213,7 +213,6 @@ export default function SettingsScreen() {
           <ListItem
             icon={<Download size={16} color="#666" strokeWidth={1.8} />}
             title="Verilerimi indir"
-            value="JSON"
             onPress={handleDownloadData}
           />
           <ListItem
@@ -230,7 +229,6 @@ export default function SettingsScreen() {
           <ListItem
             icon={<Mail size={16} color="#666" strokeWidth={1.8} />}
             title="Destek"
-            value="destek@narapp.com"
             onPress={() => mailTo("Nar - destek")}
           />
           <ListItem
@@ -246,8 +244,8 @@ export default function SettingsScreen() {
           />
         </Section>
 
-        {/* Yasal */}
-        <Section title="Yasal">
+        {/* Yasal — başlıksız grup */}
+        <View style={{ marginTop: 12, marginHorizontal: 16, backgroundColor: "#FFF", borderRadius: 14, borderWidth: 1, borderColor: "#ECECEE", overflow: "hidden" }}>
           <ListItem
             icon={<Shield size={16} color="#666" strokeWidth={1.8} />}
             title="Gizlilik politikası"
@@ -264,30 +262,30 @@ export default function SettingsScreen() {
             onPress={() => router.push("/legal/about")}
             last
           />
-        </Section>
-
-        {/* Çıkış */}
-        <View style={{ marginTop: 18, marginHorizontal: 16 }}>
-          <Pressable
-            onPress={handleSignOut}
-            style={{
-              paddingVertical: 14,
-              borderRadius: 14,
-              backgroundColor: "#FFF",
-              borderWidth: 1,
-              borderColor: "#FFD6D6",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-            }}
-          >
-            <LogOut size={18} color="#C73030" strokeWidth={2} />
-            <Text style={{ fontSize: 15, fontWeight: "700", color: "#C73030" }}>Çıkış yap</Text>
-          </Pressable>
         </View>
 
-        <Text style={{ textAlign: "center", fontSize: 11, color: "#BBB", marginTop: 20 }}>
+        {/* Çıkış yap — tam genişlikli kart */}
+        <Pressable
+          onPress={handleSignOut}
+          style={{
+            marginTop: 20,
+            marginHorizontal: 16,
+            paddingVertical: 16,
+            paddingHorizontal: 18,
+            borderRadius: 14,
+            backgroundColor: "#FFF",
+            borderWidth: 1,
+            borderColor: "#ECECEE",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "700", color: "#111" }}>Çıkış yap</Text>
+          <LogOut size={20} color="#C73030" strokeWidth={2} />
+        </Pressable>
+
+        <Text style={{ textAlign: "center", fontSize: 11, color: "#BBB", marginTop: 16 }}>
           Nar v0.1.0
         </Text>
       </ScrollView>
@@ -297,7 +295,7 @@ export default function SettingsScreen() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <View style={{ marginTop: 22 }}>
+    <View style={{ marginTop: 20 }}>
       <Text
         style={{
           fontSize: 12,
@@ -317,7 +315,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           backgroundColor: "#FFF",
           borderRadius: 14,
           borderWidth: 1,
-          borderColor: "#EEE",
+          borderColor: "#ECECEE",
           overflow: "hidden",
         }}
       >
