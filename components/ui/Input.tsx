@@ -19,17 +19,27 @@ export default function Input({
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(secureTextEntry ?? false);
 
-  const borderColor = error ? "#C73030" : focused ? "#C73030" : "#DDDDDD";
+  const borderColor = error ? "#C73030" : focused ? "#C73030" : "#E5E7EB";
 
   return (
-    <View className="mb-4">
+    <View style={{ marginBottom: 14 }}>
       {label ? (
-        <Text className="text-xs mb-1.5" style={{ color: "#666", fontWeight: "500" }}>
+        <Text style={{ fontSize: 13, fontWeight: "600", color: "#333", marginBottom: 6 }}>
           {label}
         </Text>
       ) : null}
 
-      <View className="flex-row items-center" style={{ borderBottomWidth: 1.5, borderBottomColor: borderColor }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          backgroundColor: "#FFF",
+          borderWidth: 1.5,
+          borderColor,
+          borderRadius: 14,
+          paddingHorizontal: 14,
+        }}
+      >
         <TextInput
           {...rest}
           secureTextEntry={hidden}
@@ -44,23 +54,21 @@ export default function Input({
           placeholderTextColor="#BBB"
           style={{
             flex: 1,
-            paddingVertical: 10,
+            paddingVertical: 14,
             fontSize: 16,
             color: "#111",
           }}
         />
 
         {secureTextEntry ? (
-          <Pressable onPress={() => setHidden(!hidden)} hitSlop={8} className="pl-2 py-2">
+          <Pressable onPress={() => setHidden(!hidden)} hitSlop={8} style={{ padding: 6 }}>
             {hidden ? <EyeOff size={18} color="#999" /> : <Eye size={18} color="#999" />}
           </Pressable>
         ) : null}
       </View>
 
       {error ? (
-        <Text className="mt-1.5 text-xs" style={{ color: "#C73030" }}>
-          {error}
-        </Text>
+        <Text style={{ marginTop: 6, fontSize: 12, color: "#C73030" }}>{error}</Text>
       ) : null}
     </View>
   );

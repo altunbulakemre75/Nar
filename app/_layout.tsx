@@ -1,6 +1,6 @@
 import "../global.css";
 import { useEffect } from "react";
-import { View, ActivityIndicator, Text } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -10,6 +10,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useAuthStore } from "@/lib/authStore";
 import AppErrorBoundary from "@/components/ErrorBoundary";
 import OfflineBanner from "@/components/OfflineBanner";
+import NarLogo from "@/components/NarLogo";
 import { initAnalytics, track, identifyUser, resetUser } from "@/lib/analytics";
 
 SplashScreen.preventAutoHideAsync();
@@ -94,17 +95,8 @@ function AppSplash() {
         justifyContent: "center",
       }}
     >
-      <Text
-        style={{
-          fontFamily: "PlayfairDisplay-BoldItalic",
-          fontSize: 64,
-          color: "#C73030",
-          marginBottom: 24,
-        }}
-      >
-        Nar
-      </Text>
-      <ActivityIndicator color="#C73030" />
+      <NarLogo size={72} />
+      <ActivityIndicator color="#C73030" style={{ marginTop: 32 }} />
     </View>
   );
 }

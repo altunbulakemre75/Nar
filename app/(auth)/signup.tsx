@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import NarLogo from "@/components/NarLogo";
 import { useAuthStore } from "@/lib/authStore";
 
 export default function SignupScreen() {
@@ -36,15 +37,14 @@ export default function SignupScreen() {
 
     try {
       await signUp(email.trim(), password, name.trim());
-      // YENİ kullanıcı: profil bilgileri yok, onboarding'e yönlendir
       router.replace("/onboarding");
     } catch {
-      // hata authStore.error'da g\u00f6sterilir
+      /* authStore.error'da gösterilir */
     }
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFFDFB" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -53,23 +53,15 @@ export default function SignupScreen() {
           contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="items-center pt-12 pb-8">
-            <Text
-              style={{
-                fontFamily: "PlayfairDisplay-BoldItalic",
-                fontSize: 56,
-                color: "#C73030",
-              }}
-            >
-              Nar
-            </Text>
-            <Text className="mt-2 text-sm" style={{ color: "#6B1A1A" }}>
-              Ne yediğini bil
-            </Text>
+          <View style={{ alignItems: "center", paddingTop: 48, paddingBottom: 36 }}>
+            <NarLogo size={52} />
           </View>
 
-          <Text style={{ fontSize: 22, fontWeight: "700", color: "#111", marginBottom: 24 }}>
+          <Text style={{ fontSize: 26, fontWeight: "700", color: "#111", marginBottom: 6 }}>
             Hesabını oluştur
+          </Text>
+          <Text style={{ fontSize: 14, color: "#666", marginBottom: 28 }}>
+            Saniyeler içinde kaydol, ne yediğini bilerek yaşa.
           </Text>
 
           <Input
@@ -91,15 +83,15 @@ export default function SignupScreen() {
           />
 
           <Input
-            label="Şifre (en az 8 karakter)"
+            label="Şifre"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholder="********"
+            placeholder="En az 8 karakter"
           />
 
           {(localError || error) && (
-            <Text className="text-xs mb-3" style={{ color: "#C73030" }}>
+            <Text style={{ fontSize: 12, marginBottom: 12, color: "#C73030" }}>
               {localError || error}
             </Text>
           )}
@@ -108,24 +100,19 @@ export default function SignupScreen() {
             Kayıt ol
           </Button>
 
-          <Text className="text-xs text-center mt-4" style={{ color: "#999", lineHeight: 16 }}>
+          <Text style={{ fontSize: 12, textAlign: "center", marginTop: 14, color: "#999", lineHeight: 17 }}>
             Kayıt olarak{" "}
-            <Text style={{ color: "#6B1A1A", fontWeight: "500" }}>Kullanım Koşulları</Text>
+            <Text style={{ color: "#6B1A1A", fontWeight: "600" }}>Kullanım Koşulları</Text>
             {" "}ve{" "}
-            <Text style={{ color: "#6B1A1A", fontWeight: "500" }}>Gizlilik Politikası</Text>'nı
-            kabul etmiŞ olursun.
+            <Text style={{ color: "#6B1A1A", fontWeight: "600" }}>Gizlilik Politikası</Text>'nı kabul etmiş olursun.
           </Text>
 
-          <View className="flex-1" />
+          <View style={{ flex: 1 }} />
 
-          <View className="flex-row justify-center items-center pt-6">
-            <Text className="text-sm" style={{ color: "#666" }}>
-              Zaten hesabın var mı?{" "}
-            </Text>
+          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", paddingTop: 24 }}>
+            <Text style={{ fontSize: 14, color: "#666" }}>Zaten hesabın var mı? </Text>
             <Pressable onPress={() => router.replace("/(auth)/login")} hitSlop={6}>
-              <Text className="text-sm" style={{ color: "#C73030", fontWeight: "600" }}>
-                GiriŞ yap
-              </Text>
+              <Text style={{ fontSize: 14, color: "#C73030", fontWeight: "700" }}>Giriş yap</Text>
             </Pressable>
           </View>
         </ScrollView>

@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import NarLogo from "@/components/NarLogo";
 import { useAuthStore } from "@/lib/authStore";
 
 export default function ForgotPasswordScreen() {
@@ -30,52 +31,38 @@ export default function ForgotPasswordScreen() {
       await resetPassword(email.trim());
       setSent(true);
     } catch {
-      // hata authStore.error'da
+      /* authStore.error'da gösterilir */
     }
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFFDFB" }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          <Pressable onPress={() => router.back()} hitSlop={12} className="pt-2 pb-6 w-10">
+          <Pressable onPress={() => router.back()} hitSlop={12} style={{ paddingTop: 8, paddingBottom: 20, width: 40 }}>
             <ChevronLeft size={26} color="#111" strokeWidth={2} />
           </Pressable>
 
-          <Text
-            style={{
-              fontFamily: "PlayfairDisplay-BoldItalic",
-              fontSize: 44,
-              color: "#C73030",
-              textAlign: "center",
-              marginBottom: 32,
-            }}
-          >
-            Nar
-          </Text>
+          <View style={{ alignItems: "center", marginBottom: 36 }}>
+            <NarLogo size={44} showTagline={false} />
+          </View>
 
-          <Text style={{ fontSize: 22, fontWeight: "700", color: "#111", marginBottom: 8 }}>
+          <Text style={{ fontSize: 24, fontWeight: "700", color: "#111", marginBottom: 8 }}>
             Şifremi unuttum
           </Text>
-          <Text className="text-sm mb-8" style={{ color: "#666", lineHeight: 20 }}>
+          <Text style={{ fontSize: 14, marginBottom: 28, color: "#666", lineHeight: 20 }}>
             Kayıtlı e-posta adresine bir sıfırlama bağlantısı göndereceğiz.
           </Text>
 
           {sent ? (
-            <View
-              className="rounded-2xl p-4 border"
-              style={{ backgroundColor: "#F0FFF4", borderColor: "#A5D65F" }}
-            >
-              <Text style={{ color: "#2D6A3E", fontWeight: "600", marginBottom: 4 }}>
+            <View style={{ borderRadius: 16, padding: 16, borderWidth: 1, backgroundColor: "#F0FFF4", borderColor: "#A5D65F" }}>
+              <Text style={{ color: "#2D6A3E", fontWeight: "700", marginBottom: 4 }}>
                 Gönderildi ✓
               </Text>
-              <Text className="text-sm" style={{ color: "#2D6A3E" }}>
+              <Text style={{ fontSize: 14, color: "#2D6A3E" }}>
                 {email} adresine gelen e-postadaki bağlantıya tıkla.
               </Text>
             </View>
@@ -92,7 +79,7 @@ export default function ForgotPasswordScreen() {
               />
 
               {(localError || error) && (
-                <Text className="text-xs mb-3" style={{ color: "#C73030" }}>
+                <Text style={{ fontSize: 12, marginBottom: 12, color: "#C73030" }}>
                   {localError || error}
                 </Text>
               )}
@@ -103,12 +90,10 @@ export default function ForgotPasswordScreen() {
             </>
           )}
 
-          <View className="flex-1" />
+          <View style={{ flex: 1 }} />
 
-          <Pressable onPress={() => router.replace("/(auth)/login")} className="items-center pt-6 py-2">
-            <Text className="text-sm" style={{ color: "#C73030", fontWeight: "600" }}>
-              GiriŞ ekranına dön
-            </Text>
+          <Pressable onPress={() => router.replace("/(auth)/login")} style={{ alignItems: "center", paddingTop: 24, paddingBottom: 8 }}>
+            <Text style={{ fontSize: 14, color: "#C73030", fontWeight: "700" }}>Giriş ekranına dön</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
