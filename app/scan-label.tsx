@@ -90,7 +90,10 @@ export default function ScanLabelScreen() {
     }
     setSaving(true);
     try {
-      const finalBarcode = barcode ?? `local-${Date.now()}`;
+      const finalBarcode =
+        barcode && barcode.length > 0
+          ? barcode
+          : `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
       const payload = {
         barcode: finalBarcode,
         name: productName.trim(),

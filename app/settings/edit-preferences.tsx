@@ -61,15 +61,21 @@ const FIELD_CONFIG: Record<
   },
 };
 
+const VALID_FIELDS: Field[] = ["dietary_restrictions", "health_conditions", "allergies"];
+
 export default function EditPreferencesScreen() {
-  const { field } = useLocalSearchParams<{ field: Field }>();
+  const { field: rawField } = useLocalSearchParams<{ field?: string }>();
   const user = useAuthStore((s) => s.user);
+
+  const field = (VALID_FIELDS as string[]).includes(rawField ?? "")
+    ? (rawField as Field)
+    : null;
 
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const config = FIELD_CONFIG[field as Field];
+  const config = field ? FIELD_CONFIG[field] : null;
 
   useEffect(() => {
     if (!user || !field) return;
@@ -104,10 +110,22 @@ export default function EditPreferencesScreen() {
     router.back();
   };
 
-  if (!config) {
+  if (!field || !config) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB", alignItems: "center", justifyContent: "center" }}>
-        <Text>Geçersiz alan</Text>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 10 }}>
+          <Pressable onPress={() => router.back()} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
+            <ChevronLeft size={26} color="#111" strokeWidth={2.2} />
+          </Pressable>
+        </View>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
+          <Text style={{ fontSize: 17, fontWeight: "600", color: "#111", textAlign: "center" }}>
+            Geçersiz düzenleme alanı
+          </Text>
+          <Text style={{ fontSize: 13, color: "#888", textAlign: "center", marginTop: 6 }}>
+            Profil ekranından tekrar dene.
+          </Text>
+        </View>
       </SafeAreaView>
     );
   }

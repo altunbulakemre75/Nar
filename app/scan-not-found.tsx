@@ -1,10 +1,16 @@
+import { useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { ChevronLeft, Camera } from "lucide-react-native";
+import { track } from "@/lib/analytics";
 
 export default function ScanNotFound() {
   const { barcode } = useLocalSearchParams<{ barcode: string }>();
+
+  useEffect(() => {
+    track("scan_not_found", { barcode: barcode ?? null });
+  }, [barcode]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>

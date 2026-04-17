@@ -29,7 +29,7 @@ function buildSystemPrompt(ctx: NarciContext): string {
     .join(", ");
 
   const currentProductText = ctx.currentProduct
-    ? ` Su an tarananran urun: ${ctx.currentProduct.name}.`
+    ? ` Şu an taranan ürün: ${ctx.currentProduct.name}.`
     : "";
 
   // KISA sistem promptu - az token

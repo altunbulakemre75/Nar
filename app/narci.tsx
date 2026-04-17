@@ -54,6 +54,7 @@ export default function NarciScreen() {
   contextRef.current = context;
 
   const listRef = useRef<FlatList<Message>>(null);
+  const autoSentRef = useRef(false);
 
   // Context'i y\u00fckle
   useEffect(() => {
@@ -91,7 +92,8 @@ export default function NarciScreen() {
       }
 
       // Özel prompt varsa onu gönder, yoksa ürün bağlamıyla default soru
-      if (messages.length === 0) {
+      if (messages.length === 0 && !autoSentRef.current) {
+        autoSentRef.current = true;
         if (initialPrompt) {
           setTimeout(() => handleSend(String(initialPrompt)), 500);
         } else if (currentProduct) {

@@ -71,6 +71,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
     await supabase.auth.signOut();
     set({ user: null, session: null, loading: false, error: null });
+    track("logout");
   },
 
   resetPassword: async (email) => {

@@ -5,6 +5,7 @@ export interface OFFProduct {
   brands?: string;
   categories_tags?: string[];
   image_url?: string;
+  image_front_url?: string;
   ingredients_text?: string;
   ingredients_text_tr?: string;
   nutriments?: {
@@ -64,6 +65,7 @@ export async function fetchFromOFF(barcode: string): Promise<OFFMappedProduct | 
       "brands",
       "categories_tags",
       "image_url",
+      "image_front_url",
       "ingredients_text",
       "ingredients_text_tr",
       "nutriments",
@@ -150,7 +152,7 @@ function mapOFFtoProduct(off: OFFProduct, barcode: string): OFFMappedProduct {
     name: off.product_name_tr || off.product_name || "İsimsiz ürün",
     brand: off.brands?.split(",")[0]?.trim() || null,
     category,
-    image_url: (off as any).image_front_url || off.image_url || null,
+    image_url: off.image_front_url || off.image_url || null,
     ingredients: off.ingredients_text_tr || off.ingredients_text || null,
     nutrition,
     additives: (off.additives_tags ?? [])
@@ -168,9 +170,3 @@ function mapOFFtoProduct(off: OFFProduct, barcode: string): OFFMappedProduct {
   };
 }
 
-/** Üründe yeterli besin verisi var mı? (skor hesaplanabilir mi?) */
-export function hasSufficientNutrition(nutrition: unknown): boolean {
-  if (!nutrition || typeof nutrition !== "object") return false;
-  const n = nutrition as Record<string, number | undefined>;
-  return typeof n.calories === "number" && n.calories > 0;
-}

@@ -15,6 +15,7 @@ import { ScanLine, Flame, ChevronRight, Package, Trash2 } from "lucide-react-nat
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
 import { getTodayLog, getRecentScans, deleteScan, type ScanWithProduct } from "@/lib/products";
+import { track } from "@/lib/analytics";
 import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
@@ -142,8 +143,12 @@ export default function Home() {
                       scan={s}
                       onDeleted={async () => {
                         const ok = await deleteScan(s.id);
-                        if (ok) await fetchAll();
-                        else Alert.alert("Silinemedi", "Tekrar dene.");
+                        if (ok) {
+                          track("scan_deleted", { score: s.score, product_id: s.product.id });
+                          await fetchAll();
+                        } else {
+                          Alert.alert("Silinemedi", "Tekrar dene.");
+                        }
                       }}
                     />
                   ))}
