@@ -28,7 +28,7 @@ import {
   getGreeting,
   type WeeklyStats,
 } from "@/lib/stats";
-import { scoreColor, getScoreBgColor, getScoreBorderColor } from "@/constants/colors";
+import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import WeeklyChart from "@/components/WeeklyChart";
 import { GOAL_LABELS, type Goal } from "@/types/database";
 
@@ -191,31 +191,36 @@ export default function Home() {
             {!hasEverScanned && (
               <Pressable
                 onPress={() => router.push("/(tabs)/scan")}
-                className="mx-4 mt-8 py-4 rounded-full flex-row items-center justify-center"
-                style={{ backgroundColor: "#111" }}
+                style={{
+                  marginHorizontal: 16,
+                  marginTop: 16,
+                  height: 56,
+                  backgroundColor: "#111",
+                  borderRadius: 28,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
               >
-                <ScanLine color="#fff" size={18} strokeWidth={2} />
-                <Text className="text-white font-medium ml-2 text-sm">
-                  İlk Ürününü Tara!
+                <ScanLine color="#fff" size={20} strokeWidth={2} />
+                <Text style={{ color: "#fff", fontSize: 17, fontWeight: "600" }}>
+                  İlk Ürününü Tara
                 </Text>
               </Pressable>
             )}
 
-            {/* Son taramalar */}
+            {/* Son taramalar — dikey liste */}
             {recent.length > 0 && (
-              <View className="mt-6">
-                <Text className="px-4 pb-2 text-sm font-medium text-gray-900">
+              <View style={{ marginTop: 24 }}>
+                <Text style={{ paddingHorizontal: 16, paddingBottom: 8, fontSize: 14, fontWeight: "600", color: "#111" }}>
                   Son taradıkların
                 </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
-                >
+                <View style={{ paddingHorizontal: 16, gap: 8 }}>
                   {recent.map((s) => (
                     <RecentCard key={s.id} scan={s} />
                   ))}
-                </ScrollView>
+                </View>
               </View>
             )}
           </>
@@ -251,18 +256,18 @@ function ScoreCard({
       style={{ backgroundColor: bg, borderColor: border }}
     >
       <View className="flex-row items-baseline">
-        <Text style={{ fontFamily: "Inter-Medium", fontSize: 48, color, lineHeight: 48 }}>
+        <Text style={{ fontSize: 56, fontWeight: "700", color, lineHeight: 60 }}>
           {displayScore}
         </Text>
-        <View className="ml-3 flex-1">
-          <Text className="text-base font-medium" style={{ color: "#6B1A1A" }}>
-            Bugünün skoru
+        <View className="ml-4 flex-1">
+          <Text style={{ fontSize: 20, fontWeight: "700", color: "#111" }}>
+            Bugünün Skoru
           </Text>
-          <Text className="text-xs mt-0.5" style={{ color: "#8B4848" }}>
+          <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
             {empty
               ? "İlk ürününü tara"
               : itemsCount > 0
-              ? `${itemsCount} ürün tarandı · hedef: ${goal ? GOAL_LABELS[goal] : "—"}`
+              ? `${itemsCount} ürün tarandı bugün`
               : "Bugün henüz tarama yok"}
           </Text>
         </View>
@@ -345,38 +350,57 @@ function Tile({
 }
 
 function RecentCard({ scan }: { scan: ScanWithProduct }) {
-  const color = scoreColor(scan.score);
   const [imgFailed, setImgFailed] = useState(false);
   return (
     <Pressable
       onPress={() =>
         router.push({ pathname: "/scan-result", params: { barcode: scan.product.barcode } })
       }
-      style={{ backgroundColor: "#FFF", borderColor: "#EEE", borderWidth: 1, borderRadius: 16, padding: 12, width: 160 }}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 12,
+        backgroundColor: "#FFF",
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#E5E7EB",
+      }}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-        {scan.product.image_url && !imgFailed ? (
-          <Image
-            source={{ uri: scan.product.image_url }}
-            style={{ width: 52, height: 52, borderRadius: 10, backgroundColor: "#F5F5F5" }}
-            resizeMode="contain"
-            onError={() => setImgFailed(true)}
-          />
-        ) : (
-          <View style={{ width: 52, height: 52, borderRadius: 10, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
-            <Package size={24} color="#C73030" strokeWidth={1.5} />
+      {scan.product.image_url && !imgFailed ? (
+        <Image
+          source={{ uri: scan.product.image_url }}
+          style={{ width: 56, height: 56, borderRadius: 8, backgroundColor: "#F5F5F5" }}
+          resizeMode="contain"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <View style={{ width: 56, height: 56, borderRadius: 8, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
+          <Package size={24} color="#C73030" strokeWidth={1.5} />
+        </View>
+      )}
+      <View style={{ marginLeft: 12, flex: 1 }}>
+        <Text style={{ fontSize: 14, fontWeight: "600", color: "#111" }} numberOfLines={1}>
+          {scan.product.name}
+        </Text>
+        <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }} numberOfLines={1}>
+          {scan.product.brand ?? "—"}
+        </Text>
+        <View style={{ marginTop: 6, flexDirection: "row" }}>
+          <View style={{
+            backgroundColor: getScoreBgColor(scan.score),
+            borderWidth: 1,
+            borderColor: getScoreBorderColor(scan.score),
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            borderRadius: 12,
+          }}>
+            <Text style={{ fontSize: 11, fontWeight: "600", color: getScoreTextColor(scan.score) }}>
+              Skor: {scan.score}
+            </Text>
           </View>
-        )}
-        <View style={{ paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999, backgroundColor: color + "22" }}>
-          <Text style={{ fontSize: 12, fontWeight: "700", color }}>{scan.score}</Text>
         </View>
       </View>
-      <Text style={{ fontSize: 13, fontWeight: "600", color: "#111" }} numberOfLines={1}>
-        {scan.product.name}
-      </Text>
-      <Text style={{ fontSize: 11, color: "#666", marginTop: 2 }} numberOfLines={1}>
-        {scan.product.brand ?? "—"}
-      </Text>
+      <ChevronRight size={18} color="#CCC" />
     </Pressable>
   );
 }

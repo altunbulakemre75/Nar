@@ -42,7 +42,7 @@ export interface OFFMappedProduct {
     fiber: number;
     protein: number;
     serving_size_g: number;
-  } | null;
+  };
   additives: string[];
   is_organic: boolean;
   sold_in_turkey: boolean;
@@ -142,19 +142,15 @@ function mapOFFtoProduct(off: OFFProduct, barcode: string): OFFMappedProduct {
 
   const category = off.categories_tags?.[0]?.replace(/^en:/, "") ?? null;
 
-  const hasAnyNutrition = calories > 0 || protein > 0 || fat > 0;
-  const hasValidNutrition = calories > 0 && protein > 0;
-
-  const nutrition = hasAnyNutrition
-    ? { calories, sugar, saturated_fat, fat, sodium, fiber, protein, serving_size_g: 100 }
-    : null;
+  const hasValidNutrition = calories > 0 || protein > 0;
+  const nutrition = { calories, sugar, saturated_fat, fat, sodium, fiber, protein, serving_size_g: 100 };
 
   return {
     barcode,
     name: off.product_name_tr || off.product_name || "İsimsiz ürün",
     brand: off.brands?.split(",")[0]?.trim() || null,
     category,
-    image_url: off.image_url || null,
+    image_url: (off as any).image_front_url || off.image_url || null,
     ingredients: off.ingredients_text_tr || off.ingredients_text || null,
     nutrition,
     additives: (off.additives_tags ?? [])

@@ -1,37 +1,26 @@
 import type { Goal, Nutrition, Product } from "@/types/database";
 
-/**
- * Besin verisinin skor hesaplamaya yeter seviyede olup olmadığını kontrol eder.
- */
 export function hasEnoughDataToScore(product: Product): boolean {
   const n = product.nutrition;
   if (!n) return false;
-  // En azından kalori olmalı — yoksa "0 kalori, 0 g yağ..." gibi yanıltıcı çıkar
   return typeof n.calories === "number" && n.calories > 0;
 }
 
 /**
- * Bir ürünün kullanıcının hedefine göre 0-100 skorunu hesaplar.
- * Nutri-Score mantığı + katkı maddesi cezası + hedef çarpanları.
- *
- * Besin verisi yetersizse null döner — UI '?' göstermeli.
- * NOT: Bu MVP algoritması. Gerçek üründe diyetisyen ile incelenmeli.
+ * 0-100 skor. Besin verisi yoksa -1 döner — UI '?' göstermeli.
  */
-export function calculateScore(product: Product, goal: Goal): number | null {
-  if (!hasEnoughDataToScore(product)) return null;
+export function calculateScore(product: Product, goal: Goal): number {
+  if (!product.nutrition || product.nutrition.calories === 0) return -1;
 
   const n = product.nutrition as Nutrition;
-
   let score = 50;
 
-  // --- Olumlu besinler (+puan) ---
   if (n.fiber >= 3) score += 10;
   else if (n.fiber >= 1.5) score += 5;
 
   if (n.protein >= 10) score += 10;
   else if (n.protein >= 5) score += 5;
 
-  // --- Olumsuz besinler (-puan) ---
   if (n.sugar >= 20) score -= 20;
   else if (n.sugar >= 10) score -= 10;
   else if (n.sugar >= 5) score -= 5;
@@ -42,28 +31,19 @@ export function calculateScore(product: Product, goal: Goal): number | null {
   if (n.sodium >= 600) score -= 10;
   else if (n.sodium >= 300) score -= 5;
 
-  // --- Katkı maddeleri cezası ---
   const problematicAdditives = [
-    "palm yağı",
-    "yapay aroma",
-    "sodyum nitrit",
-    "E250",
-    "E621", // MSG
-    "aspartam",
-    "E129", // Allura Red
+    "palm yağı", "yapay aroma", "sodyum nitrit",
+    "E250", "E621", "aspartam", "E129",
   ];
   const additivePenalty = product.additives.filter((a) =>
     problematicAdditives.some((p) => a.toLowerCase().includes(p.toLowerCase()))
   ).length;
   score -= additivePenalty * 5;
 
-  // --- Organik bonus ---
   if (product.is_organic) score += 5;
 
-  // --- Hedef bazlı çarpan ---
   score = applyGoalModifier(score, n, goal);
 
-  // 0-100 arasına sıkıştır
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
@@ -73,32 +53,25 @@ function applyGoalModifier(score: number, n: Nutrition, goal: Goal): number {
       if (n.calories > 200) score -= 5;
       if (n.sugar >= 15) score -= 5;
       return score;
-
     case "gain_muscle":
       if (n.protein >= 15) score += 10;
       if (n.protein >= 20) score += 5;
       return score;
-
     case "clear_skin":
       if (n.sugar >= 10) score -= 5;
       return score;
-
     case "reduce_bloat":
       if (n.sodium >= 400) score -= 10;
       return score;
-
     case "better_sleep":
       if (n.sugar >= 15) score -= 5;
       return score;
-
     case "more_energy":
       if (n.protein >= 10 && n.fiber >= 3) score += 5;
       return score;
-
     case "face_sculpt":
       if (n.sodium >= 400) score -= 5;
       return score;
-
     default:
       return score;
   }
@@ -112,7 +85,7 @@ export interface ScoreExplanation {
 
 export function explainScore(product: Product, goal: Goal): ScoreExplanation[] {
   const n = product.nutrition;
-  if (!n) return [{ points: 0, label: "Besin değeri verisi yok", type: "neutral" }];
+  if (!n || n.calories === 0) return [{ points: 0, label: "Besin değeri verisi yok", type: "neutral" }];
 
   const reasons: ScoreExplanation[] = [];
 

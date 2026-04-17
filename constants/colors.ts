@@ -40,22 +40,25 @@ export function scoreLabel(score: number): string {
 }
 
 export function getScoreBgColor(score: number): string {
-  if (score < 40) return "#FEECEC";
-  if (score < 65) return "#FFF8EC";
-  if (score < 85) return "#EDF7E6";
-  return "#E6F5F0";
+  if (score < 0) return "#F3F4F6";
+  if (score < 40) return "#FDEAE8";
+  if (score < 65) return "#FEF5E0";
+  if (score < 85) return "#E8F5DC";
+  return "#DCF3CA";
 }
 
 export function getScoreBorderColor(score: number): string {
-  if (score < 40) return "#F5CCCC";
-  if (score < 65) return "#F5E0A8";
-  if (score < 85) return "#BFDFAA";
-  return "#A8D9C8";
+  if (score < 0) return "#D1D5DB";
+  if (score < 40) return "#EF4444";
+  if (score < 65) return "#F59E0B";
+  if (score < 85) return "#84CC16";
+  return "#22C55E";
 }
 
 export function getScoreTextColor(score: number): string {
-  if (score < 40) return "#C73030";
-  if (score < 65) return "#854F0B";
-  if (score < 85) return "#2D5A1B";
-  return "#0F6E56";
+  if (score < 0) return "#6B7280";
+  if (score < 40) return "#B91C1C";
+  if (score < 65) return "#92400E";
+  if (score < 85) return "#4D7C0F";
+  return "#166534";
 }

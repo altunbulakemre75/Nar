@@ -54,8 +54,7 @@ export async function saveScan(product: Product, goal: Goal | null): Promise<num
   }
 
   const score = calculateScore(product, goal ?? "lose_weight");
-  // Skor hesaplanamadıysa (veri yetersiz) kaydetme
-  if (score === null) {
+  if (score < 0) {
     console.warn("saveScan: skor hesaplanamadı (veri eksik)");
     return null;
   }
