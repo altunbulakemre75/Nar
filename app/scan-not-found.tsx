@@ -1,119 +1,106 @@
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, PackageSearch, Plus } from "lucide-react-native";
+import { ChevronLeft, Camera } from "lucide-react-native";
 
 export default function ScanNotFound() {
   const { barcode } = useLocalSearchParams<{ barcode: string }>();
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFFDFB" }}>
-      {/* Top bar */}
-      <View className="px-4 pt-2 pb-3 flex-row items-center justify-between">
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={10}
-          className="w-9 h-9 items-center justify-center"
-        >
-          <X size={26} color="#111" strokeWidth={2} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
+        <Pressable onPress={() => router.back()} hitSlop={10}>
+          <ChevronLeft size={28} color="#FFF" strokeWidth={2} />
         </Pressable>
-        <Text style={{ fontSize: 16, fontWeight: "600", color: "#111" }}>Tarama sonucu</Text>
-        <View className="w-9 h-9" />
       </View>
 
-      <View className="flex-1 px-6 items-center justify-center">
+      <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: "center" }}>
         <View
-          className="w-20 h-20 rounded-full items-center justify-center mb-6"
-          style={{ backgroundColor: "#FFF5F2" }}
-        >
-          <PackageSearch size={36} color="#C73030" strokeWidth={1.6} />
-        </View>
-
-        <Text
           style={{
-            fontSize: 22,
-            fontWeight: "700",
-            color: "#111",
-            textAlign: "center",
-            marginBottom: 8,
-          }}
-        >
-          Bu ürünü bulamadık
-        </Text>
-        <Text
-          style={{
-            fontSize: 14,
-            color: "#666",
-            textAlign: "center",
-            marginBottom: 4,
-            lineHeight: 20,
-          }}
-        >
-          Ne kendi veritabanımızda ne de{"\n"}Open Food Facts'te kayıtlı.
-        </Text>
-
-        {barcode ? (
-          <View className="mt-4 px-4 py-2 rounded-full" style={{ backgroundColor: "#F5F5F5" }}>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#444",
-                fontFamily: "Courier",
-                fontWeight: "600",
-                letterSpacing: 1,
-              }}
-            >
-              {barcode}
-            </Text>
-          </View>
-        ) : null}
-
-        {/* Sen ekle kartı (V2'de aktif) */}
-        <View
-          className="mt-8 rounded-2xl border p-4 flex-row items-center"
-          style={{ backgroundColor: "#FFF5F2", borderColor: "#F5D4CA" }}
-        >
-          <View
-            className="w-10 h-10 rounded-full items-center justify-center mr-3"
-            style={{ backgroundColor: "#FFFFFF" }}
-          >
-            <Plus size={20} color="#C73030" strokeWidth={2.2} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{ fontSize: 14, fontWeight: "600", color: "#6B1A1A", marginBottom: 2 }}
-            >
-              Ürünü sen ekle
-            </Text>
-            <Text style={{ fontSize: 12, color: "#8B4848", lineHeight: 16 }}>
-              Ürün bilgilerini girip diğer kullanıcılarla paylaşabilirsin
-            </Text>
-          </View>
-          <View className="px-2.5 py-1 rounded-full" style={{ backgroundColor: "#FFFFFF" }}>
-            <Text style={{ fontSize: 10, color: "#999", fontWeight: "600" }}>YAKINDA</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Alt butonlar */}
-      <View className="px-4 pb-6" style={{ gap: 10 }}>
-        <Pressable
-          onPress={() => router.replace("/(tabs)/scan")}
-          style={{
-            paddingVertical: 14,
-            borderRadius: 999,
-            backgroundColor: "#C73030",
+            backgroundColor: "#1A1A1A",
+            borderRadius: 24,
+            padding: 28,
             alignItems: "center",
           }}
         >
-          <Text style={{ color: "#FFF", fontSize: 15, fontWeight: "600" }}>Tekrar dene</Text>
+          <Text
+            style={{
+              fontSize: 26,
+              fontWeight: "700",
+              color: "#FFF",
+              textAlign: "center",
+              marginBottom: 20,
+            }}
+          >
+            Yeni ürün buldun ✨
+          </Text>
+
+          <View
+            style={{
+              width: 180,
+              height: 240,
+              borderRadius: 16,
+              backgroundColor: "#FFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 20,
+              padding: 16,
+            }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: "700", color: "#111", textAlign: "center", marginBottom: 8 }}>
+              Nutrition Facts
+            </Text>
+            <View style={{ width: "100%", height: 1, backgroundColor: "#111", marginBottom: 8 }} />
+            <Text style={{ fontSize: 11, color: "#111" }}>Serving size 1 Tbsp. (21g)</Text>
+            <View style={{ width: "100%", height: 4, backgroundColor: "#111", marginVertical: 6 }} />
+            <Text style={{ fontSize: 11, color: "#111", alignSelf: "flex-start" }}>Amount per serving</Text>
+            <Text style={{ fontSize: 22, fontWeight: "900", color: "#111", alignSelf: "flex-start" }}>
+              Calories 60
+            </Text>
+            <View style={{ width: "100%", height: 1, backgroundColor: "#111", marginVertical: 4 }} />
+            <Text style={{ fontSize: 10, color: "#111" }}>Total Fat 0g · Sugar 17g</Text>
+            <Text style={{ fontSize: 10, color: "#111", marginTop: 2 }}>Protein 0g</Text>
+          </View>
+
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#CCC",
+              textAlign: "center",
+              lineHeight: 22,
+              marginBottom: 8,
+            }}
+          >
+            Besin etiketini fotoğrafla,{"\n"}AI özel analiz yapsın.
+          </Text>
+
+          {barcode ? (
+            <Text style={{ fontSize: 11, color: "#666", marginTop: 6, fontFamily: "Courier" }}>
+              {barcode}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+
+      <View style={{ padding: 20, gap: 10 }}>
+        <Pressable
+          onPress={() => router.push({ pathname: "/scan-label", params: { barcode: barcode ?? "" } })}
+          style={{
+            backgroundColor: "#FFF",
+            paddingVertical: 16,
+            borderRadius: 30,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+          }}
+        >
+          <Camera size={20} color="#111" strokeWidth={2} />
+          <Text style={{ fontSize: 16, fontWeight: "700", color: "#111" }}>Etiketi Tara</Text>
         </Pressable>
 
-        <Pressable
-          onPress={() => router.replace("/(tabs)")}
-          className="py-3 items-center"
-        >
-          <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Ana sayfaya dön</Text>
+        <Pressable onPress={() => router.replace("/(tabs)")} style={{ paddingVertical: 10, alignItems: "center" }}>
+          <Text style={{ fontSize: 15, color: "#FFF", fontWeight: "600" }}>Kapat</Text>
         </Pressable>
       </View>
     </SafeAreaView>

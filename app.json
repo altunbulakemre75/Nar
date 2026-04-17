@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.nar.scanner",
       "infoPlist": {
-        "NSCameraUsageDescription": "Nar, barkod taramak ve yemek fotoğrafı analizi için kameraya ihtiyaç duyar."
+        "NSCameraUsageDescription": "Nar, barkod taramak ve yemek fotoğrafı analizi için kameraya ihtiyaç duyar.",
+        "NSPhotoLibraryUsageDescription": "Nar, galerideki besin etiketi fotoğraflarını analiz etmek için erişim ister."
       }
     },
     "android": {
