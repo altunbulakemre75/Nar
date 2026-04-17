@@ -9,8 +9,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { useAuthStore } from "@/lib/authStore";
 import AppErrorBoundary from "@/components/ErrorBoundary";
 import OfflineBanner from "@/components/OfflineBanner";
+import { initAnalytics, track, identifyUser, resetUser } from "@/lib/analytics";
 
 SplashScreen.preventAutoHideAsync();
+initAnalytics();
 
 function AuthGate() {
   const router = useRouter();
@@ -22,10 +24,17 @@ function AuthGate() {
 
   useEffect(() => {
     restoreSession();
+    track("app_opened");
   }, [restoreSession]);
 
   useEffect(() => {
     if (!initialized) return;
+
+    if (session?.user) {
+      identifyUser(session.user.id, { email: session.user.email ?? undefined });
+    } else {
+      resetUser();
+    }
 
     const inAuthGroup = segments[0] === "(auth)";
 

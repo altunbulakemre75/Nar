@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ErrorBoundary as REB, type FallbackProps } from "react-error-boundary";
 import { AlertTriangle, RotateCcw } from "lucide-react-native";
+import { reportError } from "@/lib/analytics";
 
 interface Props {
   children: ReactNode;
@@ -85,9 +86,7 @@ export default function AppErrorBoundary({ children }: Props) {
     <REB
       FallbackComponent={Fallback}
       onError={(error, info) => {
-        // Prod'da: Sentry.captureException(error, { extra: info })
-        const err = error as Error;
-        console.error("ErrorBoundary yakaladı:", err.message, info);
+        reportError(error, { componentStack: info.componentStack });
       }}
     >
       {children}

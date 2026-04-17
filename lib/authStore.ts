@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
+import { track } from "./analytics";
 
 interface AuthState {
   user: User | null;
@@ -42,6 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       set({ user: data.user, session: data.session, loading: false });
+      track("login");
     } catch (e: any) {
       set({ loading: false, error: translateError(e.message ?? "Bilinmeyen hata") });
       throw e;
@@ -58,6 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
       if (error) throw error;
       set({ user: data.user, session: data.session, loading: false });
+      track("signup");
     } catch (e: any) {
       set({ loading: false, error: translateError(e.message ?? "Bilinmeyen hata") });
       throw e;

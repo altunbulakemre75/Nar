@@ -18,6 +18,7 @@ import { useNarciStore, type Message } from "@/lib/narciStore";
 import { sendMessage, isRamadanNow, type NarciContext } from "@/lib/narci";
 import { supabase } from "@/lib/supabase";
 import { getRecentScans, getProductByBarcode } from "@/lib/products";
+import { track, reportError } from "@/lib/analytics";
 import { useAuthStore } from "@/lib/authStore";
 import type { Product } from "@/types/database";
 
@@ -110,6 +111,10 @@ export default function NarciScreen() {
     addMessage({ role: "user", content: text });
     setInput("");
     setSending(true);
+    track("narci_message_sent", {
+      length: text.length,
+      has_product_context: !!contextRef.current.currentProduct,
+    });
 
     try {
       // G\u00fcncel ge\u00e7mi\u015fi al
@@ -122,6 +127,7 @@ export default function NarciScreen() {
       addMessage({ role: "assistant", content: reply });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
+      reportError(e, { where: "narci.handleSend" });
       addMessage({
         role: "assistant",
         content: e.message ?? "\u015eu an cevap veremiyorum, az sonra tekrar dene.",

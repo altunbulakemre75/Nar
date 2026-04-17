@@ -38,6 +38,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { Product, Goal, Nutrition } from "@/types/database";
 import { checkAchievements } from "@/lib/achievements";
+import { track } from "@/lib/analytics";
 
 const SUGGESTED_QUESTIONS = [
   "Bu ürün şişkinlik yapar mı?",
@@ -77,8 +78,19 @@ export default function ScanResultScreen() {
       }
 
       console.log("🔍 Product:", p.name, "nutrition:", p.nutrition);
+      const s = calculateScore(p, userGoal);
+      track("product_scanned", {
+        barcode,
+        name: p.name,
+        brand: p.brand ?? null,
+        score: s,
+        has_data: s >= 0,
+        has_complete_data: p.has_complete_data ?? false,
+        goal: userGoal,
+        sold_in_turkey: p.sold_in_turkey ?? false,
+      });
       setProduct(p);
-      setScore(calculateScore(p, userGoal));
+      setScore(s);
       setLoading(false);
     })();
   }, [barcode]);
@@ -97,6 +109,11 @@ export default function ScanResultScreen() {
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    track("scan_added_to_day", {
+      barcode: product.barcode,
+      score: savedScore,
+      goal,
+    });
     let newlyUnlocked: Awaited<ReturnType<typeof checkAchievements>> = [];
     try {
       newlyUnlocked = await checkAchievements();
@@ -105,6 +122,9 @@ export default function ScanResultScreen() {
     }
     setSaving(false);
     if (newlyUnlocked.length > 0) {
+      newlyUnlocked.forEach((a) =>
+        track("achievement_unlocked", { id: a.id, title: a.title })
+      );
       const first = newlyUnlocked[0];
       Alert.alert(
         `${first.icon}  Yeni rozet!`,

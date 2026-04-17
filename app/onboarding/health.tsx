@@ -5,6 +5,7 @@ import OnboardingLayout from "@/components/OnboardingLayout";
 import { useOnboardingStore } from "@/lib/onboardingStore";
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
+import { track, reportError } from "@/lib/analytics";
 
 const HEALTH_CONDITIONS = [
   "Diyabet",
@@ -81,9 +82,16 @@ export default function HealthScreen() {
 
       if (error) throw error;
 
+      track("onboarding_completed", {
+        goal: state.goal,
+        gender: state.gender,
+        activity_level: state.activity_level,
+        has_health_conditions: (state.health_conditions?.length ?? 0) > 0,
+        has_allergies: (state.allergies?.length ?? 0) > 0,
+      });
       router.replace("/(tabs)");
     } catch (e: any) {
-      console.error("Profil kayıt hatası:", e);
+      reportError(e, { step: "onboarding_complete" });
       Alert.alert(
         "Kaydedilemedi",
         "Profil bilgileri gönderilemedi. İnternet bağlantını kontrol et.",
