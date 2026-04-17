@@ -37,7 +37,7 @@ export default function Home() {
       await Promise.all([
         getTodayLog(),
         getStreakCount(),
-        getRecentScans(5),
+        getRecentScans(3),
         supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle(),
         supabase
           .from("scans")
@@ -129,11 +129,11 @@ export default function Home() {
 
             {/* Son taramalar — dikey liste */}
             {recent.length > 0 && (
-              <View style={{ marginTop: 24 }}>
-                <Text style={{ paddingHorizontal: 16, paddingBottom: 8, fontSize: 14, fontWeight: "600", color: "#111" }}>
+              <View style={{ marginTop: 28 }}>
+                <Text style={{ paddingHorizontal: 16, paddingBottom: 12, fontSize: 22, fontWeight: "700", color: "#111" }}>
                   Son taradıkların
                 </Text>
-                <View style={{ paddingHorizontal: 16, gap: 8 }}>
+                <View style={{ paddingHorizontal: 16, gap: 10 }}>
                   {recent.map((s) => (
                     <RecentCard key={s.id} scan={s} />
                   ))}
@@ -242,6 +242,7 @@ function ScoreCard({
 
 function RecentCard({ scan }: { scan: ScanWithProduct }) {
   const [imgFailed, setImgFailed] = useState(false);
+  const ringColor = getScoreBorderColor(scan.score);
   return (
     <Pressable
       onPress={() =>
@@ -250,9 +251,9 @@ function RecentCard({ scan }: { scan: ScanWithProduct }) {
       style={{
         flexDirection: "row",
         alignItems: "center",
-        padding: 12,
+        padding: 14,
         backgroundColor: "#FFF",
-        borderRadius: 14,
+        borderRadius: 16,
         borderWidth: 1,
         borderColor: "#E5E7EB",
       }}
@@ -260,38 +261,55 @@ function RecentCard({ scan }: { scan: ScanWithProduct }) {
       {scan.product.image_url && !imgFailed ? (
         <Image
           source={{ uri: scan.product.image_url }}
-          style={{ width: 56, height: 56, borderRadius: 8, backgroundColor: "#F5F5F5" }}
+          style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: "#F5F5F5" }}
           resizeMode="contain"
           onError={() => setImgFailed(true)}
         />
       ) : (
-        <View style={{ width: 56, height: 56, borderRadius: 8, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
-          <Package size={24} color="#C73030" strokeWidth={1.5} />
+        <View style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
+          <Package size={28} color="#C73030" strokeWidth={1.5} />
         </View>
       )}
-      <View style={{ marginLeft: 12, flex: 1 }}>
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#111" }} numberOfLines={1}>
+      <View style={{ marginLeft: 14, flex: 1 }}>
+        <Text style={{ fontSize: 16, fontWeight: "700", color: "#111" }} numberOfLines={1}>
           {scan.product.name}
         </Text>
-        <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }} numberOfLines={1}>
+        <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }} numberOfLines={1}>
           {scan.product.brand ?? "—"}
         </Text>
-        <View style={{ marginTop: 6, flexDirection: "row" }}>
-          <View style={{
-            backgroundColor: getScoreBgColor(scan.score),
-            borderWidth: 1,
-            borderColor: getScoreBorderColor(scan.score),
-            paddingHorizontal: 8,
-            paddingVertical: 2,
-            borderRadius: 12,
-          }}>
-            <Text style={{ fontSize: 11, fontWeight: "600", color: getScoreTextColor(scan.score) }}>
+        <View style={{ marginTop: 8, flexDirection: "row" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: getScoreBgColor(scan.score),
+              borderWidth: 1,
+              borderColor: ringColor,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 14,
+            }}
+          >
+            {/* Küçük renkli skor halkası */}
+            <View
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                borderWidth: 2,
+                borderColor: ringColor,
+                borderTopColor: "transparent",
+                marginRight: 6,
+                transform: [{ rotate: "-45deg" }],
+              }}
+            />
+            <Text style={{ fontSize: 12, fontWeight: "700", color: getScoreTextColor(scan.score) }}>
               Skor: {scan.score}
             </Text>
           </View>
         </View>
       </View>
-      <ChevronRight size={18} color="#CCC" />
+      <ChevronRight size={20} color="#999" strokeWidth={2} />
     </Pressable>
   );
 }
