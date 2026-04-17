@@ -41,10 +41,11 @@ export interface Profile {
   height_cm: number | null;
   weight_kg: number | null;
   activity_level: ActivityLevel | null;
-  water_glasses: number;
+  water_glasses: number | null;
   dietary_restrictions: string[];
   health_conditions: string[];
   allergies: string[];
+  updated_at?: string;
 }
 
 export interface Nutrition {
