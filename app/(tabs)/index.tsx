@@ -6,13 +6,15 @@ import {
   Pressable,
   RefreshControl,
   Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Swipeable } from "react-native-gesture-handler";
 import { useFocusEffect, router } from "expo-router";
-import { ScanLine, Flame, ChevronRight, Package } from "lucide-react-native";
+import { ScanLine, Flame, ChevronRight, Package, Trash2 } from "lucide-react-native";
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
-import { getTodayLog, getRecentScans, type ScanWithProduct } from "@/lib/products";
+import { getTodayLog, getRecentScans, deleteScan, type ScanWithProduct } from "@/lib/products";
 import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
@@ -84,7 +86,7 @@ export default function Home() {
             style={{
               fontFamily: "PlayfairDisplay-BoldItalic",
               fontSize: 40,
-              color: "#111",
+              color: "#C73030",
               textAlign: "center",
               lineHeight: 48,
             }}
@@ -111,10 +113,10 @@ export default function Home() {
               onPress={() => router.push("/(tabs)/scan")}
               style={{
                 marginHorizontal: 16,
-                marginTop: 16,
-                height: 56,
+                marginTop: 28,
+                height: 60,
                 backgroundColor: "#111",
-                borderRadius: 28,
+                borderRadius: 30,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
@@ -135,7 +137,15 @@ export default function Home() {
                 </Text>
                 <View style={{ paddingHorizontal: 16, gap: 10 }}>
                   {recent.map((s) => (
-                    <RecentCard key={s.id} scan={s} />
+                    <RecentCard
+                      key={s.id}
+                      scan={s}
+                      onDeleted={async () => {
+                        const ok = await deleteScan(s.id);
+                        if (ok) await fetchAll();
+                        else Alert.alert("Silinemedi", "Tekrar dene.");
+                      }}
+                    />
                   ))}
                 </View>
               </View>
@@ -170,18 +180,18 @@ function ScoreCard({
 
   return (
     <View
-      className="mx-4 p-4 rounded-2xl border"
-      style={{ backgroundColor: bg, borderColor: border }}
+      className="mx-4 rounded-3xl border"
+      style={{ backgroundColor: bg, borderColor: border, padding: 22 }}
     >
-      <View className="flex-row items-baseline">
-        <Text style={{ fontSize: 56, fontWeight: "700", color, lineHeight: 60 }}>
+      <View className="flex-row items-center">
+        <Text style={{ fontSize: 72, fontWeight: "700", color, lineHeight: 76 }}>
           {displayScore}
         </Text>
-        <View className="ml-4 flex-1">
-          <Text style={{ fontSize: 20, fontWeight: "700", color: "#111" }}>
+        <View className="ml-5 flex-1">
+          <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>
             Bugünün Skoru
           </Text>
-          <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
+          <Text style={{ fontSize: 14, color: "#666", marginTop: 2 }}>
             {empty
               ? "İlk ürününü tara"
               : itemsCount > 0
@@ -240,10 +250,39 @@ function ScoreCard({
 }
 
 
-function RecentCard({ scan }: { scan: ScanWithProduct }) {
+function RecentCard({
+  scan,
+  onDeleted,
+}: {
+  scan: ScanWithProduct;
+  onDeleted?: () => void;
+}) {
   const [imgFailed, setImgFailed] = useState(false);
   const ringColor = getScoreBorderColor(scan.score);
+
+  const renderRightActions = () => (
+    <Pressable
+      onPress={() => {
+        Alert.alert("Sil", "Bu kaydı silmek istediğine emin misin?", [
+          { text: "Vazgeç", style: "cancel" },
+          { text: "Sil", style: "destructive", onPress: () => onDeleted?.() },
+        ]);
+      }}
+      style={{
+        width: 80,
+        backgroundColor: "#EF4444",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 16,
+        marginLeft: 8,
+      }}
+    >
+      <Trash2 size={24} color="#FFF" strokeWidth={2} />
+    </Pressable>
+  );
+
   return (
+    <Swipeable renderRightActions={renderRightActions} overshootRight={false}>
     <Pressable
       onPress={() =>
         router.push({ pathname: "/scan-result", params: { barcode: scan.product.barcode } })
@@ -311,6 +350,7 @@ function RecentCard({ scan }: { scan: ScanWithProduct }) {
       </View>
       <ChevronRight size={20} color="#999" strokeWidth={2} />
     </Pressable>
+    </Swipeable>
   );
 }
 

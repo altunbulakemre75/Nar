@@ -1,6 +1,7 @@
 import "../global.css";
 import { useEffect } from "react";
 import { View, ActivityIndicator, Text } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -66,18 +67,20 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <AppErrorBoundary>
-      <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <OfflineBanner />
-        <AuthGate />
-        {initialized ? (
-          <Stack screenOptions={{ headerShown: false }} />
-        ) : (
-          <AppSplash />
-        )}
-      </SafeAreaProvider>
-    </AppErrorBoundary>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppErrorBoundary>
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
+          <OfflineBanner />
+          <AuthGate />
+          {initialized ? (
+            <Stack screenOptions={{ headerShown: false }} />
+          ) : (
+            <AppSplash />
+          )}
+        </SafeAreaProvider>
+      </AppErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
 

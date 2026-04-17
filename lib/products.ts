@@ -176,6 +176,47 @@ export interface ScanWithProduct extends Scan {
   product: Product;
 }
 
+/**
+ * Bir scan kaydını siler ve bugünün daily_logs özetini yeniden hesaplar.
+ */
+export async function deleteScan(scanId: string): Promise<boolean> {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) return false;
+
+  const { error } = await supabase.from("scans").delete().eq("id", scanId).eq("user_id", user.id);
+  if (error) {
+    console.warn("deleteScan:", error);
+    return false;
+  }
+
+  // Bugünün özetini güncelle
+  const today = new Date().toISOString().split("T")[0];
+  const { data: todayScans } = await supabase
+    .from("scans")
+    .select("score")
+    .eq("user_id", user.id)
+    .gte("scanned_at", `${today}T00:00:00`)
+    .lte("scanned_at", `${today}T23:59:59`);
+
+  const items = todayScans ?? [];
+  if (items.length === 0) {
+    await supabase.from("daily_logs").delete().eq("user_id", user.id).eq("date", today);
+  } else {
+    const avg = items.reduce((sum, s) => sum + (s.score ?? 0), 0) / items.length;
+    await supabase.from("daily_logs").upsert(
+      {
+        user_id: user.id,
+        date: today,
+        average_score: Math.round(avg * 100) / 100,
+        items_count: items.length,
+      },
+      { onConflict: "user_id,date" }
+    );
+  }
+
+  return true;
+}
+
 export async function getRecentScans(limit = 10): Promise<ScanWithProduct[]> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) return [];
