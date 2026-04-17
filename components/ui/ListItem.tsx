@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react-native";
 
 interface Props {
   icon?: ReactNode;
+  iconBg?: string;
   title: string;
   subtitle?: string;
   value?: string;
@@ -15,6 +16,7 @@ interface Props {
 
 export default function ListItem({
   icon,
+  iconBg,
   title,
   subtitle,
   value,
@@ -32,10 +34,10 @@ export default function ListItem({
       style={({ pressed }) => ({
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 12,
+        paddingVertical: 14,
         paddingHorizontal: 16,
-        borderBottomWidth: last ? 0 : 1,
-        borderBottomColor: "#F0F0F0",
+        borderBottomWidth: last ? 0 : 0.5,
+        borderBottomColor: "#ECECEE",
         backgroundColor: pressed ? "#FAFAFA" : "transparent",
       })}
     >
@@ -44,8 +46,8 @@ export default function ListItem({
           style={{
             width: 32,
             height: 32,
-            borderRadius: 10,
-            backgroundColor: destructive ? "#FFF5F2" : "#F5F5F5",
+            borderRadius: 8,
+            backgroundColor: iconBg ?? (destructive ? "#FEECEC" : "#F3F4F6"),
             alignItems: "center",
             justifyContent: "center",
             marginRight: 12,
@@ -56,21 +58,25 @@ export default function ListItem({
       ) : null}
 
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 15, color: titleColor, fontWeight: "500" }}>
+        <Text style={{ fontSize: 15, color: titleColor, fontWeight: "600" }}>
           {title}
         </Text>
         {subtitle ? (
-          <Text style={{ fontSize: 11, color: "#999", marginTop: 2 }}>{subtitle}</Text>
+          <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }} numberOfLines={1}>
+            {subtitle}
+          </Text>
         ) : null}
       </View>
 
       {rightElement ? (
-        rightElement
+        <View style={{ marginLeft: 8 }}>{rightElement}</View>
       ) : value ? (
-        <Text style={{ fontSize: 13, color: "#999", marginRight: 6 }}>{value}</Text>
+        <Text style={{ fontSize: 14, color: "#888", marginRight: 4 }}>{value}</Text>
       ) : null}
 
-      {onPress && !rightElement ? <ChevronRight size={16} color="#CCC" /> : null}
+      {onPress && !rightElement ? (
+        <ChevronRight size={18} color="#C0C0C0" strokeWidth={2} style={{ marginLeft: 4 }} />
+      ) : null}
     </Pressable>
   );
 }
