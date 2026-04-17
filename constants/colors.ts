@@ -38,3 +38,24 @@ export function scoreLabel(score: number): string {
   if (score < 85) return "Hedefinle uyumlu";
   return "Hedefinle çok uyumlu";
 }
+
+export function getScoreBgColor(score: number): string {
+  if (score < 40) return "#FEECEC";
+  if (score < 65) return "#FFF8EC";
+  if (score < 85) return "#EDF7E6";
+  return "#E6F5F0";
+}
+
+export function getScoreBorderColor(score: number): string {
+  if (score < 40) return "#F5CCCC";
+  if (score < 65) return "#F5E0A8";
+  if (score < 85) return "#BFDFAA";
+  return "#A8D9C8";
+}
+
+export function getScoreTextColor(score: number): string {
+  if (score < 40) return "#C73030";
+  if (score < 65) return "#854F0B";
+  if (score < 85) return "#2D5A1B";
+  return "#0F6E56";
+}

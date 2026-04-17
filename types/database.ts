@@ -75,6 +75,7 @@ export interface Product {
   scan_count?: number;
   sold_in_turkey?: boolean;
   origin_country?: string | null;
+  has_complete_data?: boolean;
 }
 
 export interface Scan {

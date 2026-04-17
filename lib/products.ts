@@ -54,6 +54,11 @@ export async function saveScan(product: Product, goal: Goal | null): Promise<num
   }
 
   const score = calculateScore(product, goal ?? "lose_weight");
+  // Skor hesaplanamadıysa (veri yetersiz) kaydetme
+  if (score === null) {
+    console.warn("saveScan: skor hesaplanamadı (veri eksik)");
+    return null;
+  }
 
   // 1) scan kaydı
   const { error: scanError } = await supabase

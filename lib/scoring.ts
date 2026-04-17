@@ -1,14 +1,26 @@
 import type { Goal, Nutrition, Product } from "@/types/database";
 
 /**
+ * Besin verisinin skor hesaplamaya yeter seviyede olup olmadığını kontrol eder.
+ */
+export function hasEnoughDataToScore(product: Product): boolean {
+  const n = product.nutrition;
+  if (!n) return false;
+  // En azından kalori olmalı — yoksa "0 kalori, 0 g yağ..." gibi yanıltıcı çıkar
+  return typeof n.calories === "number" && n.calories > 0;
+}
+
+/**
  * Bir ürünün kullanıcının hedefine göre 0-100 skorunu hesaplar.
  * Nutri-Score mantığı + katkı maddesi cezası + hedef çarpanları.
  *
+ * Besin verisi yetersizse null döner — UI '?' göstermeli.
  * NOT: Bu MVP algoritması. Gerçek üründe diyetisyen ile incelenmeli.
  */
-export function calculateScore(product: Product, goal: Goal): number {
-  const n = product.nutrition;
-  if (!n) return 50; // veri yoksa nötr
+export function calculateScore(product: Product, goal: Goal): number | null {
+  if (!hasEnoughDataToScore(product)) return null;
+
+  const n = product.nutrition as Nutrition;
 
   let score = 50;
 

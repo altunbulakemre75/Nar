@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, ScanLine, Users, User } from "lucide-react-native";
+import { Home, ScanLine, User } from "lucide-react-native";
 
 export default function TabsLayout() {
   return (
@@ -34,13 +34,6 @@ export default function TabsLayout() {
         options={{
           title: "Tara",
           tabBarIcon: ({ color, size }) => <ScanLine color={color} size={size - 2} strokeWidth={1.8} />,
-        }}
-      />
-      <Tabs.Screen
-        name="community"
-        options={{
-          title: "Topluluk",
-          tabBarIcon: ({ color, size }) => <Users color={color} size={size - 2} strokeWidth={1.8} />,
         }}
       />
       <Tabs.Screen

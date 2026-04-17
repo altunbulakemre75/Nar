@@ -9,6 +9,10 @@ export interface OFFProduct {
   ingredients_text_tr?: string;
   nutriments?: {
     "energy-kcal_100g"?: number;
+    "energy-kj_100g"?: number;
+    energy_100g?: number;
+    energy_unit?: string;
+    carbohydrates_100g?: number;
     sugars_100g?: number;
     "saturated-fat_100g"?: number;
     fat_100g?: number;
@@ -38,13 +42,14 @@ export interface OFFMappedProduct {
     fiber: number;
     protein: number;
     serving_size_g: number;
-  };
+  } | null;
   additives: string[];
   is_organic: boolean;
   sold_in_turkey: boolean;
   origin_country: string;
   country: string;
   verified: boolean;
+  has_complete_data?: boolean;
 }
 
 /**
@@ -71,7 +76,6 @@ export async function fetchFromOFF(barcode: string): Promise<OFFMappedProduct | 
       barcode
     )}.json?fields=${fields}`;
 
-    // 8 saniye timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -94,27 +98,56 @@ export async function fetchFromOFF(barcode: string): Promise<OFFMappedProduct | 
 }
 
 function mapOFFtoProduct(off: OFFProduct, barcode: string): OFFMappedProduct {
-  const nutriments = off.nutriments ?? {};
+  const n: Record<string, any> = off.nutriments ?? {};
   const countries = off.countries_tags ?? [];
 
-  // Türkiye'de satılıyor mu?
+  // Generic field resolver: tries primary key + fallbacks, returns 0 if nothing found
+  const getField = (primary: string, ...fallbacks: string[]): number => {
+    for (const key of [primary, ...fallbacks]) {
+      const val = n[key];
+      if (typeof val === "number" && val > 0) return val;
+    }
+    return 0;
+  };
+
+  // Calories: tries kcal keys first, then kJ with conversion
+  const getCalories = (): number => {
+    const kcal = getField("energy-kcal_100g", "energy-kcal", "energy_kcal_100g");
+    if (kcal > 0) return Math.round(kcal);
+    const kj = getField("energy-kj_100g", "energy-kj", "energy_kj_100g", "energy_100g");
+    if (kj > 0) {
+      const unit = (n["energy_unit"] ?? "").toLowerCase();
+      if (unit === "kcal") return Math.round(kj);
+      return Math.round(kj / 4.184);
+    }
+    return 0;
+  };
+
   const soldInTurkey = countries.some(
     (c) => c.toLowerCase().includes("turkey") || c.toLowerCase().includes("turkiye")
   );
-
-  // Menşe ülke - countries_tags'in ilki tipik olarak ana ülke
   const originCountryRaw = countries[0]?.replace(/^en:/, "") ?? "UNKNOWN";
   const originCountry = originCountryRaw.toUpperCase();
 
-  // Sodyum (g → mg). Eğer yoksa tuzdan yaklaşık hesapla (tuz * 400 ≈ sodyum mg)
-  const sodium = nutriments.sodium_100g
-    ? nutriments.sodium_100g * 1000
-    : nutriments.salt_100g
-    ? nutriments.salt_100g * 400
-    : 0;
+  const calories = getCalories();
+  const sugar = Number(getField("sugars_100g", "sugar_100g").toFixed(1));
+  const saturated_fat = Number(getField("saturated-fat_100g", "saturated_fat_100g").toFixed(1));
+  const fat = Number(getField("fat_100g").toFixed(1));
+  const fiber = Number(getField("fiber_100g", "fibers_100g").toFixed(1));
+  const protein = Number(getField("proteins_100g", "protein_100g").toFixed(1));
 
-  // Kategori - son tag en spesifik oluyor genelde, ama basit tutalım
+  const sodiumRaw = getField("sodium_100g");
+  const saltRaw = getField("salt_100g");
+  const sodium = sodiumRaw > 0 ? Math.round(sodiumRaw * 1000) : saltRaw > 0 ? Math.round(saltRaw * 400) : 0;
+
   const category = off.categories_tags?.[0]?.replace(/^en:/, "") ?? null;
+
+  const hasAnyNutrition = calories > 0 || protein > 0 || fat > 0;
+  const hasValidNutrition = calories > 0 && protein > 0;
+
+  const nutrition = hasAnyNutrition
+    ? { calories, sugar, saturated_fat, fat, sodium, fiber, protein, serving_size_g: 100 }
+    : null;
 
   return {
     barcode,
@@ -123,16 +156,7 @@ function mapOFFtoProduct(off: OFFProduct, barcode: string): OFFMappedProduct {
     category,
     image_url: off.image_url || null,
     ingredients: off.ingredients_text_tr || off.ingredients_text || null,
-    nutrition: {
-      calories: Math.round(nutriments["energy-kcal_100g"] ?? 0),
-      sugar: Number((nutriments.sugars_100g ?? 0).toFixed(1)),
-      saturated_fat: Number((nutriments["saturated-fat_100g"] ?? 0).toFixed(1)),
-      fat: Number((nutriments.fat_100g ?? 0).toFixed(1)),
-      sodium: Math.round(sodium),
-      fiber: Number((nutriments.fiber_100g ?? 0).toFixed(1)),
-      protein: Number((nutriments.proteins_100g ?? 0).toFixed(1)),
-      serving_size_g: 100,
-    },
+    nutrition,
     additives: (off.additives_tags ?? [])
       .map((t) => t.replace(/^en:/, "").toUpperCase())
       .slice(0, 10),
@@ -144,5 +168,13 @@ function mapOFFtoProduct(off: OFFProduct, barcode: string): OFFMappedProduct {
     origin_country: originCountry,
     country: soldInTurkey ? "TR" : originCountry,
     verified: false,
+    has_complete_data: hasValidNutrition,
   };
+}
+
+/** Üründe yeterli besin verisi var mı? (skor hesaplanabilir mi?) */
+export function hasSufficientNutrition(nutrition: unknown): boolean {
+  if (!nutrition || typeof nutrition !== "object") return false;
+  const n = nutrition as Record<string, number | undefined>;
+  return typeof n.calories === "number" && n.calories > 0;
 }
