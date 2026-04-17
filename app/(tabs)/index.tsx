@@ -299,16 +299,14 @@ function RecentCard({
     >
       <View
         style={{
-          width: 64,
-          height: 64,
-          borderRadius: 10,
+          width: 70,
+          height: 70,
+          borderRadius: 12,
           backgroundColor: "#FFF",
-          borderWidth: 1,
-          borderColor: "#F0F0F0",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          padding: 4,
+          padding: 6,
         }}
       >
         {scan.product.image_url && !imgFailed ? (

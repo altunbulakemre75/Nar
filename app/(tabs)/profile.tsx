@@ -261,7 +261,20 @@ export default function Profile() {
           <FieldRow label="Yaş" value={ageLabel} onEdit={() => router.push("/onboarding/age")} />
           <FieldRow label="Cinsiyet" value={genderLabel} onEdit={() => router.push("/onboarding/gender")} />
           <FieldRow label="Boy & Kilo" value={measureLabel} onEdit={() => router.push("/onboarding/measurements")} />
-          <FieldRow label="Günlük Su Tüketimi" value={waterLabel} onEdit={() => router.push("/onboarding/measurements")} />
+          <FieldRow label="Günlük Su Tüketimi" value={waterLabel} onEdit={async () => {
+            if (!user) return;
+            Alert.alert(
+              "Günlük su tüketimi",
+              "Ortalama kaç bardak su içiyorsun?",
+              [
+                { text: "Az (1-4)", onPress: () => updateWater(user.id, 3, fetchAll) },
+                { text: "Orta (5-6)", onPress: () => updateWater(user.id, 6, fetchAll) },
+                { text: "İyi (7-8)", onPress: () => updateWater(user.id, 8, fetchAll) },
+                { text: "Harika (9+)", onPress: () => updateWater(user.id, 10, fetchAll) },
+                { text: "Vazgeç", style: "cancel" },
+              ]
+            );
+          }} />
           <FieldRow label="Aktivite Seviyesi" value={activityLabel} onEdit={() => router.push("/onboarding/activity")} last />
         </View>
 
@@ -274,7 +287,9 @@ export default function Profile() {
           title="Diyet Kısıtlamaları"
           tags={profile?.dietary_restrictions ?? []}
           emptyText="Diyet kısıtlaması yok"
-          onEdit={() => router.push("/onboarding/health")}
+          onEdit={() =>
+            router.push({ pathname: "/settings/edit-preferences", params: { field: "dietary_restrictions" } })
+          }
         />
 
         <View style={{ height: 10 }} />
@@ -283,7 +298,9 @@ export default function Profile() {
           title="Sağlık Durumları"
           tags={profile?.health_conditions ?? []}
           emptyText="Sağlık durumu belirtilmedi"
-          onEdit={() => router.push("/onboarding/health")}
+          onEdit={() =>
+            router.push({ pathname: "/settings/edit-preferences", params: { field: "health_conditions" } })
+          }
         />
 
         <View style={{ height: 10 }} />
@@ -292,7 +309,9 @@ export default function Profile() {
           title="Alerjiler"
           tags={profile?.allergies ?? []}
           emptyText="Alerji yok"
-          onEdit={() => router.push("/onboarding/health")}
+          onEdit={() =>
+            router.push({ pathname: "/settings/edit-preferences", params: { field: "allergies" } })
+          }
         />
 
         <Pressable
@@ -310,6 +329,11 @@ export default function Profile() {
       <DayDetailModal date={selectedDate} onClose={() => setSelectedDate(null)} />
     </SafeAreaView>
   );
+}
+
+async function updateWater(userId: string, glasses: number, refresh: () => void) {
+  await supabase.from("profiles").update({ water_glasses: glasses }).eq("id", userId);
+  refresh();
 }
 
 function FieldRow({
