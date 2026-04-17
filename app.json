@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "nar-app",
-    "slug": "nar-app",
-    "version": "1.0.0",
+    "name": "Nar",
+    "slug": "nar",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,16 +10,24 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFFDFB"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "app.nar.scanner",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Nar, barkod taramak ve yemek fotoğrafı analizi için kameraya ihtiyaç duyar."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FFFDFB"
       },
+      "package": "app.nar.scanner",
+      "permissions": [
+        "CAMERA"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -29,7 +37,14 @@
     "scheme": "nar-app",
     "plugins": [
       "expo-router",
-      "expo-barcode-scanner"
+      "expo-barcode-scanner",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Nar, barkod taramak için kameraya erişim ister."
+        }
+      ],
+      "expo-font"
     ]
   }
 }

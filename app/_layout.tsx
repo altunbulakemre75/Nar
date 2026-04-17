@@ -1,10 +1,98 @@
 import "../global.css";
-import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { View, ActivityIndicator, Text } from "react-native";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useAuthStore } from "@/lib/authStore";
+import AppErrorBoundary from "@/components/ErrorBoundary";
+import OfflineBanner from "@/components/OfflineBanner";
+
+SplashScreen.preventAutoHideAsync();
+
+function AuthGate() {
+  const router = useRouter();
+  const segments = useSegments();
+
+  const session = useAuthStore((s) => s.session);
+  const initialized = useAuthStore((s) => s.initialized);
+  const restoreSession = useAuthStore((s) => s.restoreSession);
+
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
+
+  useEffect(() => {
+    if (!initialized) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (!session && !inAuthGroup) {
+      router.replace("/(auth)/login");
+    } else if (session && inAuthGroup) {
+      router.replace("/(tabs)");
+    }
+  }, [session, segments, initialized, router]);
+
+  return null;
+}
 
 export default function RootLayout() {
+  const initialized = useAuthStore((s) => s.initialized);
+
+  const [fontsLoaded] = useFonts({
+    "PlayfairDisplay-BoldItalic": require("../assets/fonts/PlayfairDisplay-BoldItalic.ttf"),
+    "PlayfairDisplay-Italic": require("../assets/fonts/PlayfairDisplay-Italic.ttf"),
+    "Inter-Regular": require("../assets/fonts/Inter_18pt-Regular.ttf"),
+    "Inter-Medium": require("../assets/fonts/Inter_18pt-Medium.ttf"),
+    "Inter-Bold": require("../assets/fonts/Inter_18pt-Bold.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <AppErrorBoundary>
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <OfflineBanner />
+        <AuthGate />
+        {initialized ? (
+          <Stack screenOptions={{ headerShown: false }} />
+        ) : (
+          <AppSplash />
+        )}
+      </SafeAreaProvider>
+    </AppErrorBoundary>
+  );
+}
+
+function AppSplash() {
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: "#FFFDFB",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: "PlayfairDisplay-BoldItalic",
+          fontSize: 64,
+          color: "#C73030",
+          marginBottom: 24,
+        }}
+      >
+        Nar
+      </Text>
+      <ActivityIndicator color="#C73030" />
+    </View>
   );
 }

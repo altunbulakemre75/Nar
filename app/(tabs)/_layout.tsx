@@ -1,27 +1,24 @@
 import { Tabs } from "expo-router";
 import { Home, ScanLine, Users, User } from "lucide-react-native";
 
-const TAB_ACTIVE = "#C73030";
-const TAB_INACTIVE = "#A0998F";
-const BG = "#FFFDFB";
-
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: TAB_ACTIVE,
-        tabBarInactiveTintColor: TAB_INACTIVE,
+        tabBarActiveTintColor: "#C73030",
+        tabBarInactiveTintColor: "#999999",
         tabBarStyle: {
-          backgroundColor: BG,
-          borderTopColor: "#EDE8E1",
-          borderTopWidth: 1,
-          height: 60,
+          backgroundColor: "#FFFDFB",
+          borderTopColor: "#EEEEEE",
+          borderTopWidth: 0.5,
+          paddingTop: 6,
           paddingBottom: 8,
+          height: 64,
         },
         tabBarLabelStyle: {
+          fontFamily: "Inter-Medium",
           fontSize: 11,
-          fontWeight: "500",
         },
       }}
     >
@@ -29,28 +26,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Ana Sayfa",
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size - 2} strokeWidth={1.8} />,
         }}
       />
       <Tabs.Screen
         name="scan"
         options={{
           title: "Tara",
-          tabBarIcon: ({ color, size }) => <ScanLine color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <ScanLine color={color} size={size - 2} strokeWidth={1.8} />,
         }}
       />
       <Tabs.Screen
         name="community"
         options={{
           title: "Topluluk",
-          tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Users color={color} size={size - 2} strokeWidth={1.8} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profil",
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <User color={color} size={size - 2} strokeWidth={1.8} />,
         }}
       />
     </Tabs>

@@ -1,18 +1,17 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Users } from "lucide-react-native";
 
-export default function CommunityScreen() {
+export default function Community() {
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.center}>
-        <Text style={styles.text}>Topluluk</Text>
+    <SafeAreaView className="flex-1 bg-nar-cream" edges={["top"]}>
+      <View className="flex-1 items-center justify-center px-8">
+        <Users size={64} color="#C73030" strokeWidth={1.5} />
+        <Text className="mt-6 text-xl font-medium text-gray-900">Topluluk</Text>
+        <Text className="mt-2 text-sm text-gray-500 text-center">
+          Kullanıcı yorumları, ürün oylamaları ve tarifler burada olacak.
+        </Text>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFFDFB" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  text: { fontSize: 20, color: "#1A1A1A", fontWeight: "600" },
-});

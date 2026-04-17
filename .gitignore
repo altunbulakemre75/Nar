@@ -31,6 +31,8 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.local
 .env*.local
 
 # typescript
@@ -39,3 +41,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# reference template (not part of app source)
+nar-starter/
+
+# one-off SQL fixes
+fix-products.sql
