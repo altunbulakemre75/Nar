@@ -24,9 +24,9 @@ import type { Product } from "@/types/database";
 
 const SAMPLE_QUESTIONS = [
   "Ramazan'da ne yiyeyim?",
-  "T\u00fckettiğim şeker fazla m\u0131?",
-  "Kahvalt\u0131da ne tavsiye edersin?",
-  "Akşam at\u0131şt\u0131rmal\u0131k \u00f6nerin?",
+  "Tükettiğim şeker fazla mı?",
+  "Kahvaltıda ne tavsiye edersin?",
+  "Akşam atıştırmalık önerin?",
 ];
 
 export default function NarciScreen() {
@@ -55,8 +55,20 @@ export default function NarciScreen() {
 
   const listRef = useRef<FlatList<Message>>(null);
   const autoSentRef = useRef(false);
+  const autoSendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
 
-  // Context'i y\u00fckle
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (autoSendTimerRef.current) clearTimeout(autoSendTimerRef.current);
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  // Context'i yükle
   useEffect(() => {
     (async () => {
       if (!user) return;
@@ -82,11 +94,11 @@ export default function NarciScreen() {
         isRamadan: isRamadanNow(),
       });
 
-      // Ho\u015fgeldin mesaj\u0131 (ilk a\u00e7\u0131l\u0131\u015fta)
+      // Hoşgeldin mesajı (ilk açılışta)
       if (messages.length === 0) {
         const greeting = userName
-          ? `Selam ${userName}! Ben Narc\u0131, senin beslenme ko\u00e7unum. Tarad\u0131\u011f\u0131n \u00fcr\u00fcnler hakk\u0131nda konu\u015fabilir, sana \u00f6zel tavsiyeler verebilirim. Nas\u0131l yard\u0131mc\u0131 olabilirim?`
-          : "Selam! Ben Narc\u0131, senin beslenme ko\u00e7unum. Nas\u0131l yard\u0131mc\u0131 olabilirim?";
+          ? `Selam ${userName}! Ben Narcı, senin beslenme koçunum. Taradığın ürünler hakkında konuşabilir, sana özel tavsiyeler verebilirim. Nasıl yardımcı olabilirim?`
+          : "Selam! Ben Narcı, senin beslenme koçunum. Nasıl yardımcı olabilirim?";
 
         addMessage({ role: "assistant", content: greeting });
       }
@@ -94,11 +106,15 @@ export default function NarciScreen() {
       // Özel prompt varsa onu gönder, yoksa ürün bağlamıyla default soru
       if (messages.length === 0 && !autoSentRef.current) {
         autoSentRef.current = true;
-        if (initialPrompt) {
-          setTimeout(() => handleSend(String(initialPrompt)), 500);
-        } else if (currentProduct) {
-          const autoMessage = `${currentProduct.name} hakk\u0131nda konu\u015fal\u0131m, dikkat edilmesi gerekenler neler?`;
-          setTimeout(() => handleSend(autoMessage), 500);
+        const payload = initialPrompt
+          ? String(initialPrompt)
+          : currentProduct
+          ? `${currentProduct.name} hakkında konuşalım, dikkat edilmesi gerekenler neler?`
+          : null;
+        if (payload) {
+          autoSendTimerRef.current = setTimeout(() => {
+            if (mountedRef.current) handleSend(payload);
+          }, 500);
         }
       }
     })();
@@ -118,30 +134,36 @@ export default function NarciScreen() {
       has_product_context: !!contextRef.current.currentProduct,
     });
 
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
-      // G\u00fcncel ge\u00e7mi\u015fi al
       const history = useNarciStore.getState().messages;
       const reply = await sendMessage(
         history.map((m) => ({ role: m.role, content: m.content })),
         text,
-        contextRef.current
+        contextRef.current,
+        controller.signal
       );
+      if (!mountedRef.current) return;
       addMessage({ role: "assistant", content: reply });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
+      if (e?.name === "AbortError" || !mountedRef.current) return;
       reportError(e, { where: "narci.handleSend" });
       addMessage({
         role: "assistant",
-        content: e.message ?? "\u015eu an cevap veremiyorum, az sonra tekrar dene.",
+        content: e.message ?? "Şu an cevap veremiyorum, az sonra tekrar dene.",
       });
     } finally {
-      setSending(false);
+      if (mountedRef.current) setSending(false);
     }
   };
 
   const handleClear = () => {
-    Alert.alert("Ge\u00e7mi\u015fi temizle", "T\u00fcm sohbeti silmek istiyor musun?", [
-      { text: "Vazge\u00e7", style: "cancel" },
+    Alert.alert("Geçmişi temizle", "Tüm sohbeti silmek istiyor musun?", [
+      { text: "Vazgeç", style: "cancel" },
       {
         text: "Sil",
         style: "destructive",
@@ -154,7 +176,7 @@ export default function NarciScreen() {
   };
 
   useEffect(() => {
-    // Yeni mesaj gelince kayd\u0131rma
+    // Yeni mesaj gelince kaydırma
     if (messages.length > 0) {
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
     }
@@ -189,13 +211,13 @@ export default function NarciScreen() {
             </Text>
           </View>
           <View className="ml-3">
-            <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>Narc\u0131</Text>
+            <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>Narcı</Text>
             <View className="flex-row items-center mt-0.5">
               <View
                 className="w-1.5 h-1.5 rounded-full mr-1.5"
                 style={{ backgroundColor: "#2D8A4E" }}
               />
-              <Text style={{ fontSize: 11, color: "#666" }}>Aktif \u00b7 T\u00fcrk\u00e7e</Text>
+              <Text style={{ fontSize: 11, color: "#666" }}>Aktif · Türkçe</Text>
             </View>
           </View>
         </View>
@@ -227,7 +249,7 @@ export default function NarciScreen() {
               {showSampleQuestions && messages.length > 0 && !sending && (
                 <View className="mt-4 px-2">
                   <Text style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>
-                    \u00d6rnek sorular
+                    Örnek sorular
                   </Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <View className="flex-row" style={{ gap: 8 }}>
@@ -257,7 +279,7 @@ export default function NarciScreen() {
           <TextInput
             value={input}
             onChangeText={setInput}
-            placeholder="Bir \u015fey sor..."
+            placeholder="Bir şey sor..."
             placeholderTextColor="#BBB"
             multiline
             maxLength={500}

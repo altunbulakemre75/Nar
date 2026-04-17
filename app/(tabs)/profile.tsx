@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { User, Settings, LogOut, Plus, Pencil } from "lucide-react-native";
@@ -77,10 +77,7 @@ export default function Profile() {
     setCalendarData(cal);
   }, [user]);
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
-
+  // Tek kaynak: useFocusEffect mount + her focus'ta çalışır (useEffect kaldırıldı).
   useFocusEffect(
     useCallback(() => {
       fetchAll();

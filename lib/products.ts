@@ -142,10 +142,16 @@ export async function saveScan(product: Product, goal: Goal | null): Promise<num
     { onConflict: "user_id,date" }
   );
 
-  // 3) scan_count artır
+  // 3) scan_count artır — read-then-write, TOCTOU race mümkün ama non-critical.
+  // Tam atomiklik için DB'de `rpc('increment_scan_count', {pid: id})` oluşturulabilir.
+  const { data: fresh } = await supabase
+    .from("products")
+    .select("scan_count")
+    .eq("id", product.id)
+    .maybeSingle();
   await supabase
     .from("products")
-    .update({ scan_count: (product.scan_count ?? 0) + 1 })
+    .update({ scan_count: ((fresh?.scan_count ?? product.scan_count ?? 0) + 1) })
     .eq("id", product.id);
 
   return score;

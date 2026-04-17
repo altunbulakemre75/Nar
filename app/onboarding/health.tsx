@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
 import OnboardingLayout from "@/components/OnboardingLayout";
@@ -50,6 +50,14 @@ export default function HealthScreen() {
 
   const [saving, setSaving] = useState(false);
 
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const handleComplete = async () => {
     const state = useOnboardingStore.getState();
     const user = useAuthStore.getState().user;
@@ -65,8 +73,6 @@ export default function HealthScreen() {
       allergies: state.allergies,
       dietary_restrictions: state.dietary_restrictions,
     };
-
-    console.log("Onboarding tamamlandı:", JSON.stringify(profilePayload, null, 2));
 
     // Oturum yoksa (dev / offline durumlar) yine de ana sayfaya geç
     if (!user) {
@@ -101,7 +107,7 @@ export default function HealthScreen() {
         ]
       );
     } finally {
-      setSaving(false);
+      if (mountedRef.current) setSaving(false);
     }
   };
 

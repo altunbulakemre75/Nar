@@ -41,7 +41,8 @@ Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan 
 export async function sendMessage(
   history: NarciMessage[],
   userMessage: string,
-  context: NarciContext
+  context: NarciContext,
+  signal?: AbortSignal
 ): Promise<string> {
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) {
@@ -80,17 +81,30 @@ export async function sendMessage(
   // gemini-2.0-flash-lite: daha yüksek free tier quota, daha hızlı, daha ucuz
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents,
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 250,
-      },
-    }),
-  });
+  // 20s timeout: kullanıcının gelen abort sinyaliyle birleştir
+  const timeoutCtrl = new AbortController();
+  const timer = setTimeout(() => timeoutCtrl.abort(), 20_000);
+  const onUserAbort = () => timeoutCtrl.abort();
+  signal?.addEventListener("abort", onUserAbort);
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 250,
+        },
+      }),
+      signal: timeoutCtrl.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onUserAbort);
+  }
 
   if (!res.ok) {
     const errorBody = await res.text();

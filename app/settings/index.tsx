@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, Alert, Switch, Linking, Share } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert, Switch, Linking, Share, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -32,6 +32,7 @@ export default function SettingsScreen() {
   const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
 
   const [notifications, setNotifications] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert("Çıkış yap", "Oturumu kapatmak istediğine emin misin?", [
@@ -64,13 +65,23 @@ export default function SettingsScreen() {
                 style: "destructive",
                 onPress: async () => {
                   if (!user) return;
-                  // CASCADE'e güvenme — her tabloyu açıkça temizle
-                  await Promise.all([
-                    supabase.from("user_achievements").delete().eq("user_id", user.id),
-                    supabase.from("scans").delete().eq("user_id", user.id),
-                    supabase.from("daily_logs").delete().eq("user_id", user.id),
-                  ]);
-                  await supabase.from("profiles").delete().eq("id", user.id);
+                  setDeleting(true);
+                  try {
+                    await Promise.all([
+                      supabase.from("user_achievements").delete().eq("user_id", user.id),
+                      supabase.from("scans").delete().eq("user_id", user.id),
+                      supabase.from("daily_logs").delete().eq("user_id", user.id),
+                    ]);
+                    await supabase.from("profiles").delete().eq("id", user.id);
+                  } catch (e) {
+                    setDeleting(false);
+                    Alert.alert(
+                      "Silme başarısız",
+                      "Verilerin tamamı silinemedi. İnternet bağlantını kontrol et ve tekrar dene."
+                    );
+                    return;
+                  }
+                  setDeleting(false);
                   Alert.alert(
                     "Hesap silindi",
                     "Verilerin temizlendi. Auth kaydı için destek ile iletişime geç."
@@ -120,6 +131,14 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FAF8F5" }}>
+      {deleting && (
+        <View style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 100, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ backgroundColor: "#FFF", padding: 24, borderRadius: 16, alignItems: "center", gap: 12 }}>
+            <ActivityIndicator size="large" color="#C73030" />
+            <Text style={{ fontSize: 14, color: "#333", fontWeight: "600" }}>Hesap siliniyor...</Text>
+          </View>
+        </View>
+      )}
       {/* Top bar */}
       <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8 }}>
         <Pressable onPress={() => router.back()} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>

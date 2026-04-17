@@ -1,20 +1,20 @@
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import NarLogo from "@/components/NarLogo";
+import { useOnboardingStore } from "@/lib/onboardingStore";
 
 export default function OnboardingWelcome() {
+  const skip = () => {
+    // Boş/yarım kalan onboarding state'ini temizle
+    useOnboardingStore.getState().reset();
+    router.replace("/(tabs)");
+  };
+
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFFDFB" }}>
       <View className="flex-1 items-center justify-center px-8">
-        <Text
-          style={{
-            fontFamily: "PlayfairDisplay-BoldItalic",
-            fontSize: 64,
-            color: "#C73030",
-          }}
-        >
-          Nar
-        </Text>
+        <NarLogo size={72} showTagline={false} />
 
         <Text
           className="mt-4 text-lg text-center"
@@ -39,10 +39,7 @@ export default function OnboardingWelcome() {
           <Text className="text-white font-semibold text-base">Başlayalım</Text>
         </Pressable>
 
-        <Pressable
-          onPress={() => router.replace("/(tabs)")}
-          className="py-3 mt-2 items-center"
-        >
+        <Pressable onPress={skip} className="py-3 mt-2 items-center">
           <Text className="text-sm" style={{ color: "#999" }}>
             Şimdilik atla
           </Text>

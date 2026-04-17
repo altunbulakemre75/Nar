@@ -185,9 +185,12 @@ export default function EditPreferencesScreen() {
             backgroundColor: "#111",
             alignItems: "center",
             justifyContent: "center",
-            opacity: saving ? 0.5 : 1,
+            flexDirection: "row",
+            gap: 10,
+            opacity: saving ? 0.6 : 1,
           }}
         >
+          {saving && <ActivityIndicator color="#FFF" size="small" />}
           <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "700" }}>
             {saving ? "Kaydediliyor..." : "Kaydet"}
           </Text>

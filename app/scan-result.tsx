@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import { useLocalSearchParams, router } from "expo-router";
 import Svg, { Circle } from "react-native-svg";
 import {
   ChevronLeft,
-  Heart,
   AlertTriangle,
   Package,
   Flame,
@@ -28,7 +27,7 @@ import {
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { getProductByBarcode, saveScan } from "@/lib/products";
-import { calculateScore, type ScoreExplanation } from "@/lib/scoring";
+import { calculateScore } from "@/lib/scoring";
 import {
   getScoreBgColor,
   getScoreBorderColor,
@@ -55,6 +54,15 @@ export default function ScanResultScreen() {
   const [score, setScore] = useState(-1);
   const [saving, setSaving] = useState(false);
 
+  // Unmount sonrası setState'i engelle
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     (async () => {
       if (!barcode) return;
@@ -77,7 +85,6 @@ export default function ScanResultScreen() {
         return;
       }
 
-      console.log("🔍 Product:", p.name, "nutrition:", p.nutrition);
       const s = calculateScore(p, userGoal);
       track("product_scanned", {
         barcode,
@@ -103,6 +110,7 @@ export default function ScanResultScreen() {
     }
     setSaving(true);
     const savedScore = await saveScan(product, goal);
+    if (!mountedRef.current) return;
     if (savedScore === null) {
       setSaving(false);
       Alert.alert("Hata", "Kaydedilemedi. Tekrar dene.");
@@ -120,6 +128,7 @@ export default function ScanResultScreen() {
     } catch (e) {
       console.warn("checkAchievements failed:", (e as Error).message);
     }
+    if (!mountedRef.current) return;
     setSaving(false);
     if (newlyUnlocked.length > 0) {
       newlyUnlocked.forEach((a) =>
@@ -149,8 +158,8 @@ export default function ScanResultScreen() {
 
   const hasData = score >= 0;
   const n: Nutrition | null = product.nutrition;
-  const goodItems = buildGoodItems(n);
-  const warnItems = buildWarnItems(n, goal);
+  const goodItems = useMemo(() => buildGoodItems(n), [n]);
+  const warnItems = useMemo(() => buildWarnItems(n, goal), [n, goal]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
@@ -162,9 +171,8 @@ export default function ScanResultScreen() {
         <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 22, color: "#111" }}>
           Nar
         </Text>
-        <Pressable hitSlop={10}>
-          <Heart size={22} color="#111" strokeWidth={2} />
-        </Pressable>
+        {/* Simetri için placeholder — favoriler v2'de eklenecek */}
+        <View style={{ width: 28, height: 28 }} />
       </View>
       <View style={{ height: 1, backgroundColor: "#EEE", marginHorizontal: 16 }} />
 

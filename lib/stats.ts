@@ -123,15 +123,6 @@ export async function getStreakCount(): Promise<number> {
   return streak;
 }
 
-export function getGreeting(name?: string | null): string {
-  const h = new Date().getHours();
-  const prefix =
-    h >= 5 && h < 12 ? "Günaydın"
-    : h >= 12 && h < 18 ? "İyi günler"
-    : h >= 18 && h < 22 ? "İyi akşamlar"
-    : "İyi geceler";
-  return name ? `${prefix}, ${name}` : prefix;
-}
 
 // ===============================
 // Takvim ve istatistik fonksiyonları

@@ -26,7 +26,7 @@ export const useNarciStore = create<NarciChatState>()(
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           timestamp: new Date().toISOString(),
         };
-        // Son 50 mesaj\u0131 tut
+        // Son 50 mesajı tut
         const all = [...get().messages, full].slice(-50);
         set({ messages: all });
         return full;

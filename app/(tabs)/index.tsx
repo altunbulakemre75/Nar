@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -36,33 +36,41 @@ export default function Home() {
   const fetchAll = useCallback(async () => {
     if (!user) return;
 
-    const [log, streakCount, recentScans, profileRes, countRes] =
-      await Promise.all([
-        getTodayLog(),
-        getStreakCount(),
-        getRecentScans(15),
-        supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle(),
-        supabase
-          .from("scans")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
-      ]);
+    try {
+      const [log, streakCount, recentScans, profileRes, countRes] =
+        await Promise.all([
+          getTodayLog(),
+          getStreakCount(),
+          getRecentScans(15),
+          supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle(),
+          supabase
+            .from("scans")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", user.id),
+        ]);
 
-    setTodayScore(log ? Math.round(Number(log.average_score)) : 0);
-    setTodayCount(log?.items_count ?? 0);
-    setStreak(streakCount);
-    setRecent(recentScans);
-    setGoal((profileRes.data?.goal as Goal) ?? null);
-    setHasEverScanned((countRes.count ?? 0) > 0);
+      setTodayScore(log ? Math.round(Number(log.average_score)) : 0);
+      setTodayCount(log?.items_count ?? 0);
+      setStreak(streakCount);
+      setRecent(recentScans);
+      setGoal((profileRes.data?.goal as Goal) ?? null);
+      setHasEverScanned((countRes.count ?? 0) > 0);
+    } catch (e) {
+      console.warn("home.fetchAll failed:", (e as Error).message);
+    }
   }, [user]);
 
-  useEffect(() => {
-    fetchAll().finally(() => setLoading(false));
-  }, [fetchAll]);
-
+  // Tek kaynak: useFocusEffect mount + her focus'ta çalışır.
+  // İlk mount'ta loading'i kapatmak için ref-li kilit.
+  const firstLoadedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      fetchAll();
+      fetchAll().finally(() => {
+        if (!firstLoadedRef.current) {
+          firstLoadedRef.current = true;
+          setLoading(false);
+        }
+      });
     }, [fetchAll])
   );
 

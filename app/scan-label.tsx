@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,14 @@ export default function ScanLabelScreen() {
   const [productName, setProductName] = useState("");
   const [brand, setBrand] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const pickImage = async (fromCamera: boolean) => {
     const opts: ImagePicker.ImagePickerOptions = {
@@ -77,8 +85,11 @@ export default function ScanLabelScreen() {
       });
     } catch (e) {
       reportError(e, { where: "scan-label.analyze" });
+      if (mountedRef.current) {
+        Alert.alert("Hata", "Etiket okunamadı. Tekrar dener misin?");
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   };
 
@@ -127,9 +138,9 @@ export default function ScanLabelScreen() {
       router.replace({ pathname: "/scan-result", params: { barcode: finalBarcode } });
     } catch (e) {
       reportError(e, { where: "scan-label.handleSave" });
-      Alert.alert("Hata", "Kaydedilemedi, tekrar dene.");
+      if (mountedRef.current) Alert.alert("Hata", "Kaydedilemedi, tekrar dene.");
     } finally {
-      setSaving(false);
+      if (mountedRef.current) setSaving(false);
     }
   };
 

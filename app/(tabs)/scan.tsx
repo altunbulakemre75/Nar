@@ -5,7 +5,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import * as Haptics from "expo-haptics";
-import { ScanLine, Zap, ZapOff, Search } from "lucide-react-native";
+import { ScanLine, Zap, ZapOff } from "lucide-react-native";
 import { getProductByBarcode } from "@/lib/products";
 
 export default function ScanScreen() {
@@ -15,6 +15,8 @@ export default function ScanScreen() {
   const [searching, setSearching] = useState(false);
   const [torch, setTorch] = useState(false);
   const lastBarcodeRef = useRef<string | null>(null);
+  // Ref-first guard: state henüz flush edilmeden arka arkaya gelen kare'leri engelle
+  const lockedRef = useRef(false);
 
   // Sekmeye her dönüldüğünde tekrar taramaya izin ver
   useFocusEffect(
@@ -22,6 +24,7 @@ export default function ScanScreen() {
       setScanned(false);
       setSearching(false);
       lastBarcodeRef.current = null;
+      lockedRef.current = false;
     }, [])
   );
 
@@ -71,8 +74,10 @@ export default function ScanScreen() {
   }
 
   const handleScan = async ({ data }: { data: string; type: string }) => {
-    if (scanned) return;
+    // Ref-first: sync kilitleme, state flush'ı beklemeden
+    if (lockedRef.current) return;
     if (lastBarcodeRef.current === data) return;
+    lockedRef.current = true;
 
     setScanned(true);
     setSearching(true);
@@ -120,9 +125,8 @@ export default function ScanScreen() {
 
           <Text style={styles.logo}>Nar</Text>
 
-          <Pressable style={styles.roundBtn} hitSlop={10}>
-            <Search size={20} color="#FFF" strokeWidth={2} />
-          </Pressable>
+          {/* Sağ taraf için simetri — boş placeholder */}
+          <View style={{ width: 44, height: 44 }} />
         </View>
 
         {/* Orta çerçeve */}
