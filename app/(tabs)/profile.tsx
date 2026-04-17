@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { User, Settings, ChevronRight, LogOut } from "lucide-react-native";
+import { User, Settings, ChevronRight, LogOut, Plus, Pencil } from "lucide-react-native";
 import { router } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { useFocusEffect } from "expo-router";
@@ -125,26 +125,78 @@ export default function Profile() {
   return (
     <SafeAreaView className="flex-1 bg-nar-cream" edges={["top"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View className="px-4 pt-4 pb-4 flex-row items-center justify-between">
-          <Text style={{ fontSize: 32, fontWeight: "700", color: "#111" }}>Profil</Text>
-          <Pressable onPress={() => router.push("/settings")} hitSlop={10}>
+        {/* Üst bar — Profil başlığı ortalı, ayarlar sağda */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 14, height: 48, justifyContent: "center" }}>
+          <Text style={{ fontSize: 20, fontWeight: "700", color: "#111", textAlign: "center" }}>
+            Profil
+          </Text>
+          <Pressable
+            onPress={() => router.push("/settings")}
+            hitSlop={10}
+            style={{ position: "absolute", right: 16, top: 12 }}
+          >
             <Settings size={24} color="#111" strokeWidth={1.8} />
           </Pressable>
         </View>
 
-        {/* Profil kartı */}
+        {/* Profil kartı — avatar + yeşil artı rozet + isim + kalem + üye tarihi */}
         <View
-          className="mx-4 p-4 rounded-2xl border border-gray-100 flex-row items-center"
-          style={{ backgroundColor: "#fff" }}
+          style={{
+            marginHorizontal: 16,
+            padding: 16,
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: "#EEE",
+            backgroundColor: "#FFF",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
         >
-          <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center">
-            <User size={30} color="#888" />
+          <View style={{ width: 64, height: 64, position: "relative" }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: "#EDEDED",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <User size={32} color="#888" strokeWidth={1.8} />
+            </View>
+            {/* Yeşil artı rozet */}
+            <Pressable
+              onPress={() => router.push("/settings")}
+              style={{
+                position: "absolute",
+                right: -2,
+                bottom: -2,
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                backgroundColor: "#22C55E",
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: 2,
+                borderColor: "#FFF",
+              }}
+            >
+              <Plus size={14} color="#FFF" strokeWidth={2.5} />
+            </Pressable>
           </View>
-          <View className="ml-4 flex-1">
-            <Text style={{ fontSize: 18, fontWeight: "700", color: "#111" }}>
-              {name ?? "Adını ekle"}
-            </Text>
-            <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
+
+          <View style={{ marginLeft: 14, flex: 1 }}>
+            <Pressable
+              onPress={() => router.push("/settings")}
+              style={{ flexDirection: "row", alignItems: "center" }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "700", color: "#111" }}>
+                {name ?? "Adını ekle"}
+              </Text>
+              <Pencil size={16} color="#22C55E" strokeWidth={2.2} style={{ marginLeft: 8 }} />
+            </Pressable>
+            <Text style={{ fontSize: 14, color: "#888", marginTop: 2 }}>
               {user?.created_at
                 ? `${new Date(user.created_at).getFullYear()} yılından beri üye`
                 : "Yeni üye"}
