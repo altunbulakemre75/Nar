@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { User, Settings, ChevronRight, LogOut, Flame, Trophy, ScanLine } from "lucide-react-native";
+import { User, Settings, ChevronRight, LogOut } from "lucide-react-native";
 import { router } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { useFocusEffect } from "expo-router";
@@ -125,10 +125,10 @@ export default function Profile() {
   return (
     <SafeAreaView className="flex-1 bg-nar-cream" edges={["top"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View className="px-4 pt-4 pb-3 flex-row items-center justify-between">
-          <Text style={{ fontFamily: "Inter-Medium", fontSize: 24, color: "#111" }}>Profil</Text>
+        <View className="px-4 pt-4 pb-4 flex-row items-center justify-between">
+          <Text style={{ fontSize: 32, fontWeight: "700", color: "#111" }}>Profil</Text>
           <Pressable onPress={() => router.push("/settings")} hitSlop={10}>
-            <Settings size={22} color="#111" strokeWidth={1.8} />
+            <Settings size={24} color="#111" strokeWidth={1.8} />
           </Pressable>
         </View>
 
@@ -137,40 +137,28 @@ export default function Profile() {
           className="mx-4 p-4 rounded-2xl border border-gray-100 flex-row items-center"
           style={{ backgroundColor: "#fff" }}
         >
-          <View className="w-14 h-14 rounded-full bg-gray-200 items-center justify-center">
-            <User size={26} color="#888" />
+          <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center">
+            <User size={30} color="#888" />
           </View>
-          <View className="ml-3 flex-1">
-            <Text className="text-base font-medium text-gray-900">{name ?? "Adını ekle"}</Text>
-            <Text className="text-xs text-gray-500 mt-0.5">
-              {user?.email ?? "2026 yılı üyesi"}
+          <View className="ml-4 flex-1">
+            <Text style={{ fontSize: 18, fontWeight: "700", color: "#111" }}>
+              {name ?? "Adını ekle"}
+            </Text>
+            <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
+              {user?.created_at
+                ? `${new Date(user.created_at).getFullYear()} yılından beri üye`
+                : "Yeni üye"}
             </Text>
           </View>
         </View>
 
-        {/* 3 istatistik kartı */}
-        <View className="flex-row mx-4 mt-3" style={{ gap: 8 }}>
-          <StatCard
-            icon={<ScanLine size={16} color="#C73030" strokeWidth={2} />}
-            value={summary.totalScans}
-            label="Toplam tarama"
-          />
-          <StatCard
-            icon={<Flame size={16} color="#FF7A00" strokeWidth={2} fill="#FF7A00" />}
-            value={summary.currentStreak}
-            label="Streak (gün)"
-          />
-          <StatCard
-            icon={<Trophy size={16} color="#B87A00" strokeWidth={2} />}
-            value={summary.averageScore}
-            label="Ortalama skor"
-          />
-        </View>
-
         {/* Takvim */}
-        <View className="mx-4 mt-5">
-          <Text className="text-sm font-semibold mb-2" style={{ color: "#111" }}>
+        <View className="mx-4 mt-6">
+          <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>
             Takip edilen ilerleme
+          </Text>
+          <Text style={{ fontSize: 14, color: "#666", marginTop: 2, marginBottom: 10 }}>
+            {summary.totalScans} tarama · {summary.currentStreak} gün streak
           </Text>
           <View
             className="rounded-2xl border overflow-hidden"
@@ -268,29 +256,6 @@ export default function Profile() {
 
       <DayDetailModal date={selectedDate} onClose={() => setSelectedDate(null)} />
     </SafeAreaView>
-  );
-}
-
-function StatCard({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: number | string;
-  label: string;
-}) {
-  return (
-    <View
-      className="flex-1 rounded-2xl border p-3"
-      style={{ backgroundColor: "#FFF", borderColor: "#EEE" }}
-    >
-      <View className="mb-1">{icon}</View>
-      <Text style={{ fontSize: 20, fontWeight: "700", color: "#111" }}>{value}</Text>
-      <Text style={{ fontSize: 10, color: "#666", marginTop: 1 }} numberOfLines={1}>
-        {label}
-      </Text>
-    </View>
   );
 }
 

@@ -9,31 +9,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
-import {
-  MessageCircle,
-  ChefHat,
-  ShoppingBag,
-  TrendingUp,
-  ScanLine,
-  Flame,
-  ChevronRight,
-  Package,
-} from "lucide-react-native";
+import { ScanLine, Flame, ChevronRight, Package } from "lucide-react-native";
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
 import { getTodayLog, getRecentScans, type ScanWithProduct } from "@/lib/products";
-import {
-  getWeeklyStats,
-  getStreakCount,
-  getGreeting,
-  type WeeklyStats,
-} from "@/lib/stats";
+import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
-  const name = (user?.user_metadata as any)?.name ?? null;
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,7 +26,6 @@ export default function Home() {
   const [todayScore, setTodayScore] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [weekly, setWeekly] = useState<WeeklyStats | null>(null);
   const [goal, setGoal] = useState<Goal | null>(null);
   const [recent, setRecent] = useState<ScanWithProduct[]>([]);
   const [hasEverScanned, setHasEverScanned] = useState(false);
@@ -49,10 +33,9 @@ export default function Home() {
   const fetchAll = useCallback(async () => {
     if (!user) return;
 
-    const [log, weeklyData, streakCount, recentScans, profileRes, countRes] =
+    const [log, streakCount, recentScans, profileRes, countRes] =
       await Promise.all([
         getTodayLog(),
-        getWeeklyStats(),
         getStreakCount(),
         getRecentScans(5),
         supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle(),
@@ -64,7 +47,6 @@ export default function Home() {
 
     setTodayScore(log ? Math.round(Number(log.average_score)) : 0);
     setTodayCount(log?.items_count ?? 0);
-    setWeekly(weeklyData);
     setStreak(streakCount);
     setRecent(recentScans);
     setGoal((profileRes.data?.goal as Goal) ?? null);
@@ -96,23 +78,19 @@ export default function Home() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C73030" />
         }
       >
-        {/* Üst: Logo + selamlama */}
-        <View className="px-4 pt-3 pb-4">
+        {/* Üst: Sadece logo */}
+        <View className="px-4 pt-2 pb-3" style={{ borderBottomWidth: 0.5, borderBottomColor: "#EEE" }}>
           <Text
             style={{
               fontFamily: "PlayfairDisplay-BoldItalic",
-              fontSize: 28,
-              color: "#C73030",
+              fontSize: 40,
+              color: "#111",
               textAlign: "center",
+              lineHeight: 48,
             }}
           >
             Nar
           </Text>
-          {name ? (
-            <Text style={{ fontSize: 13, color: "#666", textAlign: "center", marginTop: 2 }}>
-              {getGreeting(name)}
-            </Text>
-          ) : null}
         </View>
 
         {loading ? (
@@ -127,44 +105,6 @@ export default function Home() {
               goal={goal}
               empty={!hasEverScanned}
             />
-
-            {/* 4 tile grid */}
-            <Text className="px-4 pt-5 pb-2 text-sm font-medium text-gray-900">
-              Bugün sana özel
-            </Text>
-            <View className="px-4 flex-row flex-wrap" style={{ gap: 10 }}>
-              <Tile
-                icon={<MessageCircle size={22} color="#C73030" strokeWidth={1.8} />}
-                title="Narcı'ya sor"
-                subtitle="AI beslenme koçu"
-                bg="#FFF5F2"
-                onPress={() => router.push("/narci")}
-              />
-              <Tile
-                icon={<ChefHat size={22} color="#111" strokeWidth={1.8} />}
-                title="Tarif öner"
-                subtitle="Dolabına göre"
-              />
-              <Tile
-                icon={<ShoppingBag size={22} color="#111" strokeWidth={1.8} />}
-                title="Alışveriş"
-                subtitle={`${weekly?.days.reduce((s, d) => s + d.count, 0) ?? 0} tarama bu hafta`}
-              />
-              <Tile
-                icon={<TrendingUp size={22} color="#0F6E56" strokeWidth={1.8} />}
-                title="Haftalık"
-                subtitle={
-                  weekly && weekly.weekOverWeekChange !== 0
-                    ? `${weekly.weekOverWeekChange > 0 ? "↑" : "↓"} ${Math.abs(
-                        weekly.weekOverWeekChange
-                      )} puan`
-                    : weekly?.averageScore
-                    ? `Ort: ${weekly.averageScore}`
-                    : "—"
-                }
-                onPress={() => router.push("/weekly-stats")}
-              />
-            </View>
 
             {/* Büyük tara butonu — her zaman göster */}
             <Pressable
@@ -299,33 +239,6 @@ function ScoreCard({
   );
 }
 
-function Tile({
-  icon,
-  title,
-  subtitle,
-  bg = "#FFFFFF",
-  onPress,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  bg?: string;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      className="rounded-2xl p-3 border border-gray-100"
-      style={{ backgroundColor: bg, width: "48%" }}
-    >
-      <View className="mb-2">{icon}</View>
-      <Text className="text-sm font-medium text-gray-900">{title}</Text>
-      <Text className="text-xs text-gray-500 mt-0.5" numberOfLines={1}>
-        {subtitle}
-      </Text>
-    </Pressable>
-  );
-}
 
 function RecentCard({ scan }: { scan: ScanWithProduct }) {
   const [imgFailed, setImgFailed] = useState(false);
