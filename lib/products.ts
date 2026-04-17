@@ -7,6 +7,13 @@ import { fetchFromOFF } from "./openFoodFacts";
  * Barkod ile ürün getir.
  * Akış: 1) Supabase cache → 2) Open Food Facts → 3) Supabase'e kaydet.
  */
+function isStale(p: Product | null | undefined): boolean {
+  if (!p) return true;
+  if (!p.nutrition) return true;
+  const n = p.nutrition;
+  return (n.calories ?? 0) === 0 && (n.protein ?? 0) === 0;
+}
+
 export async function getProductByBarcode(barcode: string): Promise<Product | null> {
   // 1) Önce kendi veritabanımıza bak (cache)
   const { data: local, error: localError } = await supabase
@@ -16,13 +23,48 @@ export async function getProductByBarcode(barcode: string): Promise<Product | nu
     .maybeSingle();
 
   if (localError) console.warn("products.select:", localError);
-  if (local) return local as Product;
 
-  // 2) Yoksa Open Food Facts'ten çek
+  // Cache varsa ve verisi sağlam, kullan
+  if (local && !isStale(local as Product)) {
+    return local as Product;
+  }
+
+  // 2) OFF'tan taze veri çek (cache yok veya bayat)
   const offProduct = await fetchFromOFF(barcode);
-  if (!offProduct) return null;
 
-  // 3) Supabase'e kaydet — ikinci sefer cache'ten gelsin
+  // OFF'ta da yoksa — eski cache'e düş (boş bile olsa)
+  if (!offProduct) {
+    return (local as Product) ?? null;
+  }
+
+  // 3) Cache'te var ama bayat → UPDATE. Yoksa → INSERT.
+  if (local) {
+    const { data: updated, error: updateError } = await supabase
+      .from("products")
+      .update({
+        name: offProduct.name,
+        brand: offProduct.brand,
+        image_url: offProduct.image_url,
+        ingredients: offProduct.ingredients,
+        nutrition: offProduct.nutrition,
+        additives: offProduct.additives,
+        is_organic: offProduct.is_organic,
+        sold_in_turkey: offProduct.sold_in_turkey,
+        origin_country: offProduct.origin_country,
+        country: offProduct.country,
+        has_complete_data: offProduct.has_complete_data,
+      })
+      .eq("barcode", barcode)
+      .select()
+      .single();
+
+    if (updated) return updated as Product;
+    if (updateError) console.warn("products.update (stale refresh):", updateError);
+    // RLS update'i engelliyorsa taze OFF verisini bellekten döndür (id korunur)
+    return { ...(local as Product), ...offProduct } as Product;
+  }
+
+  // Yeni kayıt
   const { data: saved, error: insertError } = await supabase
     .from("products")
     .insert(offProduct)
@@ -31,7 +73,6 @@ export async function getProductByBarcode(barcode: string): Promise<Product | nu
 
   if (saved) return saved as Product;
 
-  // 23505 = duplicate key. Race condition: başka biri aynı anda eklemiş olabilir
   if (insertError?.code === "23505") {
     const { data: retry } = await supabase
       .from("products")
@@ -41,7 +82,6 @@ export async function getProductByBarcode(barcode: string): Promise<Product | nu
     if (retry) return retry as Product;
   }
 
-  // RLS veya başka nedenle insert başarısız → en azından bellekteki veriyi döndür
   if (insertError) console.warn("products.insert:", insertError);
   return offProduct as unknown as Product;
 }
@@ -59,19 +99,24 @@ export async function saveScan(product: Product, goal: Goal | null): Promise<num
     return null;
   }
 
-  // 1) scan kaydı
-  const { error: scanError } = await supabase
-    .from("scans")
-    .insert({ user_id: user.id, product_id: product.id, score, logged_in_daily: true });
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+
+  // 1) scan kaydı — scanned_at açıkça gönder (DB default'a güvenme)
+  const { error: scanError } = await supabase.from("scans").insert({
+    user_id: user.id,
+    product_id: product.id,
+    score,
+    logged_in_daily: true,
+    scanned_at: now.toISOString(),
+  });
 
   if (scanError) {
     console.error("scans.insert:", scanError);
     return null;
   }
 
-  // 2) günlük özet güncelle (upsert)
-  const today = new Date().toISOString().split("T")[0];
-
+  // 2) günlük özet güncelle — yeni insert yansımazsa en az 1 say
   const { data: todayScans } = await supabase
     .from("scans")
     .select("score")
@@ -80,17 +125,17 @@ export async function saveScan(product: Product, goal: Goal | null): Promise<num
     .lte("scanned_at", `${today}T23:59:59`);
 
   const items = todayScans ?? [];
-  const avg =
-    items.length > 0
-      ? items.reduce((sum, s) => sum + (s.score ?? 0), 0) / items.length
-      : score;
+  const count = Math.max(items.length, 1);
+  const totalScore =
+    items.length > 0 ? items.reduce((sum, s) => sum + (s.score ?? 0), 0) : score;
+  const avg = items.length > 0 ? totalScore / items.length : score;
 
   await supabase.from("daily_logs").upsert(
     {
       user_id: user.id,
       date: today,
       average_score: Math.round(avg * 100) / 100,
-      items_count: items.length,
+      items_count: count,
     },
     { onConflict: "user_id,date" }
   );
@@ -98,7 +143,7 @@ export async function saveScan(product: Product, goal: Goal | null): Promise<num
   // 3) scan_count artır
   await supabase
     .from("products")
-    .update({ scan_count: (product.scan_count ?? 0) + 1 } as any)
+    .update({ scan_count: (product.scan_count ?? 0) + 1 })
     .eq("id", product.id);
 
   return score;

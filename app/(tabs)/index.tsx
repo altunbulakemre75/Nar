@@ -243,12 +243,13 @@ function ScoreCard({
   goal: Goal | null;
   empty: boolean;
 }) {
-  const displayScore = empty ? 0 : score;
-  const color = empty ? "#999" : score > 0 ? scoreColor(score) : "#C73030";
-  const bg = empty ? "#FFF5F2" : getScoreBgColor(score);
-  const border = empty ? "#F5D4CA" : getScoreBorderColor(score);
+  const neutral = empty || itemsCount === 0;
+  const displayScore = neutral ? 0 : score;
+  const color = neutral ? "#999" : scoreColor(score);
+  const bg = neutral ? "#FFF5F2" : getScoreBgColor(score);
+  const border = neutral ? "#F5D4CA" : getScoreBorderColor(score);
   // Arrow position: clamp score% to [4%, 94%] so it stays inside bar
-  const arrowLeft = empty ? "50%" : `${Math.min(94, Math.max(4, score))}%`;
+  const arrowLeft = neutral ? "50%" : `${Math.min(94, Math.max(4, score))}%`;
 
   return (
     <View
@@ -293,7 +294,7 @@ function ScoreCard({
             left: arrowLeft as any,
             marginLeft: -6,
             fontSize: 14,
-            color: empty ? "#999" : color,
+            color: neutral ? "#999" : color,
             lineHeight: 14,
           }}
         >
@@ -309,10 +310,10 @@ function ScoreCard({
           <View style={{ flex: 1, borderRadius: 3, backgroundColor: "#5FB847" }} />
         </View>
         <View className="flex-row justify-between mt-1">
-          <Text className="text-xs" style={{ color: empty ? "#AAA" : "#8B4848" }}>
+          <Text className="text-xs" style={{ color: neutral ? "#AAA" : "#8B4848" }}>
             sağlıksız
           </Text>
-          <Text className="text-xs" style={{ color: empty ? "#AAA" : "#8B4848" }}>
+          <Text className="text-xs" style={{ color: neutral ? "#AAA" : "#8B4848" }}>
             mükemmel
           </Text>
         </View>

@@ -1,9 +1,14 @@
 import type { Goal, Nutrition, Product } from "@/types/database";
 
-export function hasEnoughDataToScore(product: Product): boolean {
-  const n = product.nutrition;
-  if (!n) return false;
-  return typeof n.calories === "number" && n.calories > 0;
+const PROBLEMATIC_ADDITIVES = [
+  "palm yağı", "yapay aroma", "sodyum nitrit",
+  "E250", "E621", "aspartam", "E129",
+];
+
+function findProblematicAdditives(additives: string[]): string[] {
+  return additives.filter((a) =>
+    PROBLEMATIC_ADDITIVES.some((p) => a.toLowerCase().includes(p.toLowerCase()))
+  );
 }
 
 /**
@@ -31,14 +36,7 @@ export function calculateScore(product: Product, goal: Goal): number {
   if (n.sodium >= 600) score -= 10;
   else if (n.sodium >= 300) score -= 5;
 
-  const problematicAdditives = [
-    "palm yağı", "yapay aroma", "sodyum nitrit",
-    "E250", "E621", "aspartam", "E129",
-  ];
-  const additivePenalty = product.additives.filter((a) =>
-    problematicAdditives.some((p) => a.toLowerCase().includes(p.toLowerCase()))
-  ).length;
-  score -= additivePenalty * 5;
+  score -= findProblematicAdditives(product.additives).length * 5;
 
   if (product.is_organic) score += 5;
 
@@ -101,8 +99,8 @@ export function explainScore(product: Product, goal: Goal): ScoreExplanation[] {
   if (n.sodium >= 600) reasons.push({ points: -10, label: `Çok yüksek sodyum (${n.sodium}mg)`, type: "negative" });
   else if (n.sodium >= 300) reasons.push({ points: -5, label: `Yüksek sodyum (${n.sodium}mg)`, type: "negative" });
 
-  for (const additive of product.additives) {
-    reasons.push({ points: -5, label: `İçerik: ${additive}`, type: "negative" });
+  for (const additive of findProblematicAdditives(product.additives)) {
+    reasons.push({ points: -5, label: `Sorunlu katkı: ${additive}`, type: "negative" });
   }
 
   return reasons;

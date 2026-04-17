@@ -91,7 +91,12 @@ export default function ScanResultScreen() {
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const newlyUnlocked = await checkAchievements();
+    let newlyUnlocked: Awaited<ReturnType<typeof checkAchievements>> = [];
+    try {
+      newlyUnlocked = await checkAchievements();
+    } catch (e) {
+      console.warn("checkAchievements failed:", (e as Error).message);
+    }
     setSaving(false);
     if (newlyUnlocked.length > 0) {
       const first = newlyUnlocked[0];
