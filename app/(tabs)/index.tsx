@@ -297,18 +297,31 @@ function RecentCard({
         borderColor: "#E5E7EB",
       }}
     >
-      {scan.product.image_url && !imgFailed ? (
-        <Image
-          source={{ uri: scan.product.image_url }}
-          style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: "#F5F5F5" }}
-          resizeMode="contain"
-          onError={() => setImgFailed(true)}
-        />
-      ) : (
-        <View style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{
+          width: 64,
+          height: 64,
+          borderRadius: 10,
+          backgroundColor: "#FFF",
+          borderWidth: 1,
+          borderColor: "#F0F0F0",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          padding: 4,
+        }}
+      >
+        {scan.product.image_url && !imgFailed ? (
+          <Image
+            source={{ uri: scan.product.image_url }}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="contain"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
           <Package size={28} color="#C73030" strokeWidth={1.5} />
-        </View>
-      )}
+        )}
+      </View>
       <View style={{ marginLeft: 14, flex: 1 }}>
         <Text style={{ fontSize: 16, fontWeight: "700", color: "#111" }} numberOfLines={1}>
           {scan.product.name}

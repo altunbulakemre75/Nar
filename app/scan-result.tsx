@@ -501,19 +501,31 @@ function goalShortLabel(goal: Goal): string {
 
 function ProductImage({ imageUrl, size = 80 }: { imageUrl: string | null | undefined; size?: number }) {
   const [failed, setFailed] = useState(false);
-  if (imageUrl && !failed) {
-    return (
-      <Image
-        source={{ uri: imageUrl }}
-        style={{ width: size, height: size, borderRadius: 14, backgroundColor: "#F5F5F5" }}
-        resizeMode="contain"
-        onError={() => setFailed(true)}
-      />
-    );
-  }
   return (
-    <View style={{ width: size, height: size, borderRadius: 14, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
-      <Package size={size * 0.4} color="#C73030" strokeWidth={1.5} />
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 14,
+        backgroundColor: "#FFF",
+        borderWidth: 1,
+        borderColor: "#EEE",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        padding: 8,
+      }}
+    >
+      {imageUrl && !failed ? (
+        <Image
+          source={{ uri: imageUrl }}
+          style={{ width: "100%", height: "100%" }}
+          resizeMode="contain"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <Package size={size * 0.4} color="#C73030" strokeWidth={1.5} />
+      )}
     </View>
   );
 }

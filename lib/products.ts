@@ -9,6 +9,8 @@ import { fetchFromOFF } from "./openFoodFacts";
  */
 function isStale(p: Product | null | undefined): boolean {
   if (!p) return true;
+  // Fotoğraf yoksa da bayat say — OFF'tan tazele
+  if (!p.image_url) return true;
   if (!p.nutrition) return true;
   const n = p.nutrition;
   return (n.calories ?? 0) === 0 && (n.protein ?? 0) === 0;
