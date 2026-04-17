@@ -64,6 +64,12 @@ export default function SettingsScreen() {
                 style: "destructive",
                 onPress: async () => {
                   if (!user) return;
+                  // CASCADE'e güvenme — her tabloyu açıkça temizle
+                  await Promise.all([
+                    supabase.from("user_achievements").delete().eq("user_id", user.id),
+                    supabase.from("scans").delete().eq("user_id", user.id),
+                    supabase.from("daily_logs").delete().eq("user_id", user.id),
+                  ]);
                   await supabase.from("profiles").delete().eq("id", user.id);
                   Alert.alert(
                     "Hesap silindi",

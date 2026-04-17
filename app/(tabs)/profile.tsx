@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { useFocusEffect } from "expo-router";
 import { useAuthStore } from "@/lib/authStore";
+import { useOnboardingStore } from "@/lib/onboardingStore";
 import { supabase } from "@/lib/supabase";
 import {
   GOAL_LABELS,
@@ -56,7 +57,22 @@ export default function Profile() {
       getCalendarData(3),
     ]);
 
-    if (profRes.data) setProfile(profRes.data as ProfileType);
+    if (profRes.data) {
+      const p = profRes.data as ProfileType;
+      setProfile(p);
+      // Onboarding store'u mevcut profille hydrate et — düzenlerken boş gelmesin
+      useOnboardingStore.getState().hydrate({
+        goal: p.goal,
+        age: p.age,
+        gender: p.gender,
+        height_cm: p.height_cm,
+        weight_kg: p.weight_kg,
+        activity_level: p.activity_level,
+        health_conditions: p.health_conditions ?? [],
+        allergies: p.allergies ?? [],
+        dietary_restrictions: p.dietary_restrictions ?? [],
+      });
+    }
     setSummary(s);
     setCalendarData(cal);
   }, [user]);
@@ -381,15 +397,16 @@ function FieldRow({
 
 function TagGroup({
   title,
-  tags,
+  tags: tagsInput,
   emptyText,
   onEdit,
 }: {
   title: string;
-  tags: string[];
+  tags: string[] | null | undefined;
   emptyText: string;
   onEdit?: () => void;
 }) {
+  const tags = Array.isArray(tagsInput) ? tagsInput : [];
   return (
     <Pressable
       onPress={onEdit}

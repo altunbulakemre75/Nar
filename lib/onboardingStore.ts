@@ -24,6 +24,7 @@ export interface OnboardingState {
   toggleAllergy: (value: string) => void;
   toggleDietaryRestriction: (value: string) => void;
 
+  hydrate: (p: Partial<Omit<OnboardingState, "setGoal" | "setAge" | "setGender" | "setHeight" | "setWeight" | "setActivityLevel" | "toggleHealthCondition" | "toggleAllergy" | "toggleDietaryRestriction" | "reset" | "hydrate">>) => void;
   reset: () => void;
 }
 
@@ -59,6 +60,19 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     set((s) => ({ allergies: toggle(s.allergies, value) })),
   toggleDietaryRestriction: (value) =>
     set((s) => ({ dietary_restrictions: toggle(s.dietary_restrictions, value) })),
+
+  hydrate: (p) =>
+    set((s) => ({
+      goal: p.goal ?? s.goal,
+      age: p.age ?? s.age,
+      gender: p.gender ?? s.gender,
+      height_cm: p.height_cm ?? s.height_cm,
+      weight_kg: p.weight_kg ?? s.weight_kg,
+      activity_level: p.activity_level ?? s.activity_level,
+      health_conditions: p.health_conditions ?? s.health_conditions,
+      allergies: p.allergies ?? s.allergies,
+      dietary_restrictions: p.dietary_restrictions ?? s.dietary_restrictions,
+    })),
 
   reset: () => set(initialState),
 }));
