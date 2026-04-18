@@ -24,10 +24,12 @@ function AuthGate() {
   const initialized = useAuthStore((s) => s.initialized);
   const restoreSession = useAuthStore((s) => s.restoreSession);
 
+  // Sadece mount'ta bir kez çalıştır — restoreSession referansı değişirse tekrar tetiklenmesin
   useEffect(() => {
     restoreSession();
     track("app_opened");
-  }, [restoreSession]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!initialized) return;

@@ -74,8 +74,10 @@ export function identifyUser(
   userId: string,
   traits?: Record<string, any>
 ): void {
+  // PostHog: tüm trait'ler kullanıcı profiline gider (analytics için gerekli)
   posthog?.identify(userId, traits);
-  Sentry.setUser({ id: userId, ...(traits ?? {}) });
+  // Sentry: SADECE user.id — email/PII Sentry event'lerine sızmasın
+  Sentry.setUser({ id: userId });
 }
 
 export function resetUser(): void {

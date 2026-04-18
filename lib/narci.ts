@@ -54,7 +54,11 @@ export async function sendMessage(
   // Son 5 mesajı al (daha az token)
   const recent = history.slice(-5);
 
-  const contents: any[] = [];
+  interface GeminiContent {
+    role: "user" | "model";
+    parts: { text: string }[];
+  }
+  const contents: GeminiContent[] = [];
 
   // Sistem promptunu ilk turn olarak ekle
   contents.push({
@@ -122,7 +126,9 @@ export async function sendMessage(
         const raw = retry?.retryDelay ?? "";
         const match = /^(\d+)s$/.exec(raw);
         if (match) seconds = parseInt(match[1], 10);
-      } catch {}
+      } catch {
+        // RetryInfo parse edilemedi — varsayılan 60 saniye ile devam
+      }
       const label = seconds < 60 ? `${seconds} saniye` : `${Math.ceil(seconds / 60)} dakika`;
       throw new Error(`Dakikalık kullanım limiti doldu. ${label} sonra tekrar dene.`);
     }
