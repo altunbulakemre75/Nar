@@ -1,5 +1,5 @@
 import "../global.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Stack, useRouter, useSegments } from "expo-router";
@@ -50,8 +50,11 @@ function AuthGate() {
   return null;
 }
 
+const MIN_SPLASH_MS = 1800;
+
 export default function RootLayout() {
   const initialized = useAuthStore((s) => s.initialized);
+  const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
   const [fontsLoaded] = useFonts({
     "PlayfairDisplay-BoldItalic": require("../assets/fonts/PlayfairDisplay-BoldItalic.ttf"),
@@ -61,11 +64,21 @@ export default function RootLayout() {
     "Inter-Bold": require("../assets/fonts/Inter_18pt-Bold.ttf"),
   });
 
+  // Splash en az MIN_SPLASH_MS kadar gözüksün
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    const t = setTimeout(() => setMinSplashElapsed(true), MIN_SPLASH_MS);
+    return () => clearTimeout(t);
+  }, []);
 
-  if (!fontsLoaded) return null;
+  // Font yüklendi + minimum süre bitti → native splash'i kapat
+  useEffect(() => {
+    if (fontsLoaded && minSplashElapsed) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, minSplashElapsed]);
+
+  // Hâlâ font/min süre bekliyor → native splash görünsün
+  if (!fontsLoaded || !minSplashElapsed) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

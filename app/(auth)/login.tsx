@@ -6,8 +6,10 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import NarLogo from "@/components/NarLogo";
 import { useAuthStore } from "@/lib/authStore";
+import { useT } from "@/lib/i18n";
 
 export default function LoginScreen() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export default function LoginScreen() {
     clearError();
 
     if (!email.trim() || !password) {
-      setLocalError("E-posta ve şifre gerekli");
+      setLocalError(t("auth.login.credentialsRequired"));
       return;
     }
 
@@ -48,14 +50,14 @@ export default function LoginScreen() {
           </View>
 
           <Text style={{ fontSize: 26, fontWeight: "700", color: "#111", marginBottom: 6 }}>
-            Tekrar hoş geldin
+            {t("auth.login.title")}
           </Text>
           <Text style={{ fontSize: 14, color: "#666", marginBottom: 28 }}>
-            Hesabına giriş yap ve taramaya devam et.
+            {t("auth.login.subtitle")}
           </Text>
 
           <Input
-            label="E-posta"
+            label={t("auth.email")}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -65,7 +67,7 @@ export default function LoginScreen() {
           />
 
           <Input
-            label="Şifre"
+            label={t("auth.password")}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -78,7 +80,7 @@ export default function LoginScreen() {
             style={{ alignSelf: "flex-end", paddingVertical: 4, marginBottom: 12 }}
           >
             <Text style={{ fontSize: 13, color: "#C73030", fontWeight: "600" }}>
-              Şifremi unuttum
+              {t("auth.login.forgot")}
             </Text>
           </Pressable>
 
@@ -89,15 +91,15 @@ export default function LoginScreen() {
           )}
 
           <Button onPress={handleSubmit} loading={loading}>
-            Giriş yap
+            {t("auth.login.submit")}
           </Button>
 
           <View style={{ flex: 1 }} />
 
           <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", paddingTop: 24 }}>
-            <Text style={{ fontSize: 14, color: "#666" }}>Hesabın yok mu? </Text>
+            <Text style={{ fontSize: 14, color: "#666" }}>{t("auth.login.noAccount")}</Text>
             <Pressable onPress={() => router.push("/(auth)/signup")} hitSlop={6}>
-              <Text style={{ fontSize: 14, color: "#C73030", fontWeight: "700" }}>Kayıt ol</Text>
+              <Text style={{ fontSize: 14, color: "#C73030", fontWeight: "700" }}>{t("auth.login.signup")}</Text>
             </Pressable>
           </View>
         </ScrollView>

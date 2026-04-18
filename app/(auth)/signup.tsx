@@ -6,8 +6,10 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import NarLogo from "@/components/NarLogo";
 import { useAuthStore } from "@/lib/authStore";
+import { useT } from "@/lib/i18n";
 
 export default function SignupScreen() {
+  const t = useT();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,15 +25,15 @@ export default function SignupScreen() {
     clearError();
 
     if (!name.trim()) {
-      setLocalError("Adını gir");
+      setLocalError(t("auth.signup.nameRequired"));
       return;
     }
     if (!email.trim()) {
-      setLocalError("E-posta gir");
+      setLocalError(t("auth.signup.emailRequired"));
       return;
     }
     if (password.length < 8) {
-      setLocalError("Şifre en az 8 karakter olmalı");
+      setLocalError(t("auth.signup.passwordShort"));
       return;
     }
 
@@ -58,22 +60,22 @@ export default function SignupScreen() {
           </View>
 
           <Text style={{ fontSize: 26, fontWeight: "700", color: "#111", marginBottom: 6 }}>
-            Hesabını oluştur
+            {t("auth.signup.title")}
           </Text>
           <Text style={{ fontSize: 14, color: "#666", marginBottom: 28 }}>
-            Saniyeler içinde kaydol, ne yediğini bilerek yaşa.
+            {t("auth.signup.subtitle")}
           </Text>
 
           <Input
-            label="Adın"
+            label={t("auth.signup.name")}
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
-            placeholder="Ad Soyad"
+            placeholder={t("auth.signup.namePlaceholder")}
           />
 
           <Input
-            label="E-posta"
+            label={t("auth.email")}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -83,11 +85,11 @@ export default function SignupScreen() {
           />
 
           <Input
-            label="Şifre"
+            label={t("auth.password")}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholder="En az 8 karakter"
+            placeholder={t("auth.signup.passwordPlaceholder")}
           />
 
           {(localError || error) && (
@@ -97,7 +99,7 @@ export default function SignupScreen() {
           )}
 
           <Button onPress={handleSubmit} loading={loading}>
-            Kayıt ol
+            {t("auth.signup.submit")}
           </Button>
 
           <Text style={{ fontSize: 12, textAlign: "center", marginTop: 14, color: "#999", lineHeight: 17 }}>
@@ -110,9 +112,9 @@ export default function SignupScreen() {
           <View style={{ flex: 1 }} />
 
           <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", paddingTop: 24 }}>
-            <Text style={{ fontSize: 14, color: "#666" }}>Zaten hesabın var mı? </Text>
+            <Text style={{ fontSize: 14, color: "#666" }}>{t("auth.signup.hasAccount")}</Text>
             <Pressable onPress={() => router.replace("/(auth)/login")} hitSlop={6}>
-              <Text style={{ fontSize: 14, color: "#C73030", fontWeight: "700" }}>Giriş yap</Text>
+              <Text style={{ fontSize: 14, color: "#C73030", fontWeight: "700" }}>{t("auth.signup.login")}</Text>
             </Pressable>
           </View>
         </ScrollView>

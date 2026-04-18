@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Transparent bg; app.json controls backgroundColor -->
+  <g transform="translate(256 230) scale(6) translate(-32 -32)">
+    <path d="M32 56 C16 56 10 42 12 28 C13 18 20 10 32 10 C44 10 51 18 52 28 C54 42 48 56 32 56 Z" fill="#C73030"/>
+    <path d="M28 10 L32 2 L36 10 Z" fill="#C73030"/>
+    <path d="M30 6 L34 6" stroke="#C73030" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="24" cy="22" r="2.2" fill="#FFFFFF" fill-opacity="0.55"/>
+    <circle cx="26" cy="34" r="1.6" fill="#FFFFFF" fill-opacity="0.25"/>
+    <circle cx="32" cy="38" r="1.6" fill="#FFFFFF" fill-opacity="0.25"/>
+    <circle cx="38" cy="34" r="1.6" fill="#FFFFFF" fill-opacity="0.25"/>
+    <circle cx="29" cy="42" r="1.4" fill="#FFFFFF" fill-opacity="0.25"/>
+    <circle cx="35" cy="42" r="1.4" fill="#FFFFFF" fill-opacity="0.25"/>
+  </g>
+  <!-- "Nar" wordmark -->
+  <text x="256" y="430" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-style="italic" font-weight="900" font-size="80" fill="#C73030">Nar</text>
+</svg>

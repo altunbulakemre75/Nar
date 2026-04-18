@@ -2,7 +2,7 @@ import LegalPage, { H, P } from "@/components/LegalPage";
 
 export default function About() {
   return (
-    <LegalPage title="Hakkında" updatedAt="17 Nisan 2026">
+    <LegalPage title="Hakkında" updatedAt="18 Nisan 2026">
       <P>
         Nar, Türkiye'nin ilk kişiselleştirilmiş gıda tarayıcı uygulamasıdır.
       </P>

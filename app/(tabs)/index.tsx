@@ -16,11 +16,13 @@ import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
 import { getTodayLog, getRecentScans, deleteScan, type ScanWithProduct } from "@/lib/products";
 import { track } from "@/lib/analytics";
+import { useT } from "@/lib/i18n";
 import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
 
 export default function Home() {
+  const t = useT();
   const user = useAuthStore((s) => s.user);
 
   const [loading, setLoading] = useState(true);
@@ -110,6 +112,7 @@ export default function Home() {
           <>
             {/* Skor kartı */}
             <ScoreCard
+              t={t}
               score={todayScore}
               itemsCount={todayCount}
               streak={streak}
@@ -134,7 +137,7 @@ export default function Home() {
             >
               <ScanLine color="#fff" size={20} strokeWidth={2} />
               <Text style={{ color: "#fff", fontSize: 17, fontWeight: "600" }}>
-                {hasEverScanned ? "Ürün Tara" : "İlk Ürününü Tara"}
+                {hasEverScanned ? t("home.scanButton") : t("home.firstScanButton")}
               </Text>
             </Pressable>
 
@@ -142,7 +145,7 @@ export default function Home() {
             {recent.length > 0 && (
               <View style={{ marginTop: 28 }}>
                 <Text style={{ paddingHorizontal: 16, paddingBottom: 12, fontSize: 22, fontWeight: "700", color: "#111" }}>
-                  Son taradıkların
+                  {t("home.recent")}
                 </Text>
                 <View style={{ paddingHorizontal: 16, gap: 10 }}>
                   {recent.map((s) => (
@@ -171,12 +174,14 @@ export default function Home() {
 }
 
 function ScoreCard({
+  t,
   score,
   itemsCount,
   streak,
   goal,
   empty,
 }: {
+  t: (k: string, vars?: Record<string, string | number>) => string;
   score: number;
   itemsCount: number;
   streak: number;
@@ -202,14 +207,14 @@ function ScoreCard({
         </Text>
         <View className="ml-5 flex-1">
           <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>
-            Bugünün Skoru
+            {t("home.todayScore")}
           </Text>
           <Text style={{ fontSize: 14, color: "#666", marginTop: 2 }}>
             {empty
-              ? "İlk ürününü tara"
+              ? t("home.firstScan")
               : itemsCount > 0
-              ? `${itemsCount} ürün tarandı bugün`
-              : "Bugün henüz tarama yok"}
+              ? t("home.itemsScanned", { count: itemsCount })
+              : t("home.noScansToday")}
           </Text>
         </View>
         {streak > 0 && !empty && (
@@ -251,10 +256,10 @@ function ScoreCard({
         </View>
         <View className="flex-row justify-between mt-1">
           <Text className="text-xs" style={{ color: neutral ? "#AAA" : "#8B4848" }}>
-            sağlıksız
+            {t("home.unhealthy")}
           </Text>
           <Text className="text-xs" style={{ color: neutral ? "#AAA" : "#8B4848" }}>
-            mükemmel
+            {t("home.perfect")}
           </Text>
         </View>
       </View>
@@ -270,15 +275,16 @@ function RecentCard({
   scan: ScanWithProduct;
   onDeleted?: () => void;
 }) {
+  const tFn = useT();
   const [imgFailed, setImgFailed] = useState(false);
   const ringColor = getScoreBorderColor(scan.score);
 
   const renderRightActions = () => (
     <Pressable
       onPress={() => {
-        Alert.alert("Sil", "Bu kaydı silmek istediğine emin misin?", [
-          { text: "Vazgeç", style: "cancel" },
-          { text: "Sil", style: "destructive", onPress: () => onDeleted?.() },
+        Alert.alert(tFn("home.deleteTitle"), tFn("home.deleteBody"), [
+          { text: tFn("common.cancel"), style: "cancel" },
+          { text: tFn("home.deleteTitle"), style: "destructive", onPress: () => onDeleted?.() },
         ]);
       }}
       style={{
@@ -367,7 +373,7 @@ function RecentCard({
               }}
             />
             <Text style={{ fontSize: 12, fontWeight: "700", color: getScoreTextColor(scan.score) }}>
-              Skor: {scan.score}
+              {tFn("home.score")}: {scan.score}
             </Text>
           </View>
         </View>

@@ -27,9 +27,14 @@ import {
   scheduleDailyReminder,
   useNotifStore,
 } from "@/lib/notifications";
+import { useT, useLangStore } from "@/lib/i18n";
 import ListItem from "@/components/ui/ListItem";
 
 export default function SettingsScreen() {
+  const t = useT();
+  const lang = useLangStore((s) => s.lang);
+  const setLang = useLangStore((s) => s.setLang);
+
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const name = (user?.user_metadata as any)?.name ?? null;
@@ -160,7 +165,9 @@ export default function SettingsScreen() {
         <View style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 100, alignItems: "center", justifyContent: "center" }}>
           <View style={{ backgroundColor: "#FFF", padding: 24, borderRadius: 16, alignItems: "center", gap: 12 }}>
             <ActivityIndicator size="large" color="#C73030" />
-            <Text style={{ fontSize: 14, color: "#333", fontWeight: "600" }}>Hesap siliniyor...</Text>
+            <Text style={{ fontSize: 14, color: "#333", fontWeight: "600" }}>
+              {lang === "en" ? "Deleting account..." : "Hesap siliniyor..."}
+            </Text>
           </View>
         </View>
       )}
@@ -169,7 +176,7 @@ export default function SettingsScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
           <ChevronLeft size={26} color="#111" strokeWidth={2.2} />
         </Pressable>
-        <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>Ayarlar</Text>
+        <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>{t("settings.title")}</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
@@ -193,7 +200,7 @@ export default function SettingsScreen() {
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <Text style={{ fontSize: 17, fontWeight: "700", color: "#111" }} numberOfLines={1}>
-              {name ?? "Adını ekle"}
+              {name ?? t("profile.addName")}
             </Text>
             <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }} numberOfLines={1}>
               {email}
@@ -217,23 +224,27 @@ export default function SettingsScreen() {
               <Sparkles size={20} color="#FFF" strokeWidth={2} fill="#FFF" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: "700", color: "#6B1A1A" }}>Nar Premium</Text>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: "#6B1A1A" }}>{t("settings.premiumTitle")}</Text>
               <Text style={{ fontSize: 12, color: "#6B1A1A", marginTop: 2, opacity: 0.8 }}>
-                Sınırsız AI + fotoğraf analizi
+                {t("settings.premiumDesc")}
               </Text>
             </View>
             <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: "#FFF" }}>
-              <Text style={{ fontSize: 11, color: "#C73030", fontWeight: "800", letterSpacing: 0.5 }}>YAKINDA</Text>
+              <Text style={{ fontSize: 11, color: "#C73030", fontWeight: "800", letterSpacing: 0.5 }}>{t("settings.premiumBadge")}</Text>
             </View>
           </LinearGradient>
         </Pressable>
 
         {/* Tercihler */}
-        <Section title="Tercihler">
+        <Section title={t("settings.prefs")}>
           <ListItem
             icon={<Bell size={16} color="#666" strokeWidth={1.8} />}
-            title="Bildirimler"
-            subtitle={notifEnabled ? `Her gün ${String(notifHour).padStart(2, "0")}:00` : "Kapalı"}
+            title={t("settings.notifications")}
+            subtitle={
+              notifEnabled
+                ? t("settings.notifications.on", { hour: String(notifHour).padStart(2, "0") })
+                : t("settings.notifications.off")
+            }
             rightElement={
               <Switch
                 value={notifEnabled}
@@ -246,20 +257,19 @@ export default function SettingsScreen() {
           />
           <ListItem
             icon={<Globe size={16} color="#666" strokeWidth={1.8} />}
-            title="Dil"
-            subtitle="Türkçe"
+            title={t("settings.language")}
+            subtitle={lang === "tr" ? t("settings.langTurkish") : t("settings.langEnglish")}
             onPress={() =>
-              Alert.alert("Dil seç", "Uygulama dilini seç", [
-                { text: "Türkçe (aktif)", style: "default" },
+              Alert.alert(t("settings.langPickerTitle"), t("settings.langPickerBody"), [
                 {
-                  text: "English",
-                  onPress: () =>
-                    Alert.alert(
-                      "Coming soon",
-                      "İngilizce çeviri yakında eklenecek."
-                    ),
+                  text: `${t("settings.langTurkish")}${lang === "tr" ? " ✓" : ""}`,
+                  onPress: () => setLang("tr"),
                 },
-                { text: "Vazgeç", style: "cancel" },
+                {
+                  text: `${t("settings.langEnglish")}${lang === "en" ? " ✓" : ""}`,
+                  onPress: () => setLang("en"),
+                },
+                { text: t("common.cancel"), style: "cancel" },
               ])
             }
             last
@@ -267,15 +277,15 @@ export default function SettingsScreen() {
         </Section>
 
         {/* Veriler */}
-        <Section title="Veriler">
+        <Section title={t("settings.data")}>
           <ListItem
             icon={<Download size={16} color="#666" strokeWidth={1.8} />}
-            title="Verilerimi indir"
+            title={t("settings.export")}
             onPress={handleDownloadData}
           />
           <ListItem
             icon={<Trash2 size={16} color="#C73030" strokeWidth={1.8} />}
-            title="Hesabı sil"
+            title={t("settings.deleteAccount")}
             onPress={handleDeleteAccount}
             destructive
             last
@@ -283,21 +293,21 @@ export default function SettingsScreen() {
         </Section>
 
         {/* Destek */}
-        <Section title="Destek">
+        <Section title={t("settings.support")}>
           <ListItem
             icon={<Mail size={16} color="#666" strokeWidth={1.8} />}
-            title="Destek"
+            title={t("settings.support")}
             onPress={() => mailTo("Nar - destek")}
           />
           <ListItem
             icon={<MessageSquare size={16} color="#666" strokeWidth={1.8} />}
-            title="Hata bildir"
+            title={t("settings.reportBug")}
             onPress={() => mailTo("Nar - hata bildirimi")}
           />
           <ListItem
             icon={<Star size={16} color="#666" strokeWidth={1.8} />}
-            title="Bize puan ver"
-            onPress={() => Alert.alert("Yakında", "App Store'da yayınlanınca aktif olacak.")}
+            title={t("settings.rate")}
+            onPress={() => Alert.alert(t("common.comingSoon"), lang === "en" ? "Will be active once published on App Store." : "App Store'da yayınlanınca aktif olacak.")}
             last
           />
         </Section>
@@ -306,17 +316,17 @@ export default function SettingsScreen() {
         <View style={{ marginTop: 12, marginHorizontal: 16, backgroundColor: "#FFF", borderRadius: 14, borderWidth: 1, borderColor: "#ECECEE", overflow: "hidden" }}>
           <ListItem
             icon={<Shield size={16} color="#666" strokeWidth={1.8} />}
-            title="Gizlilik politikası"
+            title={t("settings.privacy")}
             onPress={() => router.push("/legal/privacy")}
           />
           <ListItem
             icon={<FileText size={16} color="#666" strokeWidth={1.8} />}
-            title="Kullanım koşulları"
+            title={t("settings.terms")}
             onPress={() => router.push("/legal/terms")}
           />
           <ListItem
             icon={<Info size={16} color="#666" strokeWidth={1.8} />}
-            title="Hakkında"
+            title={t("settings.about")}
             onPress={() => router.push("/legal/about")}
             last
           />
@@ -339,12 +349,12 @@ export default function SettingsScreen() {
             justifyContent: "space-between",
           }}
         >
-          <Text style={{ fontSize: 16, fontWeight: "700", color: "#111" }}>Çıkış yap</Text>
+          <Text style={{ fontSize: 16, fontWeight: "700", color: "#111" }}>{t("settings.logout")}</Text>
           <LogOut size={20} color="#C73030" strokeWidth={2} />
         </Pressable>
 
         <Text style={{ textAlign: "center", fontSize: 11, color: "#BBB", marginTop: 16 }}>
-          Nar v0.1.0
+          {t("settings.version")}
         </Text>
       </ScrollView>
     </SafeAreaView>
