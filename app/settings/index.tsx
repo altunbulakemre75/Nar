@@ -9,10 +9,12 @@ import {
   Linking,
   Share,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { ChevronLeft, MoreHorizontal, Sparkles, ChevronRight } from "lucide-react-native";
+// ChevronRight used in profile card only
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
 import {
@@ -21,7 +23,6 @@ import {
   scheduleDailyReminder,
   useNotifStore,
 } from "@/lib/notifications";
-import ListItem from "@/components/ui/ListItem";
 
 export default function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
@@ -34,6 +35,7 @@ export default function SettingsScreen() {
   const setNotifEnabled = useNotifStore((s) => s.setEnabled);
   const notifHour = useNotifStore((s) => s.hour);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleToggleNotifications = async (next: boolean) => {
     if (next) {
@@ -53,37 +55,25 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      "Hesabını silmek istediğine emin misin?",
-      "Bu işlem geri alınamaz.",
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            if (!user) return;
-            setDeleting(true);
-            try {
-              await Promise.all([
-                supabase.from("user_achievements").delete().eq("user_id", user.id),
-                supabase.from("scans").delete().eq("user_id", user.id),
-                supabase.from("daily_logs").delete().eq("user_id", user.id),
-              ]);
-              await supabase.from("profiles").delete().eq("id", user.id);
-            } catch {
-              setDeleting(false);
-              Alert.alert("Silme başarısız", "Tekrar dene.");
-              return;
-            }
-            setDeleting(false);
-            await signOut();
-            router.replace("/(auth)/login");
-          },
-        },
-      ]
-    );
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setShowDeleteModal(false);
+    setDeleting(true);
+    try {
+      await Promise.all([
+        supabase.from("user_achievements").delete().eq("user_id", user.id),
+        supabase.from("scans").delete().eq("user_id", user.id),
+        supabase.from("daily_logs").delete().eq("user_id", user.id),
+      ]);
+      await supabase.from("profiles").delete().eq("id", user.id);
+    } catch {
+      setDeleting(false);
+      Alert.alert("Silme başarısız", "Tekrar dene.");
+      return;
+    }
+    setDeleting(false);
+    await signOut();
+    router.replace("/(auth)/login");
   };
 
   const handleDownloadData = async () => {
@@ -135,233 +125,224 @@ export default function SettingsScreen() {
         </View>
       )}
 
+      {/* Delete confirm modal */}
+      <Modal visible={showDeleteModal} transparent animationType="fade" onRequestClose={() => setShowDeleteModal(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end", paddingHorizontal: 8, paddingBottom: 8 }}>
+          <Pressable style={{ position: "absolute", inset: 0 } as any} onPress={() => setShowDeleteModal(false)} />
+          <View style={{ gap: 8 }}>
+            <View style={{ backgroundColor: "rgba(255,255,255,0.97)", borderRadius: 16, overflow: "hidden" }}>
+              <View style={{ paddingHorizontal: 16, paddingVertical: 16, alignItems: "center", borderBottomWidth: 0.5, borderBottomColor: "#E0E0E0" }}>
+                <Text style={{ fontSize: 17, fontWeight: "600", color: "#1C1C1E", textAlign: "center", marginBottom: 4 }}>
+                  Hesabını silmek istediğine emin misin?
+                </Text>
+                <Text style={{ fontSize: 13, color: "#8A8A8E", textAlign: "center", lineHeight: 18 }}>
+                  Bu işlem geri alınamaz. Tüm verilerin kalıcı olarak silinecek.
+                </Text>
+              </View>
+              <Pressable
+                onPress={handleDeleteAccount}
+                style={({ pressed }) => ({
+                  paddingVertical: 14,
+                  alignItems: "center",
+                  backgroundColor: pressed ? "#F5F5F5" : "transparent",
+                })}
+              >
+                <Text style={{ fontSize: 17, fontWeight: "600", color: "#C8362F" }}>Hesabı Sil</Text>
+              </Pressable>
+            </View>
+            <Pressable
+              onPress={() => setShowDeleteModal(false)}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "#F0F0F0" : "rgba(255,255,255,0.97)",
+                borderRadius: 16,
+                paddingVertical: 14,
+                alignItems: "center",
+              })}
+            >
+              <Text style={{ fontSize: 17, fontWeight: "600", color: "#007AFF" }}>İptal</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Navigation row */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingVertical: 8,
-            marginTop: 8,
-          }}
-        >
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8, marginTop: 8 }}>
           <Pressable
             onPress={() => router.back()}
             hitSlop={10}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: "rgba(0,0,0,0.05)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center" }}
           >
             <ChevronLeft size={20} color="#1C1C1E" strokeWidth={2} />
           </Pressable>
-
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: "rgba(0,0,0,0.05)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center" }}>
             <MoreHorizontal size={20} color="#1C1C1E" strokeWidth={2} />
           </View>
         </View>
 
-        {/* Büyük başlık */}
-        <Text
-          style={{
-            fontSize: 34,
-            fontWeight: "700",
-            color: "#1C1C1E",
-            letterSpacing: -0.8,
-            lineHeight: 40,
-            marginTop: 8,
-            marginBottom: 24,
-          }}
-        >
+        {/* Başlık */}
+        <Text style={{ fontSize: 34, fontWeight: "700", color: "#1C1C1E", letterSpacing: -0.8, lineHeight: 40, marginTop: 8, marginBottom: 24 }}>
           Ayarlar
         </Text>
 
-        {/* Profil kartı — yatay satır */}
+        {/* Profil kartı */}
         <Pressable
           onPress={() => router.push("/onboarding")}
           style={({ pressed }) => ({
             backgroundColor: pressed ? "#F5F5F5" : "#FFFFFF",
             borderRadius: 16,
             paddingHorizontal: 16,
-            paddingVertical: 12,
+            paddingVertical: 14,
             flexDirection: "row",
             alignItems: "center",
             gap: 12,
           })}
         >
-          <View
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: "#C8362F",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "#FFF" }}>{initial}</Text>
+          <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: "#C8362F", alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ fontSize: 20, fontWeight: "600", color: "#FFF" }}>{initial}</Text>
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text
-              style={{ fontSize: 17, fontWeight: "600", color: "#1C1C1E", lineHeight: 20 }}
-              numberOfLines={1}
-            >
+            <Text style={{ fontSize: 17, fontWeight: "600", color: "#1C1C1E", lineHeight: 22 }} numberOfLines={1}>
               {name ?? "İsim ekle"}
             </Text>
-            <Text
-              style={{ fontSize: 14, color: "#8A8A8E", lineHeight: 18, marginTop: 2 }}
-              numberOfLines={1}
-            >
+            <Text style={{ fontSize: 14, color: "#8A8A8E", lineHeight: 18, marginTop: 2 }} numberOfLines={1}>
               {email}
             </Text>
           </View>
-          <ChevronRight size={18} color="#9A9A9A" strokeWidth={2} />
+          <ChevronRight size={18} color="#D1D1D6" strokeWidth={2} />
         </Pressable>
 
         {/* Premium banner */}
         <Pressable
           onPress={() => router.push("/premium")}
-          style={{
-            backgroundColor: "#C8362F",
-            borderRadius: 16,
-            paddingHorizontal: 16,
-            paddingVertical: 16,
-            marginTop: 12,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 12,
-          }}
+          style={{ backgroundColor: "#C8362F", borderRadius: 16, paddingHorizontal: 16, paddingVertical: 16, marginTop: 12, flexDirection: "row", alignItems: "center", gap: 12 }}
         >
-          <View
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              backgroundColor: "rgba(255,255,255,0.15)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center" }}>
             <Sparkles size={22} color="#FFF" strokeWidth={2} fill="#FFF" />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={{ fontSize: 17, fontWeight: "600", color: "#FFF", lineHeight: 20 }}>
-              Nar Premium
-            </Text>
-            <Text style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", lineHeight: 17, marginTop: 2 }}>
+            <Text style={{ fontSize: 17, fontWeight: "600", color: "#FFF", lineHeight: 22 }}>Nar Premium</Text>
+            <Text style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 18, marginTop: 2 }}>
               Sınırsız AI + fotoğraf analizi
             </Text>
           </View>
-          <View
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 999,
-              borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.7)",
-            }}
-          >
-            <Text style={{ fontSize: 11, color: "#FFF", fontWeight: "600", letterSpacing: 1 }}>
-              YAKINDA
-            </Text>
+          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: "rgba(255,255,255,0.6)" }}>
+            <Text style={{ fontSize: 11, color: "#FFF", fontWeight: "700", letterSpacing: 1 }}>YAKINDA</Text>
           </View>
         </Pressable>
 
-        {/* TERCİHLER */}
-        <Section label="Tercihler">
-          <ListItem
-            title="Bildirimler"
-            rightElement={
-              <Switch
-                value={notifEnabled}
-                onValueChange={handleToggleNotifications}
-                trackColor={{ false: "#E5E5EA", true: "#34C759" }}
-                thumbColor="#FFF"
-                ios_backgroundColor="#E5E5EA"
-              />
-            }
-          />
-          <ListItem
-            title="Dil"
-            value="Türkçe"
-            onPress={() => Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")}
-            last
-          />
-        </Section>
+        <View style={{ gap: 10, marginTop: 8 }}>
+          <RowToggle label="Bildirimler" value={notifEnabled} onChange={handleToggleNotifications} />
+          <RowValue label="Dil" value="Türkçe" onPress={() => Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")} />
+          <RowChevron label="Verilerimi indir" onPress={handleDownloadData} />
+          <RowDestructive label="Hesabı sil" onPress={() => setShowDeleteModal(true)} />
+          <RowChevron label="Yardım merkezi" onPress={() => mailTo("Nar - yardım")} />
+          <RowChevron label="Hata bildir" onPress={() => mailTo("Nar - hata bildirimi")} />
+          <RowChevron label="Bize puan ver" onPress={() => Alert.alert("Yakında", "App Store'da yayınlanınca aktif olacak.")} />
+          <RowChevron label="Gizlilik politikası" onPress={() => router.push("/legal/privacy")} />
+        </View>
 
-        {/* HESAP */}
-        <Section label="Hesap">
-          <ListItem title="Verilerimi indir" onPress={handleDownloadData} />
-          <ListItem
-            title="Hesabı sil"
-            onPress={handleDeleteAccount}
-            destructive
-            last
-          />
-        </Section>
-
-        {/* DESTEK */}
-        <Section label="Destek">
-          <ListItem title="Yardım merkezi" onPress={() => mailTo("Nar - yardım")} />
-          <ListItem title="Hata bildir" onPress={() => mailTo("Nar - hata bildirimi")} />
-          <ListItem
-            title="Bize puan ver"
-            onPress={() => Alert.alert("Yakında", "App Store'da yayınlanınca aktif olacak.")}
-            last
-          />
-        </Section>
-
-        {/* HAKKINDA */}
-        <Section label="Hakkında">
-          <ListItem title="Gizlilik politikası" onPress={() => router.push("/legal/privacy")} last />
-        </Section>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
+// ————— Section —————
+
+
+
+// ————— Row components —————
+
+function RowChevron({ label, onPress }: { label: string; onPress?: () => void }) {
   return (
-    <View style={{ marginTop: 24 }}>
-      <Text
-        style={{
-          fontSize: 13,
-          fontWeight: "500",
-          color: "#8A8A8E",
-          letterSpacing: 0.8,
-          marginBottom: 8,
-          paddingHorizontal: 4,
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </Text>
-      <View
-        style={{
-          borderRadius: 16,
-          overflow: "hidden",
-          backgroundColor: "#FFFFFF",
-        }}
-      >
-        {children}
-      </View>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: "#1C1C1E",
+        borderRadius: 12,
+        backgroundColor: pressed ? "#1C1C1E" : "transparent",
+      })}
+    >
+      {({ pressed }) => (
+        <Text style={{ fontSize: 19, fontWeight: "500", color: pressed ? "#FFFFFF" : "#1C1C1E" }}>{label}</Text>
+      )}
+    </Pressable>
+  );
+}
+
+function RowValue({ label, value, onPress }: { label: string; value: string; onPress?: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        backgroundColor: pressed ? "#1C1C1E" : "transparent",
+      })}
+    >
+      {({ pressed }) => (
+        <>
+          <Text style={{ fontSize: 19, fontWeight: "500", color: pressed ? "#FFFFFF" : "#1C1C1E" }}>{label}</Text>
+          <Text style={{ fontSize: 17, color: pressed ? "rgba(255,255,255,0.7)" : "#8A8A8E" }}>{value}</Text>
+        </>
+      )}
+    </Pressable>
+  );
+}
+
+function RowToggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <View style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: "#1C1C1E",
+      borderRadius: 12,
+    }}>
+      <Text style={{ fontSize: 19, fontWeight: "500", color: "#1C1C1E", flex: 1, marginRight: 8 }}>{label}</Text>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: "#E5E5EA", true: "#34C759" }}
+        thumbColor="#FFF"
+        ios_backgroundColor="#E5E5EA"
+      />
     </View>
+  );
+}
+
+function RowDestructive({ label, onPress }: { label: string; onPress?: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: "#1C1C1E",
+        borderRadius: 12,
+        backgroundColor: pressed ? "#1C1C1E" : "transparent",
+      })}
+    >
+      {({ pressed }) => (
+        <Text style={{ fontSize: 19, fontWeight: "500", color: pressed ? "#FFFFFF" : "#C8362F" }}>{label}</Text>
+      )}
+    </Pressable>
   );
 }
