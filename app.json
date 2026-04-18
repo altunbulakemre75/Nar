@@ -45,6 +45,12 @@
           "cameraPermission": "Nar, barkod taramak için kameraya erişim ister."
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "color": "#C73030"
+        }
+      ],
       "expo-font"
     ]
   }

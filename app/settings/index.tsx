@@ -21,6 +21,12 @@ import {
 } from "lucide-react-native";
 import { useAuthStore } from "@/lib/authStore";
 import { supabase } from "@/lib/supabase";
+import {
+  cancelDailyReminder,
+  requestPermission,
+  scheduleDailyReminder,
+  useNotifStore,
+} from "@/lib/notifications";
 import ListItem from "@/components/ui/ListItem";
 
 export default function SettingsScreen() {
@@ -30,8 +36,28 @@ export default function SettingsScreen() {
   const email = user?.email ?? "";
   const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
 
-  const [notifications, setNotifications] = useState(false);
+  const notifEnabled = useNotifStore((s) => s.enabled);
+  const notifHour = useNotifStore((s) => s.hour);
+  const setNotifEnabled = useNotifStore((s) => s.setEnabled);
   const [deleting, setDeleting] = useState(false);
+
+  const handleToggleNotifications = async (next: boolean) => {
+    if (next) {
+      const ok = await requestPermission();
+      if (!ok) {
+        Alert.alert(
+          "İzin gerekli",
+          "Bildirimleri alabilmek için Ayarlar'dan Nar'a bildirim izni vermelisin."
+        );
+        return;
+      }
+      await scheduleDailyReminder(notifHour);
+      setNotifEnabled(true);
+    } else {
+      await cancelDailyReminder();
+      setNotifEnabled(false);
+    }
+  };
 
   const handleSignOut = () => {
     Alert.alert("Çıkış yap", "Oturumu kapatmak istediğine emin misin?", [
@@ -178,7 +204,7 @@ export default function SettingsScreen() {
 
         {/* Nar Premium — gradient kart */}
         <Pressable
-          onPress={() => Alert.alert("Nar Premium", "Yakında: Sınırsız Narcı AI sohbet, fotoğraf analizi, detaylı rapor.")}
+          onPress={() => router.push("/premium")}
           style={{ marginHorizontal: 16, marginTop: 12, borderRadius: 16, overflow: "hidden" }}
         >
           <LinearGradient
@@ -207,10 +233,11 @@ export default function SettingsScreen() {
           <ListItem
             icon={<Bell size={16} color="#666" strokeWidth={1.8} />}
             title="Bildirimler"
+            subtitle={notifEnabled ? `Her gün ${String(notifHour).padStart(2, "0")}:00` : "Kapalı"}
             rightElement={
               <Switch
-                value={notifications}
-                onValueChange={setNotifications}
+                value={notifEnabled}
+                onValueChange={handleToggleNotifications}
                 trackColor={{ false: "#E5E5E5", true: "#C73030" }}
                 thumbColor="#FFF"
                 ios_backgroundColor="#E5E5E5"

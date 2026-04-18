@@ -13,6 +13,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import Svg, { Circle } from "react-native-svg";
 import {
   ChevronLeft,
+  Heart,
   AlertTriangle,
   Package,
   Flame,
@@ -38,6 +39,7 @@ import { supabase } from "@/lib/supabase";
 import type { Product, Goal, Nutrition } from "@/types/database";
 import { checkAchievements } from "@/lib/achievements";
 import { track } from "@/lib/analytics";
+import { useFavoritesStore } from "@/lib/favorites";
 
 const SUGGESTED_QUESTIONS = [
   "Bu ürün şişkinlik yapar mı?",
@@ -156,6 +158,9 @@ export default function ScanResultScreen() {
   }
   if (!product) return null;
 
+  const favBarcodes = useFavoritesStore((s) => s.barcodes);
+  const isFav = !!product && favBarcodes.includes(product.barcode);
+
   const hasData = score >= 0;
   const n: Nutrition | null = product.nutrition;
   const goodItems = useMemo(() => buildGoodItems(n), [n]);
@@ -171,8 +176,22 @@ export default function ScanResultScreen() {
         <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 22, color: "#111" }}>
           Nar
         </Text>
-        {/* Simetri için placeholder — favoriler v2'de eklenecek */}
-        <View style={{ width: 28, height: 28 }} />
+        <Pressable
+          onPress={() => {
+            if (!product) return;
+            const added = useFavoritesStore.getState().toggle(product.barcode);
+            if (added) Haptics.selectionAsync();
+            track(added ? "favorite_added" : "favorite_removed", { barcode: product.barcode });
+          }}
+          hitSlop={10}
+        >
+          <Heart
+            size={24}
+            color={isFav ? "#C73030" : "#111"}
+            fill={isFav ? "#C73030" : "transparent"}
+            strokeWidth={2}
+          />
+        </Pressable>
       </View>
       <View style={{ height: 1, backgroundColor: "#EEE", marginHorizontal: 16 }} />
 

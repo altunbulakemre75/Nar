@@ -1,12 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { User, Settings, LogOut, Plus, Pencil } from "lucide-react-native";
+import { User, Settings, LogOut, Plus, Pencil, Heart, ChevronRight } from "lucide-react-native";
 import { router } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { useFocusEffect } from "expo-router";
 import { useAuthStore } from "@/lib/authStore";
 import { useOnboardingStore } from "@/lib/onboardingStore";
+import { useFavoritesStore } from "@/lib/favorites";
 import { supabase } from "@/lib/supabase";
 import {
   GOAL_LABELS,
@@ -38,6 +39,7 @@ const GENDER_LABELS: Record<string, string> = {
 
 export default function Profile() {
   const user = useAuthStore((s) => s.user);
+  const favCount = useFavoritesStore((s) => s.barcodes.length);
   const signOut = useAuthStore((s) => s.signOut);
 
   const [profile, setProfile] = useState<ProfileType | null>(null);
@@ -255,6 +257,33 @@ export default function Profile() {
             />
           </View>
         </View>
+
+        {/* Favoriler kısayolu */}
+        <Pressable
+          onPress={() => router.push("/favorites")}
+          style={{
+            marginHorizontal: 16,
+            marginTop: 22,
+            padding: 14,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: "#E5E7EB",
+            backgroundColor: "#FFF",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#FFF5F2", alignItems: "center", justifyContent: "center" }}>
+            <Heart size={18} color="#C73030" strokeWidth={2} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>Favorilerim</Text>
+            <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+              {favCount > 0 ? `${favCount} ürün` : "Henüz favori eklemedin"}
+            </Text>
+          </View>
+          <ChevronRight size={18} color="#999" />
+        </Pressable>
 
         {/* Hakkında */}
         <Text style={{ paddingHorizontal: 16, paddingTop: 28, paddingBottom: 10, fontSize: 22, fontWeight: "700", color: "#111" }}>

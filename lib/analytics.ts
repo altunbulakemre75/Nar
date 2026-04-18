@@ -50,6 +50,9 @@ export type AnalyticsEvent =
   | "scan_added_to_day"
   | "narci_message_sent"
   | "achievement_unlocked"
+  | "premium_cta_clicked"
+  | "favorite_added"
+  | "favorite_removed"
   | "goal_changed"
   | "weekly_stats_viewed";
 
