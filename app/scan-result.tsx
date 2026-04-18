@@ -38,7 +38,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { Product, Goal, Nutrition } from "@/types/database";
 import { checkAchievements } from "@/lib/achievements";
-import { track } from "@/lib/analytics";
+import { track, reportError } from "@/lib/analytics";
 import { useFavoritesStore } from "@/lib/favorites";
 
 const SUGGESTED_QUESTIONS = [
@@ -68,39 +68,47 @@ export default function ScanResultScreen() {
   useEffect(() => {
     (async () => {
       if (!barcode) return;
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        let userGoal: Goal = "lose_weight";
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("goal")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile?.goal) userGoal = profile.goal as Goal;
+        }
+        if (!mountedRef.current) return;
+        setGoal(userGoal);
 
-      const user = (await supabase.auth.getUser()).data.user;
-      let userGoal: Goal = "lose_weight";
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("goal")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (profile?.goal) userGoal = profile.goal as Goal;
+        const p = await getProductByBarcode(barcode);
+        if (!mountedRef.current) return;
+        if (!p) {
+          router.replace({ pathname: "/scan-not-found", params: { barcode } });
+          return;
+        }
+
+        const s = calculateScore(p, userGoal);
+        track("product_scanned", {
+          barcode,
+          name: p.name,
+          brand: p.brand ?? null,
+          score: s,
+          has_data: s >= 0,
+          has_complete_data: p.has_complete_data ?? false,
+          goal: userGoal,
+          sold_in_turkey: p.sold_in_turkey ?? false,
+        });
+        setProduct(p);
+        setScore(s);
+      } catch (e) {
+        reportError(e, { where: "scan-result.load", barcode });
+        Alert.alert("Hata", "Ürün yüklenemedi. Tekrar dene.");
+        router.back();
+      } finally {
+        if (mountedRef.current) setLoading(false);
       }
-      setGoal(userGoal);
-
-      const p = await getProductByBarcode(barcode);
-      if (!p) {
-        router.replace({ pathname: "/scan-not-found", params: { barcode } });
-        return;
-      }
-
-      const s = calculateScore(p, userGoal);
-      track("product_scanned", {
-        barcode,
-        name: p.name,
-        brand: p.brand ?? null,
-        score: s,
-        has_data: s >= 0,
-        has_complete_data: p.has_complete_data ?? false,
-        goal: userGoal,
-        sold_in_turkey: p.sold_in_turkey ?? false,
-      });
-      setProduct(p);
-      setScore(s);
-      setLoading(false);
     })();
   }, [barcode]);
 
@@ -174,7 +182,7 @@ export default function ScanResultScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <ChevronLeft size={26} color="#111" strokeWidth={2} />
         </Pressable>
-        <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 22, color: "#111" }}>
+        <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 40, lineHeight: 48, color: "#C73030" }}>
           Nar
         </Text>
         <Pressable

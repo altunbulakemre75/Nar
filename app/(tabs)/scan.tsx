@@ -217,8 +217,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontFamily: "PlayfairDisplay-BoldItalic",
-    fontSize: 28,
-    color: "#FFF",
+    fontSize: 40,
+    lineHeight: 48,
+    color: "#C73030",
   },
 
   frameWrap: { alignItems: "center", marginTop: -40 },

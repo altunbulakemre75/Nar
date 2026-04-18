@@ -3,8 +3,6 @@ import { View, Text, Pressable } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 
 interface Props {
-  icon?: ReactNode;
-  iconBg?: string;
   title: string;
   subtitle?: string;
   value?: string;
@@ -15,8 +13,6 @@ interface Props {
 }
 
 export default function ListItem({
-  icon,
-  iconBg,
   title,
   subtitle,
   value,
@@ -25,58 +21,55 @@ export default function ListItem({
   last = false,
   rightElement,
 }: Props) {
-  const titleColor = destructive ? "#C73030" : "#111";
-
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={!onPress}
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 14,
-        paddingHorizontal: 16,
-        borderBottomWidth: last ? 0 : 0.5,
-        borderBottomColor: "#ECECEE",
-        backgroundColor: pressed ? "#FAFAFA" : "transparent",
-      })}
-    >
-      {icon ? (
-        <View
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            backgroundColor: iconBg ?? (destructive ? "#FEECEC" : "#F3F4F6"),
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 12,
-          }}
-        >
-          {icon}
-        </View>
-      ) : null}
-
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 15, color: titleColor, fontWeight: "600" }}>
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }} numberOfLines={1}>
-            {subtitle}
+    <View>
+      <Pressable
+        onPress={onPress}
+        disabled={!onPress && !rightElement}
+        style={({ pressed }) => ({
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 56,
+          paddingHorizontal: 16,
+          backgroundColor: pressed ? "#F5F5F5" : "#FFFFFF",
+        })}
+      >
+        {/* Sol: başlık + opsiyonel alt yazı */}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text
+            style={{
+              fontSize: 17,
+              color: destructive ? "#C8362F" : "#1C1C1E",
+              fontWeight: "400",
+            }}
+          >
+            {title}
           </Text>
+          {subtitle ? (
+            <Text style={{ fontSize: 13, color: "#9E9E9E", marginTop: 2 }} numberOfLines={1}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+
+        {/* Sağ: custom element, değer+chevron, chevron, ya da hiçbir şey (destructive) */}
+        {rightElement ? (
+          <View style={{ marginLeft: 8 }}>{rightElement}</View>
+        ) : value ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Text style={{ fontSize: 17, color: "#9A9A9A" }}>{value}</Text>
+            <ChevronRight size={18} color="#9A9A9A" strokeWidth={2} />
+          </View>
+        ) : destructive ? null : onPress ? (
+          <ChevronRight size={18} color="#9A9A9A" strokeWidth={2} />
         ) : null}
-      </View>
+      </Pressable>
 
-      {rightElement ? (
-        <View style={{ marginLeft: 8 }}>{rightElement}</View>
-      ) : value ? (
-        <Text style={{ fontSize: 14, color: "#888", marginRight: 4 }}>{value}</Text>
+      {/* Inset divider — son satırda yok */}
+      {!last ? (
+        <View style={{ height: 1, backgroundColor: "#F0F0F0", marginLeft: 16 }} />
       ) : null}
-
-      {onPress && !rightElement ? (
-        <ChevronRight size={18} color="#C0C0C0" strokeWidth={2} style={{ marginLeft: 4 }} />
-      ) : null}
-    </Pressable>
+    </View>
   );
 }

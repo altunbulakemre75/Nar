@@ -100,23 +100,23 @@ export default function Profile() {
     ]);
   };
 
-  // Takvim için markedDates oluştur
-  const markedDates: Record<string, any> = {};
-  Object.values(calendarData).forEach((d) => {
-    if (d.items_count > 0) {
-      markedDates[d.date] = {
-        marked: true,
-        dotColor: scoreColor(d.average_score),
-      };
-    }
-  });
-  const todayKey = new Date().toISOString().slice(0, 10);
-  markedDates[todayKey] = {
-    ...(markedDates[todayKey] ?? {}),
-    selected: true,
-    selectedColor: "#C73030",
-    selectedTextColor: "#FFF",
-  };
+  // Takvim için markedDates (memoized — her render'da yeniden üretme)
+  const markedDates = useMemo(() => {
+    const md: Record<string, any> = {};
+    Object.values(calendarData).forEach((d) => {
+      if (d.items_count > 0) {
+        md[d.date] = { marked: true, dotColor: scoreColor(d.average_score) };
+      }
+    });
+    const todayKey = new Date().toISOString().slice(0, 10);
+    md[todayKey] = {
+      ...(md[todayKey] ?? {}),
+      selected: true,
+      selectedColor: "#C73030",
+      selectedTextColor: "#FFF",
+    };
+    return md;
+  }, [calendarData]);
 
   const goalLabel = profile?.goal ? GOAL_LABELS[profile.goal] : "Ayarlanmadı";
   const ageLabel = profile?.age ? `${profile.age} yaşında` : "Ayarlanmadı";
@@ -159,8 +159,8 @@ export default function Profile() {
         <View
           style={{
             marginHorizontal: 16,
-            padding: 16,
-            borderRadius: 20,
+            padding: 21,
+            borderRadius: 23,
             borderWidth: 1,
             borderColor: "#EEE",
             backgroundColor: "#FFF",
@@ -168,18 +168,18 @@ export default function Profile() {
             alignItems: "center",
           }}
         >
-          <View style={{ width: 64, height: 64, position: "relative" }}>
+          <View style={{ width: 85, height: 85, position: "relative" }}>
             <View
               style={{
-                width: 64,
-                height: 64,
-                borderRadius: 32,
+                width: 85,
+                height: 85,
+                borderRadius: 42.5,
                 backgroundColor: "#EDEDED",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <User size={32} color="#888" strokeWidth={1.8} />
+              <User size={42} color="#888" strokeWidth={1.8} />
             </View>
             {/* Yeşil artı rozet */}
             <Pressable
@@ -188,9 +188,9 @@ export default function Profile() {
                 position: "absolute",
                 right: -2,
                 bottom: -2,
-                width: 22,
-                height: 22,
-                borderRadius: 11,
+                width: 29,
+                height: 29,
+                borderRadius: 14.5,
                 backgroundColor: "#22C55E",
                 alignItems: "center",
                 justifyContent: "center",
@@ -198,21 +198,21 @@ export default function Profile() {
                 borderColor: "#FFF",
               }}
             >
-              <Plus size={14} color="#FFF" strokeWidth={2.5} />
+              <Plus size={17} color="#FFF" strokeWidth={2.5} />
             </Pressable>
           </View>
 
-          <View style={{ marginLeft: 14, flex: 1 }}>
+          <View style={{ marginLeft: 18, flex: 1 }}>
             <Pressable
               onPress={() => router.push("/settings")}
               style={{ flexDirection: "row", alignItems: "center" }}
             >
-              <Text style={{ fontSize: 20, fontWeight: "700", color: "#111" }}>
+              <Text style={{ fontSize: 26, fontWeight: "700", color: "#111" }}>
                 {name ?? "Adını ekle"}
               </Text>
-              <Pencil size={16} color="#22C55E" strokeWidth={2.2} style={{ marginLeft: 8 }} />
+              <Pencil size={21} color="#22C55E" strokeWidth={2.2} style={{ marginLeft: 9 }} />
             </Pressable>
-            <Text style={{ fontSize: 14, color: "#888", marginTop: 2 }}>
+            <Text style={{ fontSize: 18, color: "#888", marginTop: 3 }}>
               {user?.created_at
                 ? `${new Date(user.created_at).getFullYear()} yılından beri üye`
                 : "Yeni üye"}

@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -154,7 +153,7 @@ export default function NarciScreen() {
       reportError(e, { where: "narci.handleSend" });
       addMessage({
         role: "assistant",
-        content: e.message ?? "Şu an cevap veremiyorum, az sonra tekrar dene.",
+        content: "Şu an cevap veremiyorum, biraz sonra tekrar dene.",
       });
     } finally {
       if (mountedRef.current) setSending(false);
@@ -185,45 +184,27 @@ export default function NarciScreen() {
   const showSampleQuestions = messages.filter((m) => m.role === "user").length === 0;
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFFDFB" }} edges={["top", "bottom"]}>
-      {/* Top bar */}
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF" }} edges={["top", "bottom"]}>
+      {/* Top bar — sade: back, ortada başlık, sağda trash */}
       <View
-        className="px-4 py-3 flex-row items-center border-b"
-        style={{ borderColor: "#EEE", backgroundColor: "#FFF" }}
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          flexDirection: "row",
+          alignItems: "center",
+          backgroundColor: "#FFF",
+        }}
       >
-        <Pressable onPress={() => router.back()} hitSlop={10} className="w-9 h-9 items-center justify-center">
-          <X size={24} color="#111" strokeWidth={2} />
+        <Pressable onPress={() => router.back()} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
+          <X size={22} color="#111" strokeWidth={2} />
         </Pressable>
 
-        <View className="flex-row items-center ml-2 flex-1">
-          <View
-            className="w-9 h-9 rounded-full items-center justify-center"
-            style={{ backgroundColor: "#C73030" }}
-          >
-            <Text
-              style={{
-                fontFamily: "PlayfairDisplay-BoldItalic",
-                fontSize: 18,
-                color: "#FFF",
-              }}
-            >
-              N
-            </Text>
-          </View>
-          <View className="ml-3">
-            <Text style={{ fontSize: 15, fontWeight: "700", color: "#111" }}>Narcı</Text>
-            <View className="flex-row items-center mt-0.5">
-              <View
-                className="w-1.5 h-1.5 rounded-full mr-1.5"
-                style={{ backgroundColor: "#2D8A4E" }}
-              />
-              <Text style={{ fontSize: 11, color: "#666" }}>Aktif · Türkçe</Text>
-            </View>
-          </View>
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <Text style={{ fontSize: 17, fontWeight: "700", color: "#111" }}>Narcı</Text>
         </View>
 
-        <Pressable onPress={handleClear} hitSlop={10} className="w-9 h-9 items-center justify-center">
-          <Trash2 size={20} color="#999" strokeWidth={2} />
+        <Pressable onPress={handleClear} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
+          <Trash2 size={19} color="#999" strokeWidth={2} />
         </Pressable>
       </View>
 
@@ -242,29 +223,31 @@ export default function NarciScreen() {
               showTime={shouldShowTime(messages, index)}
             />
           )}
-          contentContainerStyle={{ paddingVertical: 12, paddingHorizontal: 12, flexGrow: 1 }}
+          contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 16, flexGrow: 1 }}
           ListFooterComponent={
             <>
               {sending && <TypingIndicator />}
               {showSampleQuestions && messages.length > 0 && !sending && (
-                <View className="mt-4 px-2">
-                  <Text style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>
+                <View style={{ marginTop: 16 }}>
+                  <Text style={{ fontSize: 12, color: "#999", marginBottom: 10, marginLeft: 2 }}>
                     Örnek sorular
                   </Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View className="flex-row" style={{ gap: 8 }}>
-                      {SAMPLE_QUESTIONS.map((q) => (
-                        <Pressable
-                          key={q}
-                          onPress={() => handleSend(q)}
-                          className="rounded-full border px-3 py-2"
-                          style={{ backgroundColor: "#FFF", borderColor: "#DDD" }}
-                        >
-                          <Text style={{ fontSize: 12, color: "#444" }}>{q}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </ScrollView>
+                  <View style={{ gap: 8 }}>
+                    {SAMPLE_QUESTIONS.map((q) => (
+                      <Pressable
+                        key={q}
+                        onPress={() => handleSend(q)}
+                        style={{
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          borderRadius: 14,
+                          backgroundColor: "#F4F4F5",
+                        }}
+                      >
+                        <Text style={{ fontSize: 14, color: "#333" }}>{q}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
                 </View>
               )}
             </>
@@ -273,38 +256,43 @@ export default function NarciScreen() {
 
         {/* Input */}
         <View
-          className="px-3 pt-2 pb-3 border-t flex-row items-end"
-          style={{ borderColor: "#EEE", backgroundColor: "#FFF", gap: 8 }}
+          style={{
+            paddingHorizontal: 12,
+            paddingTop: 8,
+            paddingBottom: 12,
+            flexDirection: "row",
+            alignItems: "flex-end",
+            gap: 8,
+            backgroundColor: "#FFF",
+          }}
         >
           <TextInput
             value={input}
             onChangeText={setInput}
             placeholder="Bir şey sor..."
-            placeholderTextColor="#BBB"
+            placeholderTextColor="#AAA"
             multiline
             maxLength={500}
             style={{
               flex: 1,
               maxHeight: 120,
-              paddingHorizontal: 14,
-              paddingTop: 10,
-              paddingBottom: 10,
+              paddingHorizontal: 16,
+              paddingTop: 11,
+              paddingBottom: 11,
               borderRadius: 22,
-              borderWidth: 1,
-              borderColor: "#EEE",
               fontSize: 15,
               color: "#111",
-              backgroundColor: "#FAFAFA",
+              backgroundColor: "#F4F4F5",
             }}
           />
           <Pressable
             onPress={() => handleSend()}
             disabled={!input.trim() || sending}
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: input.trim() && !sending ? "#C73030" : "#DDD",
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              backgroundColor: input.trim() && !sending ? "#C73030" : "#E5E5E7",
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -328,37 +316,33 @@ function shouldShowTime(messages: Message[], index: number): boolean {
 function MessageBubble({ message, showTime }: { message: Message; showTime: boolean }) {
   const isUser = message.role === "user";
   return (
-    <View className="mb-1">
+    <View style={{ marginBottom: 4 }}>
       {showTime && (
         <Text
           style={{
-            fontSize: 10,
+            fontSize: 11,
             color: "#BBB",
             textAlign: "center",
-            marginVertical: 6,
+            marginVertical: 8,
           }}
         >
           {formatTime(message.timestamp)}
         </Text>
       )}
-      <View
-        className={`flex-row ${isUser ? "justify-end" : "justify-start"}`}
-      >
+      <View style={{ flexDirection: "row", justifyContent: isUser ? "flex-end" : "flex-start" }}>
         <View
           style={{
-            maxWidth: "82%",
+            maxWidth: "80%",
             paddingHorizontal: 14,
             paddingVertical: 10,
-            borderRadius: 18,
-            borderBottomRightRadius: isUser ? 4 : 18,
-            borderBottomLeftRadius: isUser ? 18 : 4,
-            backgroundColor: isUser ? "#C73030" : "#FFF5F2",
+            borderRadius: 20,
+            backgroundColor: isUser ? "#C73030" : "#F4F4F5",
           }}
         >
           <Text
             style={{
-              fontSize: 14,
-              lineHeight: 20,
+              fontSize: 15,
+              lineHeight: 21,
               color: isUser ? "#FFF" : "#111",
             }}
           >
@@ -372,14 +356,13 @@ function MessageBubble({ message, showTime }: { message: Message; showTime: bool
 
 function TypingIndicator() {
   return (
-    <View className="flex-row justify-start mt-1 mb-2">
+    <View style={{ flexDirection: "row", justifyContent: "flex-start", marginTop: 4, marginBottom: 4 }}>
       <View
         style={{
           paddingHorizontal: 16,
           paddingVertical: 12,
-          borderRadius: 18,
-          borderBottomLeftRadius: 4,
-          backgroundColor: "#FFF5F2",
+          borderRadius: 20,
+          backgroundColor: "#F4F4F5",
           flexDirection: "row",
           alignItems: "center",
         }}
@@ -410,7 +393,7 @@ function Dot({ delay }: { delay: number }) {
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: "#C73030",
+        backgroundColor: "#999",
         opacity,
         marginHorizontal: 2,
       }}

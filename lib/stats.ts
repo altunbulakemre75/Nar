@@ -1,83 +1,8 @@
 import { format, startOfDay, subDays, differenceInCalendarDays } from "date-fns";
 import { supabase } from "./supabase";
 
-export interface DayStat {
-  date: string;        // YYYY-MM-DD
-  dayLabel: string;    // Pzt, Sal...
-  score: number;
-  count: number;
-}
-
-export interface WeeklyStats {
-  days: DayStat[];     // son 7 gün (eski - yeni)
-  averageScore: number;
-  totalScans: number;
-  bestDay: DayStat | null;
-  weekOverWeekChange: number;
-}
-
-const TR_DAYS = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cts"];
-
 function fmt(d: Date): string {
   return format(d, "yyyy-MM-dd");
-}
-
-export async function getWeeklyStats(): Promise<WeeklyStats> {
-  const user = (await supabase.auth.getUser()).data.user;
-  if (!user) {
-    return { days: [], averageScore: 0, totalScans: 0, bestDay: null, weekOverWeekChange: 0 };
-  }
-
-  const today = startOfDay(new Date());
-  const weekStart = fmt(subDays(today, 6));           // son 7 gün
-  const prevWeekStart = fmt(subDays(today, 13));      // önceki 7 gün
-  const prevWeekEnd = fmt(subDays(today, 7));
-
-  const { data: logs } = await supabase
-    .from("daily_logs")
-    .select("*")
-    .eq("user_id", user.id)
-    .gte("date", prevWeekStart)
-    .lte("date", fmt(today));
-
-  const logMap = new Map<string, { average_score: number; items_count: number }>();
-  (logs ?? []).forEach((l: any) => {
-    logMap.set(l.date, { average_score: Number(l.average_score), items_count: l.items_count });
-  });
-
-  const days: DayStat[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = subDays(today, i);
-    const key = fmt(d);
-    const log = logMap.get(key);
-    days.push({
-      date: key,
-      dayLabel: TR_DAYS[d.getDay()],
-      score: log ? Math.round(log.average_score) : 0,
-      count: log?.items_count ?? 0,
-    });
-  }
-
-  const activeDays = days.filter((d) => d.count > 0);
-  const averageScore =
-    activeDays.length > 0
-      ? Math.round(activeDays.reduce((s, d) => s + d.score, 0) / activeDays.length)
-      : 0;
-  const totalScans = days.reduce((s, d) => s + d.count, 0);
-  const bestDay =
-    activeDays.length > 0 ? [...activeDays].sort((a, b) => b.score - a.score)[0] : null;
-
-  // Önceki hafta ortalaması
-  const prevLogs = (logs ?? []).filter(
-    (l: any) => l.date >= prevWeekStart && l.date < weekStart
-  );
-  const prevAvg =
-    prevLogs.length > 0
-      ? prevLogs.reduce((s, l) => s + Number(l.average_score), 0) / prevLogs.length
-      : 0;
-  const weekOverWeekChange = prevAvg > 0 ? Math.round(averageScore - prevAvg) : 0;
-
-  return { days, averageScore, totalScans, bestDay, weekOverWeekChange };
 }
 
 export async function getStreakCount(): Promise<number> {

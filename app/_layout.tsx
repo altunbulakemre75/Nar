@@ -1,6 +1,6 @@
 import "../global.css";
 import { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Image } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -79,8 +79,18 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, minSplashElapsed]);
 
-  // Hâlâ font/min süre bekliyor → native splash görünsün
-  if (!fontsLoaded || !minSplashElapsed) return null;
+  // Hâlâ font/min süre bekliyor → JS-side splash göster (Expo Go native splash'ı göstermez)
+  if (!fontsLoaded || !minSplashElapsed) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#FFFDFB", alignItems: "center", justifyContent: "center" }}>
+        <Image
+          source={require("../assets/splash-icon.png")}
+          style={{ width: 320, height: 320 }}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -1,17 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Transparent bg; app.json controls backgroundColor -->
-  <g transform="translate(256 230) scale(6) translate(-32 -32)">
-    <path d="M32 56 C16 56 10 42 12 28 C13 18 20 10 32 10 C44 10 51 18 52 28 C54 42 48 56 32 56 Z" fill="#C73030"/>
-    <path d="M28 10 L32 2 L36 10 Z" fill="#C73030"/>
-    <path d="M30 6 L34 6" stroke="#C73030" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="24" cy="22" r="2.2" fill="#FFFFFF" fill-opacity="0.55"/>
-    <circle cx="26" cy="34" r="1.6" fill="#FFFFFF" fill-opacity="0.25"/>
-    <circle cx="32" cy="38" r="1.6" fill="#FFFFFF" fill-opacity="0.25"/>
-    <circle cx="38" cy="34" r="1.6" fill="#FFFFFF" fill-opacity="0.25"/>
-    <circle cx="29" cy="42" r="1.4" fill="#FFFFFF" fill-opacity="0.25"/>
-    <circle cx="35" cy="42" r="1.4" fill="#FFFFFF" fill-opacity="0.25"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="body" cx="38%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#F26B6B"/>
+      <stop offset="35%" stop-color="#D83838"/>
+      <stop offset="75%" stop-color="#A01E1E"/>
+      <stop offset="100%" stop-color="#6B1414"/>
+    </radialGradient>
+    <linearGradient id="crown" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3A0D0D"/>
+      <stop offset="100%" stop-color="#7A1818"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Nar — scale 0.72 ile küçültüldü, yukarıda -->
+  <g transform="translate(512 360) scale(0.72)">
+    <ellipse cx="0" cy="360" rx="260" ry="22" fill="#3A0D0D" fill-opacity="0.15"/>
+
+    <path d="M 0 -280
+             C -260 -280 -360 -130 -340 60
+             C -320 240 -180 340 0 340
+             C 180 340 320 240 340 60
+             C 360 -130 260 -280 0 -280 Z"
+          fill="url(#body)"/>
+
+    <path d="M -130 -270
+             L -95 -345
+             L -60 -270
+             L -25 -370
+             L 10 -270
+             L 45 -360
+             L 80 -270
+             L 115 -345
+             L 140 -270 Z"
+          fill="url(#crown)"/>
+
+    <ellipse cx="-130" cy="-90" rx="90" ry="140" fill="url(#shine)"/>
+    <ellipse cx="-160" cy="-140" rx="28" ry="45" fill="#FFFFFF" fill-opacity="0.7"/>
+
+    <circle cx="60"  cy="100" r="9" fill="#FFFFFF" fill-opacity="0.15"/>
+    <circle cx="-30" cy="160" r="7" fill="#FFFFFF" fill-opacity="0.12"/>
+    <circle cx="110" cy="150" r="7" fill="#FFFFFF" fill-opacity="0.12"/>
+    <circle cx="30"  cy="220" r="6" fill="#FFFFFF" fill-opacity="0.10"/>
+    <circle cx="-80" cy="60"  r="6" fill="#FFFFFF" fill-opacity="0.10"/>
   </g>
+
   <!-- "Nar" wordmark -->
-  <text x="256" y="430" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-style="italic" font-weight="900" font-size="80" fill="#C73030">Nar</text>
+  <text x="512" y="800"
+        text-anchor="middle"
+        font-family="Playfair Display, Georgia, 'Times New Roman', serif"
+        font-style="italic"
+        font-weight="900"
+        font-size="200"
+        fill="#3A0D0D"
+        letter-spacing="-3">Nar</text>
+
+  <!-- Tagline -->
+  <text x="512" y="880"
+        text-anchor="middle"
+        font-family="Inter, -apple-system, Helvetica, Arial, sans-serif"
+        font-weight="500"
+        font-size="34"
+        fill="#6B1A1A"
+        letter-spacing="6">NE YEDİĞİNİ BİL</text>
 </svg>

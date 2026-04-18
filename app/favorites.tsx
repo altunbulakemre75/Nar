@@ -26,25 +26,30 @@ export default function FavoritesScreen() {
       return;
     }
     (async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      let goal: Goal = "lose_weight";
-      if (user) {
-        const { data } = await supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle();
-        if (data?.goal) goal = data.goal as Goal;
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        let goal: Goal = "lose_weight";
+        if (user) {
+          const { data } = await supabase.from("profiles").select("goal").eq("id", user.id).maybeSingle();
+          if (data?.goal) goal = data.goal as Goal;
+        }
+
+        const { data: products } = await supabase
+          .from("products")
+          .select("*")
+          .in("barcode", barcodes);
+
+        const list: FavItem[] = (products ?? []).map((p) => ({
+          product: p as Product,
+          score: calculateScore(p as Product, goal),
+        }));
+        // Saklama sırasına göre sırala — O(1) lookup
+        const orderIdx = new Map(barcodes.map((b, i) => [b, i]));
+        list.sort((a, b) => (orderIdx.get(a.product.barcode) ?? 0) - (orderIdx.get(b.product.barcode) ?? 0));
+        setItems(list);
+      } catch {
+        setItems([]);
       }
-
-      const { data: products } = await supabase
-        .from("products")
-        .select("*")
-        .in("barcode", barcodes);
-
-      const list: FavItem[] = (products ?? []).map((p) => ({
-        product: p as Product,
-        score: calculateScore(p as Product, goal),
-      }));
-      // Saklama sırasına göre sırala
-      list.sort((a, b) => barcodes.indexOf(a.product.barcode) - barcodes.indexOf(b.product.barcode));
-      setItems(list);
     })();
   }, [barcodes]);
 
