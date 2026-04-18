@@ -6,7 +6,6 @@ import { router } from "expo-router";
 import {
   ChevronLeft,
   Bell,
-  Moon,
   Globe,
   Download,
   Trash2,
@@ -222,13 +221,20 @@ export default function SettingsScreen() {
             icon={<Globe size={16} color="#666" strokeWidth={1.8} />}
             title="Dil"
             subtitle="Türkçe"
-            onPress={() => Alert.alert("Yakında", "Yakında daha fazla dil eklenecek.")}
-          />
-          <ListItem
-            icon={<Moon size={16} color="#666" strokeWidth={1.8} />}
-            title="Tema"
-            subtitle="Açık"
-            onPress={() => Alert.alert("Yakında", "Koyu tema yakında eklenecek.")}
+            onPress={() =>
+              Alert.alert("Dil seç", "Uygulama dilini seç", [
+                { text: "Türkçe (aktif)", style: "default" },
+                {
+                  text: "English",
+                  onPress: () =>
+                    Alert.alert(
+                      "Coming soon",
+                      "İngilizce çeviri yakında eklenecek."
+                    ),
+                },
+                { text: "Vazgeç", style: "cancel" },
+              ])
+            }
             last
           />
         </Section>
