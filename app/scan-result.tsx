@@ -147,6 +147,12 @@ export default function ScanResultScreen() {
     }
   };
 
+  // HER render'da aynı sırada çağrılması gereken hook'lar — erken return'DAN ÖNCE
+  const favBarcodes = useFavoritesStore((s) => s.barcodes);
+  const n: Nutrition | null = product?.nutrition ?? null;
+  const goodItems = useMemo(() => buildGoodItems(n), [n]);
+  const warnItems = useMemo(() => buildWarnItems(n, goal), [n, goal]);
+
   if (loading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
@@ -158,13 +164,8 @@ export default function ScanResultScreen() {
   }
   if (!product) return null;
 
-  const favBarcodes = useFavoritesStore((s) => s.barcodes);
-  const isFav = !!product && favBarcodes.includes(product.barcode);
-
+  const isFav = favBarcodes.includes(product.barcode);
   const hasData = score >= 0;
-  const n: Nutrition | null = product.nutrition;
-  const goodItems = useMemo(() => buildGoodItems(n), [n]);
-  const warnItems = useMemo(() => buildWarnItems(n, goal), [n, goal]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFDFB" }}>
