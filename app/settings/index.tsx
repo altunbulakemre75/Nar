@@ -27,13 +27,11 @@ import {
   scheduleDailyReminder,
   useNotifStore,
 } from "@/lib/notifications";
-import { useT, useLangStore } from "@/lib/i18n";
+import { useT } from "@/lib/i18n";
 import ListItem from "@/components/ui/ListItem";
 
 export default function SettingsScreen() {
   const t = useT();
-  const lang = useLangStore((s) => s.lang);
-  const setLang = useLangStore((s) => s.setLang);
 
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
@@ -166,7 +164,7 @@ export default function SettingsScreen() {
           <View style={{ backgroundColor: "#FFF", padding: 24, borderRadius: 16, alignItems: "center", gap: 12 }}>
             <ActivityIndicator size="large" color="#C73030" />
             <Text style={{ fontSize: 14, color: "#333", fontWeight: "600" }}>
-              {lang === "en" ? "Deleting account..." : "Hesap siliniyor..."}
+              Hesap siliniyor...
             </Text>
           </View>
         </View>
@@ -257,20 +255,10 @@ export default function SettingsScreen() {
           />
           <ListItem
             icon={<Globe size={16} color="#666" strokeWidth={1.8} />}
-            title={t("settings.language")}
-            subtitle={lang === "tr" ? t("settings.langTurkish") : t("settings.langEnglish")}
+            title="Dil"
+            subtitle="Türkçe"
             onPress={() =>
-              Alert.alert(t("settings.langPickerTitle"), t("settings.langPickerBody"), [
-                {
-                  text: `${t("settings.langTurkish")}${lang === "tr" ? " ✓" : ""}`,
-                  onPress: () => setLang("tr"),
-                },
-                {
-                  text: `${t("settings.langEnglish")}${lang === "en" ? " ✓" : ""}`,
-                  onPress: () => setLang("en"),
-                },
-                { text: t("common.cancel"), style: "cancel" },
-              ])
+              Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")
             }
             last
           />
@@ -307,7 +295,7 @@ export default function SettingsScreen() {
           <ListItem
             icon={<Star size={16} color="#666" strokeWidth={1.8} />}
             title={t("settings.rate")}
-            onPress={() => Alert.alert(t("common.comingSoon"), lang === "en" ? "Will be active once published on App Store." : "App Store'da yayınlanınca aktif olacak.")}
+            onPress={() => Alert.alert("Yakında", "App Store'da yayınlanınca aktif olacak.")}
             last
           />
         </Section>

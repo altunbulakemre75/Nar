@@ -9,10 +9,17 @@ interface LangState {
   setLang: (l: Lang) => void;
 }
 
+// İngilizce desteği şimdilik kapalı — lang her zaman "tr".
+// setLang no-op: eski "en" değeri persist'te kalmış olsa bile
+// initial state "tr" olacak (merge fonksiyonu ile).
 export const useLangStore = create<LangState>()(
   persist(
-    (set) => ({ lang: "tr", setLang: (lang) => set({ lang }) }),
-    { name: "nar-lang", storage: createJSONStorage(() => AsyncStorage) }
+    () => ({ lang: "tr" as Lang, setLang: (_l: Lang) => {} }),
+    {
+      name: "nar-lang",
+      storage: createJSONStorage(() => AsyncStorage),
+      merge: (_persisted, current) => ({ ...current, lang: "tr" as Lang }),
+    }
   )
 );
 
