@@ -83,10 +83,10 @@ export default function NarciPersonalityScreen() {
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 48 }}>
         <Text style={{ fontSize: 34, fontWeight: "700", color: "#1C1C1E", letterSpacing: -0.8, lineHeight: 40, marginTop: 8, marginBottom: 8 }}>
-          Narcı Kişiliği
+          Aura Kişiliği
         </Text>
         <Text style={{ fontSize: 15, color: "#6B6B70", marginBottom: 28, lineHeight: 22 }}>
-          Narcı seninle nasıl konuşsun? İstediğin zaman değiştirebilirsin.
+          Aura seninle nasıl konuşsun? İstediğin zaman değiştirebilirsin.
         </Text>
 
         {options.map(({ id, icon: Icon, color }) => {

@@ -22,7 +22,7 @@ export default function About() {
       <H>Nasıl çalışır?</H>
       <P>
         Ürünün barkodunu tara — Nar Aura, hedeflerin ve sağlık durumuna göre 0-100 arası
-        kişisel bir skor verir ve Narcı asistan sana özel öneri sunar. Gününü takip eder,
+        kişisel bir skor verir ve Aura asistan sana özel öneri sunar. Gününü takip eder,
         haftalık özet çıkarır, başarılarını rozetle taçlandırır.
       </P>
 

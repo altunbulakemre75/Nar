@@ -39,7 +39,7 @@ export default function Privacy() {
       <P>
         Verilerini asla satmıyoruz. Altyapı sağlayıcılarımız:{"\n"}
         · Supabase (Frankfurt, AB) — hesap ve veritabanı{"\n"}
-        · Google Gemini API — Narcı AI sohbetinde sorularını yanıtlar. Mesajların
+        · Google Gemini API — Aura AI sohbetinde sorularını yanıtlar. Mesajların
         Google'ın veri saklama politikasına tabidir{"\n"}
         · Sentry — hata takibi (sadece teknik hata detayları){"\n"}
         · PostHog (Frankfurt, AB) — anonim kullanım analitiği{"\n"}

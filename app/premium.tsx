@@ -65,13 +65,13 @@ export default function PremiumScreen() {
         <View style={{ gap: 10, marginBottom: 24 }}>
           <Feature
             icon={<MessageCircle size={20} color="#C73030" strokeWidth={2} />}
-            title="Sınırsız Narcı AI"
+            title="Sınırsız Aura AI"
             description="İstediğin kadar soru sor — günlük limit yok."
           />
           <Feature
             icon={<Camera size={20} color="#C73030" strokeWidth={2} />}
             title="Fotoğraf analizi"
-            description="Tabak fotoğrafı çek, Narcı kalori ve besin tahmini yapsın."
+            description="Tabak fotoğrafı çek, Aura kalori ve besin tahmini yapsın."
           />
           <Feature
             icon={<BarChart3 size={20} color="#C73030" strokeWidth={2} />}

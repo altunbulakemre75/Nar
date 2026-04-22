@@ -235,7 +235,7 @@ export default function SettingsScreen() {
         </Pressable>
 
         <View style={{ gap: 10, marginTop: 8 }}>
-          <RowChevron label="Narcı kişiliği" onPress={() => router.push("/settings/narci-personality")} />
+          <RowChevron label="Aura kişiliği" onPress={() => router.push("/settings/narci-personality")} />
           <RowToggle label="Bildirimler" value={notifEnabled} onChange={handleToggleNotifications} />
           <RowValue label="Dil" value="Türkçe" onPress={() => Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")} />
           <RowChevron label="Verilerimi indir" onPress={handleDownloadData} />

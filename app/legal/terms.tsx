@@ -11,7 +11,7 @@ export default function Terms() {
       <H>Hizmet</H>
       <P>
         Nar Aura; barkod tarama, ürünleri kişiselleştirilmiş bir skorla puanlama, günlük ve
-        haftalık beslenme takibi, AI destekli beslenme sohbeti (Narcı) ve besin etiketi
+        haftalık beslenme takibi, AI destekli beslenme sohbeti (Aura) ve besin etiketi
         OCR analizi hizmeti sunar. Uygulama tıbbi bir cihaz veya tıbbi tavsiye değildir.
       </P>
 

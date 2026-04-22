@@ -313,9 +313,9 @@ export default function ScanResultScreen() {
           </>
         )}
 
-        {/* Narcı soruları */}
+        {/* Aura soruları */}
         <Text style={{ fontSize: 18, fontWeight: "700", color: "#111", paddingHorizontal: 16, marginTop: 24, marginBottom: 10 }}>
-          Narcı'ya Sor
+          Aura'ya Sor
         </Text>
         <View style={{ paddingHorizontal: 16, gap: 8 }}>
           {SUGGESTED_QUESTIONS.map((q) => (

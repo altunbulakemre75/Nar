@@ -20,6 +20,7 @@ import { useT } from "@/lib/i18n";
 import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
+import { AuraCard } from "@/components/AuraCard";
 
 export default function Home() {
   const t = useT();
@@ -131,6 +132,9 @@ export default function Home() {
               goal={goal}
               empty={!hasEverScanned}
             />
+
+            {/* Aura'ya Sor kartı */}
+            <AuraCard />
 
             {/* Büyük tara butonu — her zaman göster */}
             <Pressable

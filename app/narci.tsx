@@ -96,8 +96,8 @@ export default function NarciScreen() {
       // Hoşgeldin mesajı (ilk açılışta)
       if (messages.length === 0) {
         const greeting = userName
-          ? `Selam ${userName}! Ben Narcı, Nar Aura koçunum. Seninle konuşmaya hazırım — ne taradığın, neyi merak ettiğin, nasıl hissettiğin... hepsini anlatabilirsin.`
-          : "Selam! Ben Narcı, Nar Aura koçunum. Nasıl yardımcı olabilirim?";
+          ? `Selam ${userName}! Ben Aura, senin beslenme koçunum. Seninle konuşmaya hazırım — ne taradığın, neyi merak ettiğin, nasıl hissettiğin... hepsini anlatabilirsin.`
+          : "Selam! Ben Aura, senin beslenme koçunum. Nasıl yardımcı olabilirim?";
 
         addMessage({ role: "assistant", content: greeting });
       }
@@ -200,7 +200,7 @@ export default function NarciScreen() {
         </Pressable>
 
         <View style={{ flex: 1, alignItems: "center" }}>
-          <Text style={{ fontSize: 17, fontWeight: "700", color: "#111" }}>Narcı</Text>
+          <Text style={{ fontSize: 17, fontWeight: "700", color: "#111" }}>Aura</Text>
         </View>
 
         <Pressable onPress={handleClear} hitSlop={10} style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
