@@ -32,6 +32,35 @@ export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
   very_active: "Çok aktif",
 };
 
+export type HealthMode =
+  | "glp1"
+  | "diabet_1"
+  | "diabet_2"
+  | "ibs"
+  | "pcos"
+  | "hamilelik"
+  | "emzirme";
+
+export const HEALTH_MODE_LABELS: Record<HealthMode, string> = {
+  glp1: "GLP-1 İlacı (Ozempic, Mounjaro vb.)",
+  diabet_1: "Diyabet Tip 1",
+  diabet_2: "Diyabet Tip 2",
+  ibs: "IBS / Sindirim sorunu",
+  pcos: "PCOS",
+  hamilelik: "Hamilelik",
+  emzirme: "Emzirme dönemi",
+};
+
+export const HEALTH_MODE_DESCRIPTIONS: Record<HealthMode, string> = {
+  glp1: "Protein ve mikrobesin odaklı tavsiye. Kas kaybı önleme.",
+  diabet_1: "Kan şekeri, insülin, glisemik indeks odaklı.",
+  diabet_2: "Glisemik kontrol ve yemek zamanlaması.",
+  ibs: "FODMAP uyarıları, şişkinlik önleme.",
+  pcos: "Düşük glisemik, anti-enflamatuar beslenme.",
+  hamilelik: "Folik asit, demir, güvenli gıda uyarıları.",
+  emzirme: "Laktasyon desteği, kafein/alkol yönetimi.",
+};
+
 export type NarciPersonality = "anne" | "muhendis" | "yol_arkadasi";
 
 export const PERSONALITY_LABELS: Record<NarciPersonality, string> = {
@@ -60,6 +89,8 @@ export interface Profile {
   health_conditions: string[];
   allergies: string[];
   narci_personality?: NarciPersonality;
+  health_modes?: HealthMode[];
+  glp1_medication?: string | null;
   updated_at?: string;
 }
 

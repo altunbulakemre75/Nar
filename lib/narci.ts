@@ -1,6 +1,7 @@
-import type { Goal, Profile, Product } from "@/types/database";
+import type { Goal, Profile, Product, HealthMode } from "@/types/database";
 import { GOAL_LABELS } from "@/types/database";
 import { buildPersonalityPrompt, getPersonalityTone } from "./personalities";
+import { buildHealthModePrompt, maybeAddMedicalDisclaimer } from "./mizan";
 
 export interface NarciMessage {
   role: "user" | "assistant";
@@ -37,6 +38,10 @@ function buildSystemPrompt(ctx: NarciContext): string {
   const personality = p.narci_personality ?? "anne";
   const personalityPrompt = buildPersonalityPrompt(personality);
 
+  // Mizan — sağlık modları
+  const healthModes = (p.health_modes ?? []) as HealthMode[];
+  const healthPrompt = buildHealthModePrompt(healthModes);
+
   // Ortak kurallar (her kişilik için geçerli)
   const commonRules = `
 KURALLAR (hepsinde geçerli):
@@ -55,7 +60,51 @@ Kullanıcı bilgisi:
 - Kısıtlama/sağlık: ${restrictions}
 - Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}`;
 
-  return `${personalityPrompt}\n${commonRules}\n${userContext}`;
+  return `${personalityPrompt}${healthPrompt}\n${commonRules}\n${userContext}`;
+}
+
+// Mesaj başı max karakter — token optimizasyonu
+const MAX_MSG_CHARS = 400;
+// Geçmişten tutulacak son mesaj sayısı
+const HISTORY_LIMIT = 4;
+// Exponential backoff: 1s, 2s, 4s (toplam 7s + anlık)
+const MAX_RETRIES = 3;
+const BASE_BACKOFF_MS = 1000;
+
+function trimMessage(text: string): string {
+  if (text.length <= MAX_MSG_CHARS) return text;
+  return text.slice(0, MAX_MSG_CHARS) + "…";
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    signal?.addEventListener("abort", onAbort);
+  });
+}
+
+function parseRetryDelaySec(errorBody: string): number | null {
+  try {
+    const parsed = JSON.parse(errorBody);
+    const details = parsed?.error?.details ?? [];
+    const retry = details.find((d: any) => d["@type"]?.includes("RetryInfo"));
+    const raw = retry?.retryDelay ?? "";
+    const match = /^(\d+)s$/.exec(raw);
+    return match ? parseInt(match[1], 10) : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function sendMessage(
@@ -71,8 +120,8 @@ export async function sendMessage(
 
   const systemPrompt = buildSystemPrompt(context);
 
-  // Son 5 mesajı al (daha az token)
-  const recent = history.slice(-5);
+  // Son N mesajı al + her birini kırp (token optimizasyonu)
+  const recent = history.slice(-HISTORY_LIMIT);
 
   interface GeminiContent {
     role: "user" | "model";
@@ -81,92 +130,104 @@ export async function sendMessage(
   const contents: GeminiContent[] = [];
 
   // Sistem promptunu ilk turn olarak ekle
-  contents.push({
-    role: "user",
-    parts: [{ text: systemPrompt }],
-  });
-  contents.push({
-    role: "model",
-    parts: [{ text: "Anlaşıldı." }],
-  });
+  contents.push({ role: "user", parts: [{ text: systemPrompt }] });
+  contents.push({ role: "model", parts: [{ text: "Anlaşıldı." }] });
 
   for (const msg of recent) {
     contents.push({
       role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }],
+      parts: [{ text: trimMessage(msg.content) }],
     });
   }
 
-  contents.push({
-    role: "user",
-    parts: [{ text: userMessage }],
-  });
+  contents.push({ role: "user", parts: [{ text: trimMessage(userMessage) }] });
 
-  // gemini-2.0-flash-lite: daha yüksek free tier quota, daha hızlı, daha ucuz
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-  // 20s timeout: kullanıcının gelen abort sinyaliyle birleştir
-  const timeoutCtrl = new AbortController();
-  const timer = setTimeout(() => timeoutCtrl.abort(), 20_000);
-  const onUserAbort = () => timeoutCtrl.abort();
-  signal?.addEventListener("abort", onUserAbort);
-
-  // Kişilik moduna göre ton
   const toneConfig = getPersonalityTone(context.profile?.narci_personality ?? "anne");
 
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: toneConfig.temperature,
-          maxOutputTokens: toneConfig.maxTokens,
-        },
-      }),
-      signal: timeoutCtrl.signal,
-    });
-  } finally {
-    clearTimeout(timer);
-    signal?.removeEventListener("abort", onUserAbort);
-  }
+  const body = JSON.stringify({
+    contents,
+    generationConfig: {
+      temperature: toneConfig.temperature,
+      maxOutputTokens: toneConfig.maxTokens,
+    },
+  });
 
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error("Gemini API hatası:", res.status, errorBody);
+  // Exponential backoff döngüsü — 429 ve 5xx için
+  let lastErrorBody = "";
+  let lastStatus = 0;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    // Her deneme için ayrı timeout controller
+    const timeoutCtrl = new AbortController();
+    const timer = setTimeout(() => timeoutCtrl.abort(), 20_000);
+    const onUserAbort = () => timeoutCtrl.abort();
+    signal?.addEventListener("abort", onUserAbort);
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        signal: timeoutCtrl.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onUserAbort);
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      const text =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+        "Bir şey ters gitti, tekrar dener misin?";
+      const hasHealthMode = (context.profile?.health_modes ?? []).length > 0;
+      return text.trim() + maybeAddMedicalDisclaimer(hasHealthMode);
+    }
+
+    lastStatus = res.status;
+    lastErrorBody = await res.text();
+    console.error(`Gemini API hatası (deneme ${attempt + 1}):`, res.status);
+
+    // Retry edilmeyecek hatalar — hemen fırlat
     if (res.status === 401 || res.status === 403) {
       throw new Error("API anahtarı geçersiz veya yetkin yok.");
-    }
-    if (res.status === 429) {
-      // Quota limit - retryDelay "48s" gibi geliyor, saniyeye çevir
-      let seconds = 60;
-      try {
-        const parsed = JSON.parse(errorBody);
-        const details = parsed?.error?.details ?? [];
-        const retry = details.find((d: any) => d["@type"]?.includes("RetryInfo"));
-        const raw = retry?.retryDelay ?? "";
-        const match = /^(\d+)s$/.exec(raw);
-        if (match) seconds = parseInt(match[1], 10);
-      } catch {
-        // RetryInfo parse edilemedi — varsayılan 60 saniye ile devam
-      }
-      const label = seconds < 60 ? `${seconds} saniye` : `${Math.ceil(seconds / 60)} dakika`;
-      throw new Error(`Dakikalık kullanım limiti doldu. ${label} sonra tekrar dene.`);
     }
     if (res.status === 404) {
       throw new Error("Model bulunamadı. API anahtarı eski olabilir.");
     }
-    throw new Error("Şu an cevap veremiyorum, az sonra tekrar dene.");
+    if (res.status === 400) {
+      throw new Error("İstek reddedildi, az sonra tekrar dene.");
+    }
+
+    // 429 ve 5xx — retry edilebilir
+    const shouldRetry = (res.status === 429 || res.status >= 500) && attempt < MAX_RETRIES;
+    if (!shouldRetry) break;
+
+    // Backoff süresi: sunucu retryDelay verdiyse onu kullan (10s'e kadar), yoksa exponential
+    const serverDelaySec = res.status === 429 ? parseRetryDelaySec(lastErrorBody) : null;
+    const backoffMs =
+      serverDelaySec !== null && serverDelaySec <= 10
+        ? serverDelaySec * 1000
+        : BASE_BACKOFF_MS * Math.pow(2, attempt);
+
+    try {
+      await sleep(backoffMs, signal);
+    } catch {
+      // Abort edilirse döngüyü kır
+      throw new DOMException("Aborted", "AbortError");
+    }
   }
 
-  const data = await res.json();
-  const text =
-    data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-    "Bir şey ters gitti, tekrar dener misin?";
-
-  return text.trim();
+  // Tüm denemeler tükendi
+  if (lastStatus === 429) {
+    const serverDelaySec = parseRetryDelaySec(lastErrorBody) ?? 60;
+    const label =
+      serverDelaySec < 60 ? `${serverDelaySec} saniye` : `${Math.ceil(serverDelaySec / 60)} dakika`;
+    throw new Error(`Dakikalık kullanım limiti doldu. ${label} sonra tekrar dene.`);
+  }
+  throw new Error("Şu an cevap veremiyorum, az sonra tekrar dene.");
 }
 
 export function isRamadanNow(): boolean {

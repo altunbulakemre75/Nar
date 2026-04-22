@@ -236,6 +236,7 @@ export default function SettingsScreen() {
 
         <View style={{ gap: 10, marginTop: 8 }}>
           <RowChevron label="Aura kişiliği" onPress={() => router.push("/settings/narci-personality")} />
+          <RowChevron label="Sağlık modları" onPress={() => router.push("/settings/health-modes")} />
           <RowToggle label="Bildirimler" value={notifEnabled} onChange={handleToggleNotifications} />
           <RowValue label="Dil" value="Türkçe" onPress={() => Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")} />
           <RowChevron label="Verilerimi indir" onPress={handleDownloadData} />
