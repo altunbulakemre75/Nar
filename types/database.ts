@@ -32,6 +32,20 @@ export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
   very_active: "Çok aktif",
 };
 
+export type NarciPersonality = "anne" | "muhendis" | "yol_arkadasi";
+
+export const PERSONALITY_LABELS: Record<NarciPersonality, string> = {
+  anne: "Anne Modu",
+  muhendis: "Mühendis Modu",
+  yol_arkadasi: "Yol Arkadaşı",
+};
+
+export const PERSONALITY_DESCRIPTIONS: Record<NarciPersonality, string> = {
+  anne: "Empatik, koruyucu, yargılamaz. Türk annesi gibi sevgiyle konuşur.",
+  muhendis: "Verisel, rasyonel. Kalori, protein, glisemik indeks — sayılar odaklı.",
+  yol_arkadasi: "Samimi arkadaşın. Günlük dil, bazen şaka, hep yanında.",
+};
+
 export interface Profile {
   id: string;
   name: string | null;
@@ -45,6 +59,7 @@ export interface Profile {
   dietary_restrictions: string[];
   health_conditions: string[];
   allergies: string[];
+  narci_personality?: NarciPersonality;
   updated_at?: string;
 }
 

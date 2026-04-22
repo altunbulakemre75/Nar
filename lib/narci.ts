@@ -1,5 +1,6 @@
 import type { Goal, Profile, Product } from "@/types/database";
 import { GOAL_LABELS } from "@/types/database";
+import { buildPersonalityPrompt, getPersonalityTone } from "./personalities";
 
 export interface NarciMessage {
   role: "user" | "assistant";
@@ -32,10 +33,29 @@ function buildSystemPrompt(ctx: NarciContext): string {
     ? ` Şu an taranan ürün: ${ctx.currentProduct.name}.`
     : "";
 
-  // KISA sistem promptu - az token
-  return `Sen Narcı, Türkçe beslenme koçu asistansın. Kısa (2-3 cümle), samimi, pratik cevap ver. "Sağlıksız/iyi gıda" deme, "hedefinle uyumlu/değil" de. Tıbbi tanı koyma - diyetisyene yönlendir.
-Kullanıcı: hedef=${goalLabel}, yaş=${p.age ?? "?"}, cinsiyet=${p.gender ?? "?"}, kısıtlama=${restrictions}.
-Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}`;
+  // Kişilik modu — default 'anne'
+  const personality = p.narci_personality ?? "anne";
+  const personalityPrompt = buildPersonalityPrompt(personality);
+
+  // Ortak kurallar (her kişilik için geçerli)
+  const commonRules = `
+KURALLAR (hepsinde geçerli):
+- Kısa cevap ver (2-4 cümle yeterli)
+- "Sağlıksız/iyi gıda" deme — "hedefinle uyumlu/değil" de
+- Tıbbi tanı koyma — "diyetisyen/doktorunla konuş" de
+- Asla love bombing veya pohpohlama yapma
+- Dürüst geri bildirim ver, ama ton kişiliğe uygun olsun
+- UYUM-NÖTR: Kullanıcı hedefinden saptıysa "kaçırdın/başaramadın/yapmamalıydın" ASLA DEME. Gerçekte ne olduğunu yargısız kabul et, haftalık bağlamla yumuşat, bir sonraki adımı öner.`;
+
+  const userContext = `
+Kullanıcı bilgisi:
+- Hedef: ${goalLabel}
+- Yaş: ${p.age ?? "?"}
+- Cinsiyet: ${p.gender ?? "?"}
+- Kısıtlama/sağlık: ${restrictions}
+- Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}`;
+
+  return `${personalityPrompt}\n${commonRules}\n${userContext}`;
 }
 
 export async function sendMessage(
@@ -91,6 +111,9 @@ export async function sendMessage(
   const onUserAbort = () => timeoutCtrl.abort();
   signal?.addEventListener("abort", onUserAbort);
 
+  // Kişilik moduna göre ton
+  const toneConfig = getPersonalityTone(context.profile?.narci_personality ?? "anne");
+
   let res: Response;
   try {
     res = await fetch(url, {
@@ -99,8 +122,8 @@ export async function sendMessage(
       body: JSON.stringify({
         contents,
         generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 250,
+          temperature: toneConfig.temperature,
+          maxOutputTokens: toneConfig.maxTokens,
         },
       }),
       signal: timeoutCtrl.signal,
