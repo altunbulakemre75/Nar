@@ -14,6 +14,8 @@ export interface NarciContext {
   currentProduct?: Product | null;
   isRamadan?: boolean;
   mood?: "great" | "good" | "ok" | "low" | "tired" | null;
+  todayMeals?: { name: string; calories: number; protein: number }[];
+  todayTotals?: { calories: number; protein: number; fat: number; carbs: number };
 }
 
 function buildSystemPrompt(ctx: NarciContext): string {
@@ -58,13 +60,22 @@ KURALLAR (hepsinde geçerli):
   };
   const moodText = ctx.mood ? ` Bugünkü ruh hali: ${moodLabels[ctx.mood]}.` : "";
 
+  // Bugünkü yemekler + toplam
+  const mealsText = (ctx.todayMeals ?? []).length > 0
+    ? `\n- Bugün yedikleri: ${ctx.todayMeals!.map((m) => `${m.name}(${m.calories}kcal)`).join(", ")}.`
+    : "";
+  const totals = ctx.todayTotals;
+  const totalsText = totals && totals.calories > 0
+    ? `\n- Bugünkü toplam: ${totals.calories} kcal, ${totals.protein}g protein, ${totals.fat}g yağ, ${totals.carbs}g karb.`
+    : "";
+
   const userContext = `
 Kullanıcı bilgisi:
 - Hedef: ${goalLabel}
 - Yaş: ${p.age ?? "?"}
 - Cinsiyet: ${p.gender ?? "?"}
 - Kısıtlama/sağlık: ${restrictions}
-- Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}${moodText}`;
+- Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}${moodText}${mealsText}${totalsText}`;
 
   return `${personalityPrompt}${healthPrompt}\n${commonRules}\n${userContext}`;
 }

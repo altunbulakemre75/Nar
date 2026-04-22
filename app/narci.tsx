@@ -16,6 +16,7 @@ import * as Haptics from "expo-haptics";
 import { useNarciStore, type Message } from "@/lib/narciStore";
 import { sendMessage, isRamadanNow, type NarciContext } from "@/lib/narci";
 import { useMoodStore } from "@/lib/moodStore";
+import { useMealStore } from "@/lib/mealStore";
 import { supabase } from "@/lib/supabase";
 import { getRecentScans, getProductByBarcode } from "@/lib/products";
 import { track, reportError } from "@/lib/analytics";
@@ -83,6 +84,7 @@ export default function NarciScreen() {
         currentProduct = await getProductByBarcode(String(productId));
       }
 
+      const mealState = useMealStore.getState();
       setContext({
         profile: profileRes.data ?? null,
         recentScans: recentScans.map((s) => ({
@@ -93,6 +95,12 @@ export default function NarciScreen() {
         currentProduct,
         isRamadan: isRamadanNow(),
         mood: useMoodStore.getState().getToday(),
+        todayMeals: mealState.getToday().map((m) => ({
+          name: m.name,
+          calories: m.calories,
+          protein: m.protein,
+        })),
+        todayTotals: mealState.getTodayTotals(),
       });
 
       // Hoşgeldin mesajı (ilk açılışta)
