@@ -22,6 +22,7 @@ import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } f
 import { GOAL_LABELS, type Goal } from "@/types/database";
 import { AuraCard } from "@/components/AuraCard";
 import { WaterCard } from "@/components/WaterCard";
+import { MoodCard } from "@/components/MoodCard";
 
 export default function Home() {
   const t = useT();
@@ -139,6 +140,9 @@ export default function Home() {
 
             {/* Su takibi */}
             <WaterCard />
+
+            {/* Ruh hali takibi */}
+            <MoodCard />
 
             {/* Büyük tara butonu — her zaman göster */}
             <Pressable

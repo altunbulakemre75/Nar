@@ -15,6 +15,7 @@ import { X, Send, Trash2 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useNarciStore, type Message } from "@/lib/narciStore";
 import { sendMessage, isRamadanNow, type NarciContext } from "@/lib/narci";
+import { useMoodStore } from "@/lib/moodStore";
 import { supabase } from "@/lib/supabase";
 import { getRecentScans, getProductByBarcode } from "@/lib/products";
 import { track, reportError } from "@/lib/analytics";
@@ -91,6 +92,7 @@ export default function NarciScreen() {
         })),
         currentProduct,
         isRamadan: isRamadanNow(),
+        mood: useMoodStore.getState().getToday(),
       });
 
       // Hoşgeldin mesajı (ilk açılışta)

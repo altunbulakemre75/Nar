@@ -13,6 +13,7 @@ export interface NarciContext {
   recentScans?: { name: string; score: number; brand: string | null }[];
   currentProduct?: Product | null;
   isRamadan?: boolean;
+  mood?: "great" | "good" | "ok" | "low" | "tired" | null;
 }
 
 function buildSystemPrompt(ctx: NarciContext): string {
@@ -52,13 +53,18 @@ KURALLAR (hepsinde geçerli):
 - Dürüst geri bildirim ver, ama ton kişiliğe uygun olsun
 - UYUM-NÖTR: Kullanıcı hedefinden saptıysa "kaçırdın/başaramadın/yapmamalıydın" ASLA DEME. Gerçekte ne olduğunu yargısız kabul et, haftalık bağlamla yumuşat, bir sonraki adımı öner.`;
 
+  const moodLabels: Record<string, string> = {
+    great: "harika", good: "iyi", ok: "normal", low: "düşük", tired: "yorgun",
+  };
+  const moodText = ctx.mood ? ` Bugünkü ruh hali: ${moodLabels[ctx.mood]}.` : "";
+
   const userContext = `
 Kullanıcı bilgisi:
 - Hedef: ${goalLabel}
 - Yaş: ${p.age ?? "?"}
 - Cinsiyet: ${p.gender ?? "?"}
 - Kısıtlama/sağlık: ${restrictions}
-- Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}`;
+- Son taramalar: ${recentScansText || "yok"}.${currentProductText}${ctx.isRamadan ? " Ramazan zamanı." : ""}${moodText}`;
 
   return `${personalityPrompt}${healthPrompt}\n${commonRules}\n${userContext}`;
 }
