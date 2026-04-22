@@ -23,6 +23,7 @@ import { GOAL_LABELS, type Goal } from "@/types/database";
 import { AuraCard } from "@/components/AuraCard";
 import { WaterCard } from "@/components/WaterCard";
 import { MoodCard } from "@/components/MoodCard";
+import { MealLogCard } from "@/components/MealLogCard";
 
 export default function Home() {
   const t = useT();
@@ -143,6 +144,9 @@ export default function Home() {
 
             {/* Ruh hali takibi */}
             <MoodCard />
+
+            {/* Yemek günlüğü */}
+            <MealLogCard />
 
             {/* Büyük tara butonu — her zaman göster */}
             <Pressable

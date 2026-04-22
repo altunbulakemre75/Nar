@@ -17,6 +17,8 @@ import {
 import { getCalendarData, getProfileSummary, type DayData } from "@/lib/stats";
 import DayDetailModal from "@/components/DayDetailModal";
 import { scoreColor } from "@/constants/colors";
+import { MoodTrend } from "@/components/MoodTrend";
+import { ScanTrend } from "@/components/ScanTrend";
 
 // Türkçe takvim lokalizasyonu
 LocaleConfig.locales.tr = {
@@ -219,6 +221,10 @@ export default function Profile() {
             </Text>
           </View>
         </View>
+
+        {/* 7 günlük trendler */}
+        <ScanTrend />
+        <MoodTrend />
 
         {/* Takvim */}
         <View className="mx-4 mt-6">
