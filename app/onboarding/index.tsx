@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { ShieldCheck } from "lucide-react-native";
 import NarAuraLogo from "@/components/NarLogo";
 import { useOnboardingStore } from "@/lib/onboardingStore";
 
@@ -28,6 +29,33 @@ export default function OnboardingWelcome() {
           birkaç küçük soru soracağız.{"\n"}
           Yaklaşık 1 dakika sürer.
         </Text>
+
+        {/* Gizlilik sözü */}
+        <View
+          style={{
+            marginTop: 32,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            borderRadius: 14,
+            backgroundColor: "#F0F9F0",
+            borderWidth: 1,
+            borderColor: "#C8E6C9",
+            flexDirection: "row",
+            alignItems: "flex-start",
+            gap: 10,
+          }}
+        >
+          <ShieldCheck size={20} color="#2E7D32" strokeWidth={2.2} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: "#2E7D32", marginBottom: 3 }}>
+              Gizlilik sözümüz
+            </Text>
+            <Text style={{ fontSize: 12, color: "#2E4A2F", lineHeight: 17 }}>
+              Sağlık verin sadece senindir. Üçüncü taraflara satılmaz, reklam için
+              kullanılmaz. KVKK uyumlu, Frankfurt (AB) sunucularında şifreli.
+            </Text>
+          </View>
+        </View>
       </View>
 
       <View className="px-6 pb-8">
