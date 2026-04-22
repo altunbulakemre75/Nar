@@ -4,14 +4,14 @@ export default function Privacy() {
   return (
     <LegalPage title="Gizlilik Politikası" updatedAt="18 Nisan 2026">
       <P>
-        Nar olarak gizliliğine önem veriyoruz. Bu politika, uygulamayı kullandığında hangi
+        Nar Aura olarak gizliliğine önem veriyoruz. Bu politika, uygulamayı kullandığında hangi
         verilerini topladığımızı, nasıl kullandığımızı ve haklarını açıklar. Türkiye'de
         geçerli KVKK ve AB'de geçerli GDPR prensiplerine uygun işliyoruz.
       </P>
 
       <H>Veri sorumlusu</H>
       <P>
-        Nar uygulaması · destek@narapp.com. Veri işleme amacımız: sana kişiselleştirilmiş
+        Nar Aura uygulaması · destek@narapp.com. Veri işleme amacımız: sana kişiselleştirilmiş
         gıda skorları ve sağlık içgörüleri sunmak.
       </P>
 
@@ -62,7 +62,7 @@ export default function Privacy() {
 
       <H>Çocuklar</H>
       <P>
-        Nar 13 yaş altı kullanıcıları hedeflememektedir. Çocuğunun izinsiz hesap
+        Nar Aura 13 yaş altı kullanıcıları hedeflememektedir. Çocuğunun izinsiz hesap
         açtığını düşünüyorsan bizimle iletişime geç.
       </P>
 

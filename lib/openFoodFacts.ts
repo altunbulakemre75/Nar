@@ -82,7 +82,7 @@ export async function fetchFromOFF(barcode: string): Promise<OFFMappedProduct | 
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(url, {
-      headers: { "User-Agent": "Nar/1.0 (https://narapp.com)" },
+      headers: { "User-Agent": "NarAura/1.0 (https://narapp.com)" },
       signal: controller.signal,
     });
     clearTimeout(timeoutId);

@@ -51,7 +51,7 @@ export async function scheduleDailyReminder(hour = DEFAULT_HOUR, minute = 0): Pr
 
   const id = await Notifications.scheduleNotificationAsync({
     content: {
-      title: "Nar",
+      title: "Nar Aura",
       body: "Bugünkü yemeklerini eklemeyi unutma 🍎",
       sound: false,
     },

@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import NarLogo from "@/components/NarLogo";
+import NarAuraLogo from "@/components/NarLogo";
 import { useOnboardingStore } from "@/lib/onboardingStore";
 
 export default function OnboardingWelcome() {
@@ -14,7 +14,7 @@ export default function OnboardingWelcome() {
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFFDFB" }}>
       <View className="flex-1 items-center justify-center px-8">
-        <NarLogo size={72} showTagline={false} />
+        <NarAuraLogo size={72} showTagline={false} />
 
         <Text
           className="mt-4 text-lg text-center"

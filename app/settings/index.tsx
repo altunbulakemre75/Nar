@@ -43,7 +43,7 @@ export default function SettingsScreen() {
       if (!ok) {
         Alert.alert(
           "İzin gerekli",
-          "Bildirimleri alabilmek için Ayarlar'dan Nar'a bildirim izni vermelisin."
+          "Bildirimleri alabilmek için Ayarlar'dan Nar Aura'ya bildirim izni vermelisin."
         );
         return;
       }
@@ -91,7 +91,7 @@ export default function SettingsScreen() {
         scans: scans.data,
         achievements: achievements.data,
       };
-      await Share.share({ title: "Nar verilerim", message: JSON.stringify(payload, null, 2) });
+      await Share.share({ title: "Nar Aura verilerim", message: JSON.stringify(payload, null, 2) });
     } catch {
       Alert.alert("Hata", "Veriler dışa aktarılamadı.");
     }
@@ -224,7 +224,7 @@ export default function SettingsScreen() {
             <Sparkles size={22} color="#FFF" strokeWidth={2} fill="#FFF" />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={{ fontSize: 17, fontWeight: "600", color: "#FFF", lineHeight: 22 }}>Nar Premium</Text>
+            <Text style={{ fontSize: 17, fontWeight: "600", color: "#FFF", lineHeight: 22 }}>Nar Aura Premium</Text>
             <Text style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 18, marginTop: 2 }}>
               Sınırsız AI + fotoğraf analizi
             </Text>
@@ -239,8 +239,8 @@ export default function SettingsScreen() {
           <RowValue label="Dil" value="Türkçe" onPress={() => Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")} />
           <RowChevron label="Verilerimi indir" onPress={handleDownloadData} />
           <RowDestructive label="Hesabı sil" onPress={() => setShowDeleteModal(true)} />
-          <RowChevron label="Yardım merkezi" onPress={() => mailTo("Nar - yardım")} />
-          <RowChevron label="Hata bildir" onPress={() => mailTo("Nar - hata bildirimi")} />
+          <RowChevron label="Yardım merkezi" onPress={() => mailTo("Nar Aura - yardım")} />
+          <RowChevron label="Hata bildir" onPress={() => mailTo("Nar Aura - hata bildirimi")} />
           <RowChevron label="Bize puan ver" onPress={() => Alert.alert("Yakında", "App Store'da yayınlanınca aktif olacak.")} />
           <RowChevron label="Gizlilik politikası" onPress={() => router.push("/legal/privacy")} />
         </View>

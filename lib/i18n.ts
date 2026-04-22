@@ -111,7 +111,7 @@ const tr: Dict = {
 
   // Settings
   "settings.title": "Ayarlar",
-  "settings.premiumTitle": "Nar Premium",
+  "settings.premiumTitle": "Nar Aura Premium",
   "settings.premiumDesc": "Sınırsız AI + fotoğraf analizi",
   "settings.premiumBadge": "YAKINDA",
   "settings.prefs": "Tercihler",
@@ -133,7 +133,7 @@ const tr: Dict = {
   "settings.terms": "Kullanım koşulları",
   "settings.about": "Hakkında",
   "settings.logout": "Çıkış yap",
-  "settings.version": "Nar v0.1.0",
+  "settings.version": "Nar Aura v0.1.0",
 
   // Scan result
   "result.loading": "Ürün bulunuyor...",
@@ -159,7 +159,7 @@ const tr: Dict = {
     "Bir ürün taradığında sağ üstteki kalp ikonuna basarak favorilerine ekleyebilirsin.",
 
   // Premium
-  "premium.title": "Nar Premium",
+  "premium.title": "Nar Aura Premium",
   "premium.subtitle": "Sınırsız AI sohbet, fotoğraf analizi ve detaylı raporlar.",
   "premium.cta": "Premium'a geç",
   "premium.monthly": "Aylık",
@@ -251,7 +251,7 @@ const en: Dict = {
   "profile.logoutConfirm": "Are you sure you want to sign out?",
 
   "settings.title": "Settings",
-  "settings.premiumTitle": "Nar Premium",
+  "settings.premiumTitle": "Nar Aura Premium",
   "settings.premiumDesc": "Unlimited AI + photo analysis",
   "settings.premiumBadge": "COMING",
   "settings.prefs": "Preferences",
@@ -273,7 +273,7 @@ const en: Dict = {
   "settings.terms": "Terms of Use",
   "settings.about": "About",
   "settings.logout": "Sign out",
-  "settings.version": "Nar v0.1.0",
+  "settings.version": "Nar Aura v0.1.0",
 
   "result.loading": "Finding product...",
   "result.servingSize": "Serving: {size}g",
@@ -296,7 +296,7 @@ const en: Dict = {
   "favorites.emptyBody":
     "Tap the heart on a product's scan result to save it here.",
 
-  "premium.title": "Nar Premium",
+  "premium.title": "Nar Aura Premium",
   "premium.subtitle": "Unlimited AI chat, photo analysis and detailed reports.",
   "premium.cta": "Go Premium",
   "premium.monthly": "Monthly",

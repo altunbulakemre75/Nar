@@ -22,7 +22,7 @@ import { useAuthStore } from "@/lib/authStore";
 import type { Product } from "@/types/database";
 
 const SAMPLE_QUESTIONS = [
-  "Ramazan'da ne yiyeyim?",
+  "Bugün ne yiyebilirim?",
   "Tükettiğim şeker fazla mı?",
   "Kahvaltıda ne tavsiye edersin?",
   "Akşam atıştırmalık önerin?",
@@ -96,8 +96,8 @@ export default function NarciScreen() {
       // Hoşgeldin mesajı (ilk açılışta)
       if (messages.length === 0) {
         const greeting = userName
-          ? `Selam ${userName}! Ben Narcı, senin beslenme koçunum. Taradığın ürünler hakkında konuşabilir, sana özel tavsiyeler verebilirim. Nasıl yardımcı olabilirim?`
-          : "Selam! Ben Narcı, senin beslenme koçunum. Nasıl yardımcı olabilirim?";
+          ? `Selam ${userName}! Ben Narcı, Nar Aura koçunum. Seninle konuşmaya hazırım — ne taradığın, neyi merak ettiğin, nasıl hissettiğin... hepsini anlatabilirsin.`
+          : "Selam! Ben Narcı, Nar Aura koçunum. Nasıl yardımcı olabilirim?";
 
         addMessage({ role: "assistant", content: greeting });
       }

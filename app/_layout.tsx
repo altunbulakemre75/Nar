@@ -10,7 +10,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useAuthStore } from "@/lib/authStore";
 import AppErrorBoundary from "@/components/ErrorBoundary";
 import OfflineBanner from "@/components/OfflineBanner";
-import NarLogo from "@/components/NarLogo";
+import NarAuraLogo from "@/components/NarLogo";
 import { initAnalytics, track, identifyUser, resetUser } from "@/lib/analytics";
 
 SplashScreen.preventAutoHideAsync();
@@ -120,7 +120,7 @@ function AppSplash() {
         justifyContent: "center",
       }}
     >
-      <NarLogo size={72} />
+      <NarAuraLogo size={72} />
       <ActivityIndicator color="#C73030" style={{ marginTop: 32 }} />
     </View>
   );

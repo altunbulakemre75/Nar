@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Nar",
-    "slug": "nar",
+    "name": "Nar Aura",
+    "slug": "nar-aura",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,8 +19,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.nar.scanner",
       "infoPlist": {
-        "NSCameraUsageDescription": "Nar, barkod taramak ve yemek fotoğrafı analizi için kameraya ihtiyaç duyar.",
-        "NSPhotoLibraryUsageDescription": "Nar, galerideki besin etiketi fotoğraflarını analiz etmek için erişim ister."
+        "NSCameraUsageDescription": "Nar Aura, barkod taramak ve yemek fotoğrafı analizi için kameraya ihtiyaç duyar.",
+        "NSPhotoLibraryUsageDescription": "Nar Aura, galerideki besin etiketi fotoğraflarını analiz etmek için erişim ister."
       }
     },
     "android": {
@@ -46,7 +46,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Nar, barkod taramak için kameraya erişim ister."
+          "cameraPermission": "Nar Aura, barkod taramak için kameraya erişim ister."
         }
       ],
       [

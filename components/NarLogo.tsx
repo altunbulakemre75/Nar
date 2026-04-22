@@ -2,10 +2,10 @@ import { View, Text } from "react-native";
 import Svg, { Path, Circle, G } from "react-native-svg";
 
 /**
- * Nar logosu — küçük bir nar ikonu + "Nar" metni.
+ * Nar Aura logosu — nar ikonu + "Nar Aura" metni.
  * size: logo ikonu çapı (default 56). Metin ona göre orantılı.
  */
-export default function NarLogo({
+export default function NarAuraLogo({
   size = 56,
   showTagline = true,
   color = "#C73030",
@@ -15,24 +15,38 @@ export default function NarLogo({
   color?: string;
 }) {
   const textSize = size;
+  const auraSize = textSize * 0.55;
   return (
     <View style={{ alignItems: "center" }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Pomegranate size={size * 0.75} color={color} />
-        <Text
-          style={{
-            fontFamily: "PlayfairDisplay-BoldItalic",
-            fontSize: textSize,
-            color,
-            lineHeight: textSize * 1.1,
-          }}
-        >
-          Nar
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+          <Text
+            style={{
+              fontFamily: "PlayfairDisplay-BoldItalic",
+              fontSize: textSize,
+              color,
+              lineHeight: textSize * 1.1,
+            }}
+          >
+            Nar
+          </Text>
+          <Text
+            style={{
+              fontFamily: "PlayfairDisplay-BoldItalic",
+              fontSize: auraSize,
+              color,
+              opacity: 0.75,
+              letterSpacing: 1,
+            }}
+          >
+            Aura
+          </Text>
+        </View>
       </View>
       {showTagline ? (
         <Text style={{ marginTop: 6, fontSize: 13, color: "#6B1A1A", letterSpacing: 0.3 }}>
-          Ne yediğini bil
+          Seni tanıyan beslenme koçun
         </Text>
       ) : null}
     </View>

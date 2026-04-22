@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import NarLogo from "@/components/NarLogo";
+import NarAuraLogo from "@/components/NarLogo";
 import { useAuthStore } from "@/lib/authStore";
 import { useT } from "@/lib/i18n";
 
@@ -46,7 +46,7 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={{ alignItems: "center", paddingTop: 56, paddingBottom: 44 }}>
-            <NarLogo size={56} />
+            <NarAuraLogo size={56} />
           </View>
 
           <Text style={{ fontSize: 26, fontWeight: "700", color: "#111", marginBottom: 6 }}>

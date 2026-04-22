@@ -147,15 +147,20 @@ export async function sendMessage(
 }
 
 export function isRamadanNow(): boolean {
-  const now = new Date();
-  const year = now.getFullYear();
-  const ranges: Record<number, [string, string]> = {
-    2026: ["2026-02-17", "2026-03-19"],
-    2027: ["2027-02-07", "2027-03-08"],
-    2028: ["2028-01-27", "2028-02-25"],
-  };
-  const range = ranges[year];
-  if (!range) return false;
-  const nowStr = now.toISOString().slice(0, 10);
-  return nowStr >= range[0] && nowStr <= range[1];
+  // PASIF: Ramazan modu şu an kapalı.
+  // Tekrar aktifleştirmek için return false; satırını sil,
+  // aşağıdaki kodu uncomment et.
+  return false;
+
+  // const now = new Date();
+  // const year = now.getFullYear();
+  // const ranges: Record<number, [string, string]> = {
+  //   2026: ["2026-02-17", "2026-03-19"],
+  //   2027: ["2027-02-07", "2027-03-08"],
+  //   2028: ["2028-01-27", "2028-02-25"],
+  // };
+  // const range = ranges[year];
+  // if (!range) return false;
+  // const nowStr = now.toISOString().slice(0, 10);
+  // return nowStr >= range[0] && nowStr <= range[1];
 }

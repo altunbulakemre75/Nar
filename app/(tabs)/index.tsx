@@ -93,17 +93,29 @@ export default function Home() {
       >
         {/* Üst: Sadece logo */}
         <View className="px-4 pt-2 pb-3" style={{ borderBottomWidth: 0.5, borderBottomColor: "#EEE" }}>
-          <Text
-            style={{
-              fontFamily: "PlayfairDisplay-BoldItalic",
-              fontSize: 40,
-              color: "#C73030",
-              textAlign: "center",
-              lineHeight: 48,
-            }}
-          >
-            Nar
-          </Text>
+          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "baseline", gap: 6 }}>
+            <Text
+              style={{
+                fontFamily: "PlayfairDisplay-BoldItalic",
+                fontSize: 40,
+                color: "#C73030",
+                lineHeight: 48,
+              }}
+            >
+              Nar
+            </Text>
+            <Text
+              style={{
+                fontFamily: "PlayfairDisplay-BoldItalic",
+                fontSize: 22,
+                color: "#C73030",
+                opacity: 0.75,
+                letterSpacing: 1,
+              }}
+            >
+              Aura
+            </Text>
+          </View>
         </View>
 
         {loading ? (

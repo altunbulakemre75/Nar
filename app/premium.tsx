@@ -54,7 +54,7 @@ export default function PremiumScreen() {
             <Sparkles size={34} color="#FFF" strokeWidth={2} fill="#FFF" />
           </View>
           <Text style={{ fontSize: 30, fontWeight: "800", color: "#111", textAlign: "center" }}>
-            Nar Premium
+            Nar Aura Premium
           </Text>
           <Text style={{ fontSize: 15, color: "#666", textAlign: "center", marginTop: 6, lineHeight: 22, paddingHorizontal: 10 }}>
             Sınırsız AI sohbet, fotoğraf analizi ve detaylı raporlar.

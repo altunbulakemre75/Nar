@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import NarLogo from "@/components/NarLogo";
+import NarAuraLogo from "@/components/NarLogo";
 import { useAuthStore } from "@/lib/authStore";
 
 export default function ForgotPasswordScreen() {
@@ -47,7 +47,7 @@ export default function ForgotPasswordScreen() {
           </Pressable>
 
           <View style={{ alignItems: "center", marginBottom: 36 }}>
-            <NarLogo size={44} showTagline={false} />
+            <NarAuraLogo size={44} showTagline={false} />
           </View>
 
           <Text style={{ fontSize: 24, fontWeight: "700", color: "#111", marginBottom: 8 }}>

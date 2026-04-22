@@ -76,9 +76,11 @@ export async function checkAchievements(): Promise<Achievement[]> {
     streak_30: streak >= 30,
   };
 
-  // Ramazan kontrolü (basit - şimdilik her zaman false)
+  // Ramazan kontrolü - PASIF. Ramazan modu kapalı olduğu için
+  // ramadan_champ başarımı kazanılamaz. Açmak için lib/narci.ts
+  // isRamadanNow() fonksiyonunu aktifleştir.
   const ramadanHelpers = {
-    ramadan_champ: false, // TODO: Ramazan ayı logları kontrolü
+    ramadan_champ: false,
   };
 
   // Hepsini kontrol et

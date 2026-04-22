@@ -182,9 +182,14 @@ export default function ScanResultScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <ChevronLeft size={26} color="#111" strokeWidth={2} />
         </Pressable>
-        <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 40, lineHeight: 48, color: "#C73030" }}>
-          Nar
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+          <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 40, lineHeight: 48, color: "#C73030" }}>
+            Nar
+          </Text>
+          <Text style={{ fontFamily: "PlayfairDisplay-BoldItalic", fontSize: 22, color: "#C73030", opacity: 0.75, letterSpacing: 1 }}>
+            Aura
+          </Text>
+        </View>
         <Pressable
           onPress={() => {
             if (!product) return;

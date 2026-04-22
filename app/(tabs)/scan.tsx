@@ -50,8 +50,8 @@ export default function ScanScreen() {
           <Text style={styles.permTitle}>Kamera izni gerekli</Text>
           <Text style={styles.permSub}>
             {denied
-              ? "Kamera izni reddedildi. Ayarlardan Nar'a kamera izni verebilirsin."
-              : "Nar, barkod taramak için kameraya ihtiyaç duyar."}
+              ? "Kamera izni reddedildi. Ayarlardan Nar Aura'ya kamera izni verebilirsin."
+              : "Nar Aura, barkod taramak için kameraya ihtiyaç duyar."}
           </Text>
 
           <Pressable
@@ -123,7 +123,10 @@ export default function ScanScreen() {
             )}
           </Pressable>
 
-          <Text style={styles.logo}>Nar</Text>
+          <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+            <Text style={styles.logo}>Nar</Text>
+            <Text style={styles.logoAura}>Aura</Text>
+          </View>
 
           {/* Sağ taraf için simetri — boş placeholder */}
           <View style={{ width: 44, height: 44 }} />
@@ -220,6 +223,13 @@ const styles = StyleSheet.create({
     fontSize: 40,
     lineHeight: 48,
     color: "#C73030",
+  },
+  logoAura: {
+    fontFamily: "PlayfairDisplay-BoldItalic",
+    fontSize: 22,
+    color: "#C73030",
+    opacity: 0.75,
+    letterSpacing: 1,
   },
 
   frameWrap: { alignItems: "center", marginTop: -40 },
