@@ -21,6 +21,7 @@ import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
 import { AuraCard } from "@/components/AuraCard";
+import { WaterCard } from "@/components/WaterCard";
 
 export default function Home() {
   const t = useT();
@@ -135,6 +136,9 @@ export default function Home() {
 
             {/* Aura'ya Sor kartı */}
             <AuraCard />
+
+            {/* Su takibi */}
+            <WaterCard />
 
             {/* Büyük tara butonu — her zaman göster */}
             <Pressable
