@@ -19,12 +19,51 @@ import { Image } from "react-native";
 import { estimateMeal, estimateMealFromPhoto, type MealEstimate } from "@/lib/mealEstimator";
 import { useMealStore } from "@/lib/mealStore";
 
+type HiddenExtra = {
+  id: string;
+  label: string;
+  emoji: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+};
+
+const HIDDEN_EXTRAS: HiddenExtra[] = [
+  { id: "butter", label: "Tereyağı", emoji: "🧈", calories: 80, protein: 0, fat: 9, carbs: 0 },
+  { id: "oil", label: "Zeytinyağı", emoji: "🫒", calories: 100, protein: 0, fat: 11, carbs: 0 },
+  { id: "sauce", label: "Sos / Mayonez", emoji: "🥗", calories: 120, protein: 0, fat: 13, carbs: 1 },
+  { id: "cheese", label: "Ekstra peynir", emoji: "🧀", calories: 60, protein: 4, fat: 5, carbs: 0 },
+  { id: "bread", label: "Ekmek dilimi", emoji: "🍞", calories: 80, protein: 3, fat: 1, carbs: 15 },
+  { id: "sugar", label: "Şeker / bal", emoji: "🍯", calories: 50, protein: 0, fat: 0, carbs: 13 },
+];
+
 export default function AddMealScreen() {
   const [text, setText] = useState("");
   const [estimating, setEstimating] = useState(false);
   const [estimate, setEstimate] = useState<MealEstimate | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [extras, setExtras] = useState<string[]>([]);
   const add = useMealStore((s) => s.add);
+
+  const toggleExtra = (id: string) => {
+    Haptics.selectionAsync();
+    setExtras((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  // Görünmez kalorilerle birleşik tahmin
+  const finalEstimate = estimate
+    ? HIDDEN_EXTRAS.filter((e) => extras.includes(e.id)).reduce(
+        (acc, e) => ({
+          ...acc,
+          calories: acc.calories + e.calories,
+          protein: acc.protein + e.protein,
+          fat: acc.fat + e.fat,
+          carbs: acc.carbs + e.carbs,
+        }),
+        { ...estimate }
+      )
+    : null;
 
   const pickImage = async (useCamera: boolean) => {
     const perm = useCamera
@@ -62,7 +101,7 @@ export default function AddMealScreen() {
     setEstimate(null);
     try {
       const res = await estimateMealFromPhoto(asset.base64, "image/jpeg");
-      setEstimate(res);
+      handleNewEstimate(res);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
       Alert.alert("Fotoğraf analizi başarısız", e?.message ?? "Tekrar dene.");
@@ -78,7 +117,7 @@ export default function AddMealScreen() {
     setEstimate(null);
     try {
       const result = await estimateMeal(text.trim());
-      setEstimate(result);
+      handleNewEstimate(result);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
       Alert.alert("Tahmin yapılamadı", e?.message ?? "Tekrar dene.");
@@ -88,10 +127,16 @@ export default function AddMealScreen() {
   };
 
   const save = () => {
-    if (!estimate) return;
-    add(estimate);
+    if (!finalEstimate) return;
+    add(finalEstimate);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
+  };
+
+  // Yeni tahmin her geldiğinde extras'ı sıfırla
+  const handleNewEstimate = (e: MealEstimate) => {
+    setEstimate(e);
+    setExtras([]);
   };
 
   return (
@@ -204,26 +249,66 @@ export default function AddMealScreen() {
             </Text>
           </Pressable>
 
-          {estimate && (
+          {estimate && finalEstimate && (
             <View style={{ marginTop: 24, padding: 16, borderRadius: 16, backgroundColor: "#FFF5F2", borderWidth: 1, borderColor: "#FFD7CC" }}>
               <Text style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>Tahmini</Text>
               <Text style={{ fontSize: 18, fontWeight: "700", color: "#111", marginBottom: 14 }}>{estimate.name}</Text>
 
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <MacroCell label="Kalori" value={`${estimate.calories}`} unit="kcal" />
-                <MacroCell label="Protein" value={`${estimate.protein}`} unit="g" />
-                <MacroCell label="Yağ" value={`${estimate.fat}`} unit="g" />
-                <MacroCell label="Karb" value={`${estimate.carbs}`} unit="g" />
+                <MacroCell label="Kalori" value={`${finalEstimate.calories}`} unit="kcal" />
+                <MacroCell label="Protein" value={`${finalEstimate.protein}`} unit="g" />
+                <MacroCell label="Yağ" value={`${finalEstimate.fat}`} unit="g" />
+                <MacroCell label="Karb" value={`${finalEstimate.carbs}`} unit="g" />
               </View>
 
               <Text style={{ fontSize: 11, color: "#888", marginTop: 12, textAlign: "center" }}>
                 Değerler yaklaşıktır (±%15-20). Porsiyon farkı büyük etki eder.
               </Text>
 
+              {/* Görünmez kalori */}
+              <View style={{ marginTop: 18, paddingTop: 14, borderTopWidth: 1, borderTopColor: "#FFD7CC" }}>
+                <Text style={{ fontSize: 13, fontWeight: "600", color: "#111", marginBottom: 4 }}>
+                  Görünmez kalori eklendi mi?
+                </Text>
+                <Text style={{ fontSize: 11, color: "#888", marginBottom: 10 }}>
+                  Yağ, sos, ekmek gibi ek şeyleri işaretle — tahmine eklensin.
+                </Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                  {HIDDEN_EXTRAS.map((e) => {
+                    const on = extras.includes(e.id);
+                    return (
+                      <Pressable
+                        key={e.id}
+                        onPress={() => toggleExtra(e.id)}
+                        style={{
+                          paddingHorizontal: 10,
+                          paddingVertical: 6,
+                          borderRadius: 999,
+                          backgroundColor: on ? "#C73030" : "#FFF",
+                          borderWidth: 1,
+                          borderColor: on ? "#C73030" : "#E5D5C5",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Text style={{ fontSize: 13 }}>{e.emoji}</Text>
+                        <Text style={{ fontSize: 12, fontWeight: "500", color: on ? "#FFF" : "#333" }}>
+                          {e.label}
+                        </Text>
+                        <Text style={{ fontSize: 10, color: on ? "rgba(255,255,255,0.8)" : "#888" }}>
+                          +{e.calories}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
               <Pressable
                 onPress={save}
                 style={{
-                  marginTop: 14,
+                  marginTop: 18,
                   paddingVertical: 12,
                   borderRadius: 999,
                   backgroundColor: "#111",
@@ -235,7 +320,7 @@ export default function AddMealScreen() {
               >
                 <Check size={16} color="#FFF" strokeWidth={2.5} />
                 <Text style={{ color: "#FFF", fontSize: 15, fontWeight: "600" }}>
-                  Günlüğüme ekle
+                  Günlüğüme ekle ({finalEstimate.calories} kcal)
                 </Text>
               </Pressable>
             </View>
