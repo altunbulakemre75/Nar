@@ -222,10 +222,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* 7 günlük trendler */}
-        <ScanTrend />
-        <MoodTrend />
-
         {/* Takvim */}
         <View className="mx-4 mt-6">
           <Text style={{ fontSize: 22, fontWeight: "700", color: "#111" }}>
@@ -263,6 +259,10 @@ export default function Profile() {
             />
           </View>
         </View>
+
+        {/* 7 günlük trendler — takvimin altında, küçük */}
+        <ScanTrend />
+        <MoodTrend />
 
         {/* Favoriler kısayolu */}
         <Pressable

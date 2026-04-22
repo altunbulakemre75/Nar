@@ -45,41 +45,41 @@ export function MoodTrend() {
     <View
       style={{
         marginHorizontal: 16,
-        marginTop: 12,
+        marginTop: 10,
         backgroundColor: "#FFF",
-        borderRadius: 16,
-        padding: 16,
+        borderRadius: 14,
+        padding: 12,
         borderWidth: 1,
         borderColor: "#E5E7EB",
       }}
     >
-      <Text style={{ fontSize: 15, fontWeight: "600", color: "#111", marginBottom: 14 }}>
-        Ruh hali trendi · son 7 gün
+      <Text style={{ fontSize: 13, fontWeight: "600", color: "#111", marginBottom: 10 }}>
+        Ruh hali trendi · 7 gün
       </Text>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 80 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 54 }}>
         {days.map((date) => {
           const mood = history[date];
           const value = mood ? MOOD_VALUES[mood] : 0;
-          const height = value === 0 ? 4 : (value / 5) * 70;
+          const height = value === 0 ? 3 : (value / 5) * 44;
           const color = mood ? MOOD_COLORS[mood] : "#E5E7EB";
           const d = new Date(date);
           const dayLabel = WEEKDAYS_TR[d.getDay()];
 
           return (
             <View key={date} style={{ alignItems: "center", flex: 1 }}>
-              <Text style={{ fontSize: 14, marginBottom: 4 }}>
+              <Text style={{ fontSize: 12, marginBottom: 2 }}>
                 {mood ? MOOD_EMOJIS[mood] : ""}
               </Text>
               <View
                 style={{
-                  width: 16,
+                  width: 12,
                   height,
-                  borderRadius: 4,
+                  borderRadius: 3,
                   backgroundColor: color,
                 }}
               />
-              <Text style={{ fontSize: 10, color: "#888", marginTop: 6 }}>{dayLabel}</Text>
+              <Text style={{ fontSize: 9, color: "#888", marginTop: 4 }}>{dayLabel}</Text>
             </View>
           );
         })}

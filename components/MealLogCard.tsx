@@ -1,13 +1,33 @@
+import { useMemo } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { UtensilsCrossed, Plus, Trash2 } from "lucide-react-native";
 import { useMealStore } from "@/lib/mealStore";
 
+function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function MealLogCard() {
-  const meals = useMealStore((s) => s.getToday());
-  const totals = useMealStore((s) => s.getTodayTotals());
+  const byDate = useMealStore((s) => s.byDate);
   const remove = useMealStore((s) => s.remove);
+
+  const meals = useMemo(() => byDate[todayKey()] ?? [], [byDate]);
+  const totals = useMemo(
+    () =>
+      meals.reduce(
+        (acc, m) => ({
+          calories: acc.calories + m.calories,
+          protein: acc.protein + m.protein,
+          fat: acc.fat + m.fat,
+          carbs: acc.carbs + m.carbs,
+        }),
+        { calories: 0, protein: 0, fat: 0, carbs: 0 }
+      ),
+    [meals]
+  );
 
   const handleRemove = (id: string, name: string) => {
     Alert.alert("Sil", `"${name}" günlükten silinsin mi?`, [

@@ -79,39 +79,39 @@ export function ScanTrend() {
     <View
       style={{
         marginHorizontal: 16,
-        marginTop: 12,
+        marginTop: 10,
         backgroundColor: "#FFF",
-        borderRadius: 16,
-        padding: 16,
+        borderRadius: 14,
+        padding: 12,
         borderWidth: 1,
         borderColor: "#E5E7EB",
       }}
     >
-      <Text style={{ fontSize: 15, fontWeight: "600", color: "#111", marginBottom: 14 }}>
-        Tarama trendi · son 7 gün
+      <Text style={{ fontSize: 13, fontWeight: "600", color: "#111", marginBottom: 10 }}>
+        Tarama trendi · 7 gün
       </Text>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 80 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 54 }}>
         {stats.map((s) => {
-          const height = s.avg > 0 ? (s.avg / 100) * 70 : 4;
+          const height = s.avg > 0 ? (s.avg / 100) * 44 : 3;
           const color = scoreColor(s.avg);
           const d = new Date(s.date);
           const dayLabel = WEEKDAYS_TR[d.getDay()];
 
           return (
             <View key={s.date} style={{ alignItems: "center", flex: 1 }}>
-              <Text style={{ fontSize: 10, color: "#111", marginBottom: 4, fontWeight: "600" }}>
+              <Text style={{ fontSize: 9, color: "#111", marginBottom: 2, fontWeight: "600" }}>
                 {s.count > 0 ? Math.round(s.avg) : ""}
               </Text>
               <View
                 style={{
-                  width: 16,
+                  width: 12,
                   height,
-                  borderRadius: 4,
+                  borderRadius: 3,
                   backgroundColor: color,
                 }}
               />
-              <Text style={{ fontSize: 10, color: "#888", marginTop: 6 }}>{dayLabel}</Text>
+              <Text style={{ fontSize: 9, color: "#888", marginTop: 4 }}>{dayLabel}</Text>
             </View>
           );
         })}

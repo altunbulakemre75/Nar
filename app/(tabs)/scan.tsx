@@ -5,7 +5,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import * as Haptics from "expo-haptics";
-import { ScanLine, Zap, ZapOff } from "lucide-react-native";
+import { ScanLine, Zap, ZapOff, UtensilsCrossed } from "lucide-react-native";
 import { getProductByBarcode } from "@/lib/products";
 
 export default function ScanScreen() {
@@ -128,8 +128,14 @@ export default function ScanScreen() {
             <Text style={styles.logoAura}>Aura</Text>
           </View>
 
-          {/* Sağ taraf için simetri — boş placeholder */}
-          <View style={{ width: 44, height: 44 }} />
+          {/* Yemek fotoğrafı kısayolu */}
+          <Pressable
+            onPress={() => router.push("/add-meal")}
+            style={styles.roundBtn}
+            hitSlop={10}
+          >
+            <UtensilsCrossed size={20} color="#FFF" strokeWidth={2} />
+          </Pressable>
         </View>
 
         {/* Orta çerçeve */}
@@ -143,10 +149,10 @@ export default function ScanScreen() {
           <Text style={styles.frameHint}>Barkodu çerçeveye yerleştir</Text>
         </View>
 
-        {/* Alt ipucu */}
+        {/* Alt ipucu + yemek fotoğrafı CTA */}
         <View style={styles.bottomBar}>
           <Text style={styles.bottomHint}>
-            Türk ve yurtdışı ürünler · Binlerce barkod destekleniyor
+            Barkodu okut · Ya da ↑ üst sağdan yemek fotoğrafı çek
           </Text>
         </View>
       </SafeAreaView>

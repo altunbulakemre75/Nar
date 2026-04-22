@@ -21,9 +21,7 @@ import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
 import { GOAL_LABELS, type Goal } from "@/types/database";
 import { AuraCard } from "@/components/AuraCard";
-import { WaterCard } from "@/components/WaterCard";
-import { MoodCard } from "@/components/MoodCard";
-import { MealLogCard } from "@/components/MealLogCard";
+import { WidgetPager } from "@/components/WidgetPager";
 
 export default function Home() {
   const t = useT();
@@ -139,14 +137,8 @@ export default function Home() {
             {/* Aura'ya Sor kartı */}
             <AuraCard />
 
-            {/* Su takibi */}
-            <WaterCard />
-
-            {/* Ruh hali takibi */}
-            <MoodCard />
-
-            {/* Yemek günlüğü */}
-            <MealLogCard />
+            {/* Widget pager: Su / Ruh hali / Yemek günlüğü */}
+            <WidgetPager />
 
             {/* Büyük tara butonu — her zaman göster */}
             <Pressable
