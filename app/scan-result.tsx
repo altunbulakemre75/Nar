@@ -36,10 +36,12 @@ import {
   scoreLabel,
 } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
-import type { Product, Goal, Nutrition } from "@/types/database";
+import type { Product, Goal, Nutrition, Profile } from "@/types/database";
 import { checkAchievements } from "@/lib/achievements";
 import { track, reportError } from "@/lib/analytics";
 import { useFavoritesStore } from "@/lib/favorites";
+import { analyzeBasiret } from "@/lib/basiret";
+import { BasiretCard } from "@/components/BasiretCard";
 
 const SUGGESTED_QUESTIONS = [
   "Bu ürün şişkinlik yapar mı?",
@@ -53,6 +55,7 @@ export default function ScanResultScreen() {
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [goal, setGoal] = useState<Goal>("lose_weight");
+  const [profile, setProfile] = useState<Partial<Profile> | null>(null);
   const [score, setScore] = useState(-1);
   const [saving, setSaving] = useState(false);
 
@@ -71,16 +74,19 @@ export default function ScanResultScreen() {
       try {
         const user = (await supabase.auth.getUser()).data.user;
         let userGoal: Goal = "lose_weight";
+        let userProfile: Partial<Profile> | null = null;
         if (user) {
-          const { data: profile } = await supabase
+          const { data: prof } = await supabase
             .from("profiles")
-            .select("goal")
+            .select("goal, health_modes, narci_personality")
             .eq("id", user.id)
             .maybeSingle();
-          if (profile?.goal) userGoal = profile.goal as Goal;
+          if (prof?.goal) userGoal = prof.goal as Goal;
+          userProfile = prof ?? null;
         }
         if (!mountedRef.current) return;
         setGoal(userGoal);
+        setProfile(userProfile);
 
         const p = await getProductByBarcode(barcode);
         if (!mountedRef.current) return;
@@ -283,6 +289,12 @@ export default function ScanResultScreen() {
             </Text>
           </View>
         )}
+
+        {/* Basiret — yemekten önce sağlık modu tabanlı karar */}
+        {product && profile && (() => {
+          const basiret = analyzeBasiret(product, profile);
+          return basiret ? <BasiretCard result={basiret} /> : null;
+        })()}
 
         {/* İyi Dengelenmiş */}
         {goodItems.length > 0 && (
