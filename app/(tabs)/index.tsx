@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { track } from "@/lib/analytics";
 import { useT } from "@/lib/i18n";
 import { getStreakCount } from "@/lib/stats";
 import { scoreColor, getScoreBgColor, getScoreBorderColor, getScoreTextColor } from "@/constants/colors";
-import { GOAL_LABELS, type Goal } from "@/types/database";
+import { type Goal } from "@/types/database";
 import { AuraCard } from "@/components/AuraCard";
 import { WidgetPager } from "@/components/WidgetPager";
 

@@ -66,6 +66,12 @@ Tanım: "${description}"`;
   }
 
   if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error("Dakikalık limit doldu, 1-2 dakika sonra tekrar dene.");
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error("API yetki hatası. Lütfen destek ekibine bildir.");
+    }
     throw new Error(`Tahmin alınamadı (${res.status}). Tekrar dene.`);
   }
 
@@ -152,6 +158,12 @@ Eğer fotoğrafta yemek görmezsen calories:0 dön.`;
   }
 
   if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error("Dakikalık limit doldu, 1-2 dakika sonra tekrar dene.");
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error("API yetki hatası. Lütfen destek ekibine bildir.");
+    }
     throw new Error(`Fotoğraf analizi başarısız (${res.status}). Tekrar dene.`);
   }
 

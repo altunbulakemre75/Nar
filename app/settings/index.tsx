@@ -7,7 +7,6 @@ import {
   Alert,
   Switch,
   Linking,
-  Share,
   ActivityIndicator,
   Modal,
 } from "react-native";
@@ -82,54 +81,6 @@ export default function SettingsScreen() {
     setDeleting(false);
     await signOut();
     router.replace("/(auth)/login");
-  };
-
-  const handleDownloadData = () => {
-    Alert.alert(
-      "Verilerini indir",
-      "JSON olarak şunlar dışa aktarılacak:\n\n• Profil (yaş, hedef, sağlık modları)\n• Tüm taramaların\n• Günlük özetler\n• Başarımların\n• Su, ruh hali, yemek günlüğü geçmişi\n\nDosyayı istediğin yere kaydedebilir veya paylaşabilirsin.",
-      [
-        { text: "Vazgeç", style: "cancel" },
-        { text: "İndir", onPress: () => doDownload() },
-      ]
-    );
-  };
-
-  const doDownload = async () => {
-    if (!user) return;
-    try {
-      const [profile, scans, achievements, dailyLogs] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("scans").select("*, product:products(name, brand, barcode)").eq("user_id", user.id),
-        supabase.from("user_achievements").select("*").eq("user_id", user.id),
-        supabase.from("daily_logs").select("*").eq("user_id", user.id),
-      ]);
-
-      // Cihazda tutulan yerel veriler (su, ruh hali, yemek günlüğü)
-      const waterState = useWaterStore.getState();
-      const moodState = useMoodStore.getState();
-      const mealState = useMealStore.getState();
-
-      const payload = {
-        exportedAt: new Date().toISOString(),
-        appVersion: "Nar Aura v0.1.0",
-        user: { id: user.id, email: user.email, name },
-        profile: profile.data,
-        scans: scans.data,
-        daily_logs: dailyLogs.data,
-        achievements: achievements.data,
-        water: { date: waterState.date, glasses: waterState.glasses },
-        mood_history: moodState.history,
-        meals: mealState.byDate,
-      };
-
-      await Share.share({
-        title: "Nar Aura verilerim",
-        message: JSON.stringify(payload, null, 2),
-      });
-    } catch {
-      Alert.alert("Hata", "Veriler dışa aktarılamadı.");
-    }
   };
 
   const mailTo = (subject: string) => {
