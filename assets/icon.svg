@@ -1,56 +1,167 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
+    <!-- Arkaplan krem -->
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFFDFB"/>
       <stop offset="100%" stop-color="#FBE6DE"/>
     </linearGradient>
-    <radialGradient id="body" cx="38%" cy="30%" r="75%">
-      <stop offset="0%" stop-color="#F26B6B"/>
-      <stop offset="35%" stop-color="#D83838"/>
-      <stop offset="75%" stop-color="#A01E1E"/>
-      <stop offset="100%" stop-color="#6B1414"/>
+
+    <!-- Nar gövdesi derin radial gradient -->
+    <radialGradient id="body" cx="35%" cy="28%" r="85%">
+      <stop offset="0%" stop-color="#FF7878"/>
+      <stop offset="25%" stop-color="#E84040"/>
+      <stop offset="55%" stop-color="#B82020"/>
+      <stop offset="85%" stop-color="#7A1010"/>
+      <stop offset="100%" stop-color="#4D0808"/>
     </radialGradient>
-    <linearGradient id="crown" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3A0D0D"/>
-      <stop offset="100%" stop-color="#7A1818"/>
-    </linearGradient>
-    <radialGradient id="shine" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+
+    <!-- Yüzey dokusu için ince granül -->
+    <radialGradient id="texture" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#E82020" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#8B1818" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#4D0808" stop-opacity="0.28"/>
+    </radialGradient>
+
+    <!-- Parlama ışık -->
+    <radialGradient id="highlight" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.15"/>
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Sert beyaz highlight (yansıma) -->
+    <radialGradient id="shine" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Taç (üst kısım) -->
+    <linearGradient id="crown" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5A0C0C"/>
+      <stop offset="100%" stop-color="#8B1818"/>
+    </linearGradient>
+
+    <!-- Yaprak -->
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4A7C2A"/>
+      <stop offset="50%" stop-color="#2E5F1A"/>
+      <stop offset="100%" stop-color="#1B4410"/>
+    </linearGradient>
+
+    <!-- Yaprak highlight -->
+    <linearGradient id="leafShine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8FB86A" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#8FB86A" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Dal -->
+    <linearGradient id="stem" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6B4423"/>
+      <stop offset="100%" stop-color="#3E2817"/>
+    </linearGradient>
+
+    <!-- Su damlası -->
+    <radialGradient id="drop" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.05"/>
     </radialGradient>
   </defs>
 
+  <!-- Arka plan -->
   <rect width="1024" height="1024" fill="url(#bg)"/>
 
-  <g transform="translate(512 560)">
-    <ellipse cx="0" cy="340" rx="300" ry="32" fill="#3A0D0D" fill-opacity="0.18"/>
+  <!-- Zemin gölgesi (meyvenin altı) -->
+  <ellipse cx="512" cy="880" rx="280" ry="28" fill="#3A0D0D" fill-opacity="0.18"/>
 
-    <path d="M 0 -280
-             C -260 -280 -360 -130 -340 60
-             C -320 240 -180 340 0 340
-             C 180 340 320 240 340 60
-             C 360 -130 260 -280 0 -280 Z"
-          fill="url(#body)"/>
+  <!-- Dal (en arkada, taç ile yaprak arasında görünmez) -->
+  <path d="M 512 180 Q 580 150, 650 140 Q 700 135, 730 155"
+        stroke="url(#stem)" stroke-width="18" stroke-linecap="round" fill="none"/>
 
-    <path d="M -130 -270
-             L -95 -345
-             L -60 -270
-             L -25 -370
-             L 10 -270
-             L 45 -360
-             L 80 -270
-             L 115 -345
-             L 140 -270 Z"
-          fill="url(#crown)"/>
-
-    <ellipse cx="-130" cy="-90" rx="90" ry="140" fill="url(#shine)"/>
-    <ellipse cx="-160" cy="-140" rx="28" ry="45" fill="#FFFFFF" fill-opacity="0.7"/>
-
-    <circle cx="60"  cy="100" r="9" fill="#FFFFFF" fill-opacity="0.15"/>
-    <circle cx="-30" cy="160" r="7" fill="#FFFFFF" fill-opacity="0.12"/>
-    <circle cx="110" cy="150" r="7" fill="#FFFFFF" fill-opacity="0.12"/>
-    <circle cx="30"  cy="220" r="6" fill="#FFFFFF" fill-opacity="0.10"/>
-    <circle cx="-80" cy="60"  r="6" fill="#FFFFFF" fill-opacity="0.10"/>
+  <!-- Yapraklar (dalın üstünde) -->
+  <!-- Sol üst yaprak -->
+  <g transform="translate(460 165) rotate(-35)">
+    <path d="M 0 0 Q -40 -60, -30 -130 Q 10 -110, 30 -50 Q 20 -10, 0 0 Z"
+          fill="url(#leaf)"/>
+    <path d="M 0 0 Q -25 -50, -22 -110" stroke="#1B4410" stroke-width="2" fill="none" opacity="0.5"/>
+    <path d="M -5 -30 Q -22 -40, -28 -50" stroke="#1B4410" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M -10 -60 Q -25 -70, -30 -80" stroke="#1B4410" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M -6 -20 Q 2 -60, -2 -110" fill="url(#leafShine)"/>
   </g>
+
+  <!-- Sağ üst yaprak (büyük) -->
+  <g transform="translate(680 150) rotate(25)">
+    <path d="M 0 0 Q 50 -70, 40 -150 Q -10 -120, -30 -55 Q -15 -10, 0 0 Z"
+          fill="url(#leaf)"/>
+    <path d="M 0 0 Q 25 -60, 28 -130" stroke="#1B4410" stroke-width="2" fill="none" opacity="0.5"/>
+    <path d="M 5 -30 Q 28 -45, 35 -60" stroke="#1B4410" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M 10 -70 Q 30 -80, 35 -95" stroke="#1B4410" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M 8 -25 Q 0 -70, 5 -130" fill="url(#leafShine)"/>
+  </g>
+
+  <!-- Orta yaprak (arkada) -->
+  <g transform="translate(560 140) rotate(-5)">
+    <path d="M 0 0 Q -15 -50, -5 -110 Q 15 -90, 18 -40 Q 8 -8, 0 0 Z"
+          fill="url(#leaf)" opacity="0.85"/>
+    <path d="M 0 -5 Q 5 -50, 8 -100" stroke="#1B4410" stroke-width="1.5" fill="none" opacity="0.5"/>
+  </g>
+
+  <!-- Taç (meyvenin hemen tepesinde, sivri uçlar) -->
+  <path d="M 395 260
+           L 430 175
+           L 460 260
+           L 495 160
+           L 520 260
+           L 555 170
+           L 580 260
+           L 615 180
+           L 640 260 Z"
+        fill="url(#crown)"/>
+
+  <!-- Nar gövdesi -->
+  <path d="M 512 258
+           C 252 258, 158 410, 170 590
+           C 182 780, 312 870, 512 870
+           C 712 870, 842 780, 854 590
+           C 866 410, 772 258, 512 258 Z"
+        fill="url(#body)"/>
+
+  <!-- Gövde üstüne doku -->
+  <path d="M 512 258
+           C 252 258, 158 410, 170 590
+           C 182 780, 312 870, 512 870
+           C 712 870, 842 780, 854 590
+           C 866 410, 772 258, 512 258 Z"
+        fill="url(#texture)"/>
+
+  <!-- Geniş ışık yansıması (sol üst) -->
+  <ellipse cx="360" cy="430" rx="130" ry="180" fill="url(#highlight)"/>
+
+  <!-- Parlak ışık noktası -->
+  <ellipse cx="335" cy="385" rx="40" ry="55" fill="url(#shine)"/>
+  <ellipse cx="335" cy="385" rx="14" ry="22" fill="#FFFFFF" fill-opacity="0.85"/>
+
+  <!-- İkinci parlak nokta (daha küçük) -->
+  <ellipse cx="700" cy="480" rx="18" ry="28" fill="url(#shine)" opacity="0.45"/>
+
+  <!-- Su damlaları (meyvenin üzerinde dağınık) -->
+  <ellipse cx="450" cy="540" rx="12" ry="16" fill="url(#drop)"/>
+  <ellipse cx="446" cy="536" rx="4" ry="5" fill="#FFFFFF" fill-opacity="0.7"/>
+
+  <ellipse cx="580" cy="620" rx="10" ry="14" fill="url(#drop)"/>
+  <ellipse cx="577" cy="617" rx="3" ry="4" fill="#FFFFFF" fill-opacity="0.7"/>
+
+  <ellipse cx="620" cy="720" rx="9" ry="12" fill="url(#drop)"/>
+  <ellipse cx="618" cy="717" rx="3" ry="4" fill="#FFFFFF" fill-opacity="0.7"/>
+
+  <ellipse cx="390" cy="680" rx="8" ry="11" fill="url(#drop)"/>
+  <ellipse cx="388" cy="677" rx="2.5" ry="3.5" fill="#FFFFFF" fill-opacity="0.7"/>
+
+  <ellipse cx="510" cy="780" rx="7" ry="10" fill="url(#drop)"/>
+  <ellipse cx="508" cy="777" rx="2" ry="3" fill="#FFFFFF" fill-opacity="0.6"/>
+
+  <!-- Alt kısımda kararma (form için) -->
+  <ellipse cx="512" cy="820" rx="280" ry="60" fill="#3A0808" fill-opacity="0.2"/>
 </svg>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -32,8 +32,15 @@ export default function HealthModesScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const mountedRef = useRef(true);
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     (async () => {
       if (!user) return;
       const { data } = await supabase
@@ -41,13 +48,10 @@ export default function HealthModesScreen() {
         .select("health_modes")
         .eq("id", user.id)
         .maybeSingle();
-      if (!mounted) return;
+      if (!mountedRef.current) return;
       if (data?.health_modes) setActive(data.health_modes);
       setLoading(false);
     })();
-    return () => {
-      mounted = false;
-    };
   }, [user]);
 
   const toggle = async (mode: HealthMode) => {
@@ -63,6 +67,7 @@ export default function HealthModesScreen() {
       .from("profiles")
       .update({ health_modes: newModes })
       .eq("id", user.id);
+    if (!mountedRef.current) return;
     setSaving(false);
     if (error) {
       setActive(prev);

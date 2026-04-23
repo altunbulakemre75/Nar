@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -45,6 +45,14 @@ export default function AddMealScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [extras, setExtras] = useState<string[]>([]);
   const add = useMealStore((s) => s.add);
+
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const toggleExtra = (id: string) => {
     Haptics.selectionAsync();
@@ -101,28 +109,37 @@ export default function AddMealScreen() {
     setEstimate(null);
     try {
       const res = await estimateMealFromPhoto(asset.base64, "image/jpeg");
+      if (!mountedRef.current) return;
       handleNewEstimate(res);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
+      if (!mountedRef.current) return;
       Alert.alert("Fotoğraf analizi başarısız", e?.message ?? "Tekrar dene.");
     } finally {
-      setEstimating(false);
+      if (mountedRef.current) setEstimating(false);
     }
   };
 
   const runEstimate = async () => {
-    if (!text.trim() || estimating) return;
+    const trimmed = text.trim();
+    if (!trimmed || estimating) return;
+    if (trimmed.length < 3) {
+      Alert.alert("Çok kısa", "Daha ayrıntılı yaz — en az 3 karakter.");
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setEstimating(true);
     setEstimate(null);
     try {
       const result = await estimateMeal(text.trim());
+      if (!mountedRef.current) return;
       handleNewEstimate(result);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
+      if (!mountedRef.current) return;
       Alert.alert("Tahmin yapılamadı", e?.message ?? "Tekrar dene.");
     } finally {
-      setEstimating(false);
+      if (mountedRef.current) setEstimating(false);
     }
   };
 

@@ -70,6 +70,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     set({ loading: true });
     await supabase.auth.signOut();
+    // Kişisel lokal veriyi temizle — başka kullanıcı girerse ayrışsın
+    try {
+      const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+      await AsyncStorage.multiRemove(["nar-water", "nar-mood", "nar-meals"]);
+    } catch {
+      // Storage temizlenemese bile signOut devam eder
+    }
     set({ user: null, session: null, loading: false, error: null });
     track("logout");
   },

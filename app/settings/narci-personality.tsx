@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -21,8 +21,15 @@ export default function NarciPersonalityScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const mountedRef = useRef(true);
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     (async () => {
       if (!user) return;
       const { data } = await supabase
@@ -30,13 +37,10 @@ export default function NarciPersonalityScreen() {
         .select("narci_personality")
         .eq("id", user.id)
         .maybeSingle();
-      if (!mounted) return;
+      if (!mountedRef.current) return;
       if (data?.narci_personality) setCurrent(data.narci_personality);
       setLoading(false);
     })();
-    return () => {
-      mounted = false;
-    };
   }, [user]);
 
   const save = async (personality: NarciPersonality) => {
@@ -48,6 +52,7 @@ export default function NarciPersonalityScreen() {
       .from("profiles")
       .update({ narci_personality: personality })
       .eq("id", user.id);
+    if (!mountedRef.current) return;
     setSaving(false);
     if (error) {
       setCurrent(prev);

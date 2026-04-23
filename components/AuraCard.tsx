@@ -3,11 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Sparkles, MessageCircle } from "lucide-react-native";
 
-const SAMPLE_QUESTIONS = [
-  "Bugün ne yiyebilirim?",
-  "Şeker fazla mı?",
-  "Atıştırmalık öner",
-];
+const SAMPLE_QUESTIONS = ["Bugün ne yiyebilirim?", "Şeker fazla mı?", "Atıştırmalık öner"];
 
 export function AuraCard() {
   const openNarci = (prompt?: string) => {
@@ -19,85 +15,69 @@ export function AuraCard() {
   };
 
   return (
-    <Pressable onPress={() => openNarci()} style={{ marginHorizontal: 16, marginTop: 16 }}>
+    <Pressable onPress={() => openNarci()} style={{ marginHorizontal: 16, marginTop: 12 }}>
       <LinearGradient
         colors={["#8E1E24", "#C73030"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{
-          borderRadius: 20,
-          padding: 20,
+          borderRadius: 14,
+          padding: 12,
           overflow: "hidden",
         }}
       >
-        {/* Dekoratif daireler - glassmorphism hissi */}
+        {/* Dekoratif daire */}
         <View
           style={{
             position: "absolute",
-            top: -30,
-            right: -20,
-            width: 120,
-            height: 120,
+            top: -20,
+            right: -15,
+            width: 80,
+            height: 80,
             backgroundColor: "rgba(255,255,255,0.12)",
-            borderRadius: 60,
-          }}
-        />
-        <View
-          style={{
-            position: "absolute",
-            bottom: -40,
-            left: -30,
-            width: 100,
-            height: 100,
-            backgroundColor: "rgba(255,255,255,0.08)",
-            borderRadius: 50,
+            borderRadius: 40,
           }}
         />
 
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 }}>
-          <Sparkles size={20} color="#FFFFFF" fill="#FFFFFF" />
-          <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "600" }}>
-            Aura'ya Sor
-          </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
+            <Sparkles size={16} color="#FFFFFF" fill="#FFFFFF" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}>
+                Aura'ya Sor
+              </Text>
+              <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, marginTop: 1 }}>
+                Seni dinliyor
+              </Text>
+            </View>
+          </View>
+          <MessageCircle size={14} color="rgba(255,255,255,0.9)" />
         </View>
 
-        <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, marginBottom: 16, lineHeight: 20 }}>
-          Aura seni dinliyor. İstediğini sor, seninle konuşalım.
-        </Text>
-
-        {/* Örnek sorular chip olarak */}
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        {/* Örnek sorular — kompakt chip'ler */}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
           {SAMPLE_QUESTIONS.map((q) => (
             <Pressable
               key={q}
               onPress={() => openNarci(q)}
               style={{
                 backgroundColor: "rgba(255,255,255,0.2)",
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderRadius: 20,
+                paddingHorizontal: 9,
+                paddingVertical: 4,
+                borderRadius: 999,
                 borderWidth: 1,
                 borderColor: "rgba(255,255,255,0.3)",
               }}
             >
-              <Text style={{ color: "#FFFFFF", fontSize: 13 }}>{q}</Text>
+              <Text style={{ color: "#FFFFFF", fontSize: 11 }}>{q}</Text>
             </Pressable>
           ))}
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-            marginTop: 16,
-            justifyContent: "flex-end",
-          }}
-        >
-          <MessageCircle size={16} color="rgba(255,255,255,0.8)" />
-          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>
-            Konuşmaya başla →
-          </Text>
         </View>
       </LinearGradient>
     </Pressable>

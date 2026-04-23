@@ -36,8 +36,14 @@ export const useMealStore = create<MealState>()(
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           created_at: new Date().toISOString(),
         };
-        const todays = get().byDate[today] ?? [];
-        set({ byDate: { ...get().byDate, [today]: [...todays, newMeal] } });
+        const current = get().byDate;
+        const todays = current[today] ?? [];
+        const next = { ...current, [today]: [...todays, newMeal] };
+        // Son 60 günü tut — AsyncStorage şişmesin
+        const keys = Object.keys(next).sort().slice(-60);
+        const trimmed: Record<string, Meal[]> = {};
+        for (const k of keys) trimmed[k] = next[k];
+        set({ byDate: trimmed });
       },
       remove: (id) => {
         const today = todayKey();

@@ -69,6 +69,11 @@ export default function SettingsScreen() {
         supabase.from("daily_logs").delete().eq("user_id", user.id),
       ]);
       await supabase.from("profiles").delete().eq("id", user.id);
+
+      // Cihazdaki tüm kişisel veriyi de temizle
+      useWaterStore.getState().reset();
+      useMoodStore.setState({ history: {} });
+      useMealStore.setState({ byDate: {} });
     } catch {
       setDeleting(false);
       Alert.alert("Silme başarısız", "Tekrar dene.");

@@ -84,6 +84,7 @@ export default function NarciScreen() {
         currentProduct = await getProductByBarcode(String(productId));
       }
 
+      if (!mountedRef.current) return;
       const mealState = useMealStore.getState();
       setContext({
         profile: profileRes.data ?? null,
