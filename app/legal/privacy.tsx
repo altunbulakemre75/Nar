@@ -55,9 +55,27 @@ export default function Privacy() {
       <H>Haklarına</H>
       <P>
         KVKK ve GDPR kapsamında şu haklara sahipsin:{"\n"}
-        · Verilerine erişim → Ayarlar › Verilerimi indir (JSON){"\n"}
-        · Verilerini silme → Ayarlar › Hesabı sil{"\n"}
+        · Verilerine erişim → Ayarlar › Verilerim (şeffaflık ekranı){"\n"}
+        · İndirme → Verilerim › JSON veya CSV olarak dışa aktar{"\n"}
+        · Verilerini silme → Ayarlar › Hesabı sil (tek tık){"\n"}
         · Düzeltme, işleme itiraz ve taşınabilirlik için: destek@narapp.com
+      </P>
+
+      <H>Nar Aura sözü — biz ne YAPMIYORUZ</H>
+      <P>
+        Sağlık uygulamalarında yaşanan son yıl skandalları göz önünde:{"\n\n"}
+        · Popüler bir hamilelik takip uygulaması, kadın üreme sağlığı verilerini
+        Meta reklam platformuna rızasız aktardı. Mahkeme 2025'te aleyhine karar verdi.{"\n"}
+        · Bir yumurtlama takip uygulaması, adet verilerini Çin'e gönderdi (FTC cezası).{"\n"}
+        · Büyük bir kalori takip uygulamasında 150 milyon kullanıcının verisi çalındı (2018).{"\n"}
+        · Bir AI kalori tarayıcısı aldatıcı faturalama nedeniyle Apple tarafından
+        App Store'dan çıkarıldı (2026).{"\n\n"}
+        Nar Aura bunları YAPMIYOR:{"\n"}
+        · Sağlık verilerin 3. taraf reklamcılara, sosyal medya platformlarına VE
+        herhangi bir pazarlama şirketine satılmaz.{"\n"}
+        · Reklam hedefleme için veri kullanılmaz.{"\n"}
+        · Gizli abonelik tuzağı yok — iptal tek tıkla.{"\n"}
+        · Ücretsiz olan özellikler sonradan paralı yapılmaz.
       </P>
 
       <H>Çocuklar</H>

@@ -274,7 +274,7 @@ export default function SettingsScreen() {
           <RowChevron label="Sağlık modları" onPress={() => router.push("/settings/health-modes")} />
           <RowToggle label="Bildirimler" value={notifEnabled} onChange={handleToggleNotifications} />
           <RowValue label="Dil" value="Türkçe" onPress={() => Alert.alert("Dil", "İngilizce çeviri yakında eklenecek.")} />
-          <RowChevron label="Verilerimi indir" onPress={handleDownloadData} />
+          <RowChevron label="Verilerim (şeffaflık)" onPress={() => router.push("/settings/my-data")} />
           <RowDestructive label="Hesabı sil" onPress={() => setShowDeleteModal(true)} />
           <RowChevron label="Yardım merkezi" onPress={() => mailTo("Nar Aura - yardım")} />
           <RowChevron label="Hata bildir" onPress={() => mailTo("Nar Aura - hata bildirimi")} />

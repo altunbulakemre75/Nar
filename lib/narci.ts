@@ -124,12 +124,44 @@ function parseRetryDelaySec(errorBody: string): number | null {
   }
 }
 
+// Acil durum tetikleyicileri — kullanıcı AI'dan tıbbi/psikolojik kriz yardımı isterse
+// AI bunu asla yanıtlamamalı, profesyonel yönlendirme yapmalı (App Store gereksinimi)
+const HARMFUL_TRIGGERS = [
+  "intihar", "kendime zarar", "yaşamak istemiyorum", "kendimi öldür",
+  "suicide", "self-harm", "hurt myself", "kill myself",
+  "yemek yemek istemiyorum", "anoreksi", "bulimi", "kusturuyorum",
+];
+
+function detectCrisis(message: string): boolean {
+  const lower = message.toLowerCase();
+  return HARMFUL_TRIGGERS.some((t) => lower.includes(t));
+}
+
+const CRISIS_RESPONSE = `Seni duyuyorum. Şu an zor bir zamandan geçiyorsun.
+
+Lütfen hemen bir uzmanla konuş:
+
+🇹🇷 **Türkiye**
+• 182 — Sağlık Bakanlığı MHRS (7/24)
+• 112 — Acil
+• RUSİHAK İntihar Önleme: 0 212 219 45 65
+
+🌍 **Global**
+• findahelpline.com — ülkene göre hat
+
+Ben bir beslenme koçuyum, bu tür durumlar için eğitimli değilim. Ama yalnız değilsin, gerçek bir insan seni dinlemek için hazır.`;
+
 export async function sendMessage(
   history: NarciMessage[],
   userMessage: string,
   context: NarciContext,
   signal?: AbortSignal
 ): Promise<string> {
+  // Acil durum kontrolü — Gemini'ye hiç göndermeden direkt yönlendir
+  if (detectCrisis(userMessage)) {
+    return CRISIS_RESPONSE;
+  }
+
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("Gemini API anahtarı bulunamadı. .env dosyasını kontrol et.");
